@@ -1,0 +1,82 @@
+﻿@model IEnumerable<animeAlley.Models.Utilizador>
+
+@{
+    ViewData["Title"] = "Entrar";
+}
+
+
+<header>Login</header>
+<!--
+    Depois mudar o endereço de saida de cada "botão da navbar "
+-->
+<navbar>
+    <li><a href="default.asp">Home</a></li>
+    <li><a href="news.asp">Minha Lista</a></li>
+    <li><a href="contact.asp">Fórum</a></li>
+    <li><a href="about.asp">(Onde vai ficar a lupa)</a></li>
+</navbar>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<header class="bg-primary text-white text-center py-3">
+    <h1>Login</h1>
+</header>
+
+<div class="container mt-4">
+    <form asp-action="Login" method="post">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="Email" required />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="Password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+        <a asp-action="Register" class="btn btn-link">Criar Conta</a>
+    </form>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.nome)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.password)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.arquivo)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.nome)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.password)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.arquivo)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

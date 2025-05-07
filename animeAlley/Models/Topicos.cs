@@ -18,9 +18,9 @@ namespace animeAlley.Models
         public DateTime dataPost { get; set; }
 
         //As duas em baixo vão ser FK
-        [ForeignKey("Utilizador")]
+        [ForeignKey("Topicos")]
         public String? utilizadorId { get; set; } // ID do utilizador que criou o tópico
-        [ForeignKey("comentariosID")]
+        [ForeignKey("Topicos")]
         public String? comentariosID { get; set; } // ID do comentário associado ao tópico
     }
 }
