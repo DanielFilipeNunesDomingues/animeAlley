@@ -9,11 +9,11 @@ using animeAlley.Data;
 
 #nullable disable
 
-namespace animeAlley.Data.Migrations
+namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250507112942_animeAlley")]
-    partial class animeAlley
+    [Migration("20250513132115_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

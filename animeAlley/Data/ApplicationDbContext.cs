@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using animeAlley.Models;
 
 namespace animeAlley.Data
 {
@@ -9,5 +10,6 @@ namespace animeAlley.Data
             : base(options)
         {
         }
+        public DbSet<animeAlley.Models.Comentario> Comentario { get; set; } = default!;
     }
 }

@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace animeAlley.Data.Migrations
+namespace animeAlley.Migrations
 {
     /// <inheritdoc />
-    public partial class animeAlley : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
