@@ -3,21 +3,37 @@ using System.ComponentModel.DataAnnotations;
 
 public class Studio
 {
-    [Key] //Primary Key
-    public int Id { get; set; }
+    /// <summary>
+    /// Identificador único do model Studio
+    /// </summary>
+    [Key]
+    public int Id { get; set; } // Identificador único do estúdio
 
+    /// <summary>
+    /// Nome do estúdio
+    /// </summary>
     [MaxLength(200)]
-    public string? nome { get; set; } // Nome do estúdio
+    [Required] // Campo obrigatório
+    public string Nome { get; set; } = string.Empty!; // Nome do estúdio
 
+    /// <summary>
+    /// Descrição do estúdio
+    /// </summary>
     [MaxLength(500)]
-    public string? about { get; set; } // Descrição do estúdio
+    public string Sobre { get; set; } = string.Empty; // Descrição do estúdio
 
-    public Estados status { get; set; } // Estado do estúdio (Ativo/Inativo)
+    /// <summary>
+    /// Estado atual do estúdio, pode estar Ativo (ainda em funcionamento) ou Inativo (não está mais em funcionamento)
+    /// </summary>
+    public Estado Status { get; set; } // Estado do estúdio (Ativo/Inativo)
 
 
 }
 
-public enum Estados
+/// <summary>
+/// Enumeração que representa o estado atual do estúdio.
+/// </summary>
+public enum Estado
 {
     Ativo,
     Inativo

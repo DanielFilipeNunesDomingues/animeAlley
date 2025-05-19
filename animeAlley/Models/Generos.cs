@@ -3,10 +3,17 @@ namespace animeAlley.Models
 {
     public class Generos
     {
-        [Key] //Primary Key
-        public int Id { get; set; }
+        /// <summary>
+        /// Identificador único do model Generos
+        /// </summary>
+        [Key]
+        public int Id { get; set; } //Primary Key
 
-        //FK
-        public String? genero { get; set; } // Nome do gênero
+        /// <summary>
+        /// Nome do gênero
+        /// </summary>
+        [StringLength(50)]
+        [Required]
+        public string Genero { get; set; } = string.Empty; // Nome do gênero
     }
 }

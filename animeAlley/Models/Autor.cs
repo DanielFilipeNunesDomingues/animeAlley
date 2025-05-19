@@ -4,21 +4,38 @@ using System.ComponentModel.DataAnnotations;
 
 public class Autor
 {
-    [Key] //Primary Key
-    public int Id { get; set; }
+    /// <summary>
+    /// Identificador único do model Autor
+    /// </summary>
+    [Key]
+    public int Id { get; set; } //Primary Key
 
+    /// <summary>
+    /// Nome do autor
+    /// </summary>
+    [Required] // Campo obrigatório
     [MaxLength(200)]
-    public String? nome { get; set; } // Nome do autor
+    public string Nome { get; set; } = string.Empty; // Nome do autor
 
+    /// <summary>
+    /// Data de nascimento do autor
+    /// </summary>
     [DataType(DataType.Date)]
-    public DateTime date_nasc { get; set; }
+    public DateTime DateNasc { get; set; }
 
+    /// <summary>
+    /// Descrição do autor
+    /// </summary>
     [MaxLength(200)]
-    public String? about { get; set; } // Descrição do autor
+    public string Sobre { get; set; } = string.Empty; // Descrição do autor
 
+    /// <summary>
+    /// Foto do autor
+    /// </summary>
+    [Required] // Campo obrigatório
     [MaxLength(200)]
-    public String? foto { get; set; } // URL da foto do autor
+    public string Foto { get; set; } = string.Empty; // URL da foto do autor
 
-    //FK
-    public String? obras { get; set; } // FK para a obra a que o autor pertence
+    //FK M-N
+    public ICollection<Obras> ObrasAutor { get; set; } = []; // FK para a obra a que o autor pertence 
 }

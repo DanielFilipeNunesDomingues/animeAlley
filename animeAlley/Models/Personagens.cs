@@ -3,23 +3,43 @@ using System.ComponentModel.DataAnnotations;
 
 public class Personagens
 {
+    /// <summary>
+    /// Identificador único do model Personagens
+    /// </summary>
     [Key] //Primary Key
-    public int id { get; set; }
+    public int Id { get; set; }
 
-    [MaxLength(80)] // MaxLength(80) para o campo nome
-    public String? nome { get; set; }
+    /// <summary>
+    /// Nome da personagem
+    /// </summary>
+    [MaxLength(100)] // MaxLength(100) para o campo nome
+    [Required] // Campo obrigatório
+    public string Nome { get; set; } = string.Empty; // Nome da personagem
 
-    public TipoPersonagem tipoPersonagem { get; set; } // Tipo de personagem (Protagonista, Antagonista, Secundário, Figurante)
+    /// <summary>
+    /// Função da personagem na obra (Protagonista, Antagonista, Secundário, Figurante)
+    /// </summary>
+    public TipoPersonagem TipoPersonagem { get; set; } // Tipo de personagem (Protagonista, Antagonista, Secundário, Figurante)
 
+    /// <summary>
+    /// Descrição da personagem
+    /// </summary>
     [MaxLength(500)] // para o campo sinopse
-    public String? sinopse { get; set; } // Sinopse da personagem
+    public string Sinopse { get; set; } = string.Empty; // Sinopse da personagem
 
-    [MaxLength(200)] // para o campo historia
-    public String? foto { get; set; } // URL da foto da personagem
+    /// <summary>
+    /// Foto da personagem
+    /// </summary>
+    [MaxLength(500)] // para o campo historia
+    public string Foto { get; set; } = string.Empty; // URL da foto da personagem
 
 
-    //FK
-    public String? obras { get; set; } // FK para a obra a que a personagem pertence
+    //FK M-N
+
+    /// <summary>
+    /// Lista de obras a que a personagem pertence
+    /// </summary>
+    public ICollection<Obras> ObrasPersonagem { get; set; } = []; // FK para as obras a que a personagem pertence
 }
 
 public enum TipoPersonagem

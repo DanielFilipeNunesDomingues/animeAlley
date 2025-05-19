@@ -5,16 +5,25 @@ namespace animeAlley.Models
 {
     public class Forum
     {
-        [Key] //Primary Key
-        public int id { get; set; }
+        /// <summary>
+        /// Identificador único do fórum.
+        /// </summary>
+        [Key]
+        public int Id { get; set; } //Primary Key
 
+        /// <summary>
+        /// Temas específicos para cada forum existente.
+        /// </summary>
         [MaxLength(80)] // MaxLength(80) para o campo Tema
-        public String? tema { get; set; }
+        [Required]
+        public string Tema { get; set; } = string.Empty; // Tema do fórum
 
-        // FK
-        [ForeignKey("topicosID")]
-        public String? topicosID { get; set; }
+        // FK M-N
 
+        /// <summary>
+        /// Lista de tópicos associados a este fórum.
+        /// </summary>
+        public ICollection<Topicos> Topicos { get; set; } = []; // Lista de tópicos associados a este fórum
 
     }
 }
