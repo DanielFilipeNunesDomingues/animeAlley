@@ -12,12 +12,12 @@ public class Studio
     [MaxLength(500)]
     public string? about { get; set; } // Descrição do estúdio
 
-    public estados status { get; set; } // Estado do estúdio (Ativo/Inativo)
+    public Estados status { get; set; } // Estado do estúdio (Ativo/Inativo)
 
 
 }
 
-public enum estados
+public enum Estados
 {
     Ativo,
     Inativo
