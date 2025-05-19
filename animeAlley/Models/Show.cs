@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class Shows
+public class Show
 {
     /// <summary>
     /// Identificador único do model Shows
@@ -111,12 +111,12 @@ public class Shows
     /// <summary>
     /// Lista de personagens que tem no show
     /// </summary>
-    public ICollection<Personagens> PersonagensShows { get; set; } = []; // FK para as personagens do show   
+    public ICollection<Personagem> PersonagensShows { get; set; } = []; // FK para as personagens do show   
 
     /// <summary>
     /// Lista de generos que tem no show
     /// </summary>
-    public ICollection<Generos> GenerosShows { get; set; } = []; // FK para os géneros do show
+    public ICollection<Genero> GenerosShows { get; set; } = []; // FK para os géneros do show
 
     /// <summary>
     /// Lista de shows nas listas dos utilizadores

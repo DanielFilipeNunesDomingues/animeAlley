@@ -1,7 +1,7 @@
 ﻿namespace animeAlley.Models;
 using System.ComponentModel.DataAnnotations;
 
-public class Personagens
+public class Personagem
 {
     /// <summary>
     /// Identificador único do model Personagens
@@ -39,7 +39,7 @@ public class Personagens
     /// <summary>
     /// Lista de obras a que a personagem pertence
     /// </summary>
-    public ICollection<Obras> ObrasPersonagem { get; set; } = []; // FK para as obras a que a personagem pertence
+    public ICollection<Obra> ObrasPersonagem { get; set; } = []; // FK para as obras a que a personagem pertence
 }
 
 public enum TipoPersonagem

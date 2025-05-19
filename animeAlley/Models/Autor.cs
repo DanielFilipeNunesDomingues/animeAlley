@@ -37,5 +37,5 @@ public class Autor
     public string Foto { get; set; } = string.Empty; // URL da foto do autor
 
     //FK M-N
-    public ICollection<Obras> ObrasAutor { get; set; } = []; // FK para a obra a que o autor pertence 
+    public ICollection<Obra> ObrasAutor { get; set; } = []; // FK para a obra a que o autor pertence 
 }

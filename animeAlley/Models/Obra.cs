@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace animeAlley.Models
 {
-    public class Obras
+    public class Obra
     {
         /// <summary>
         /// Identificador único do model Obras
@@ -20,7 +20,7 @@ namespace animeAlley.Models
         /// FK para os Shows
         /// </summary>
         [ValidateNever]
-        public Shows Shows { get; set; } = null!;
+        public Show Shows { get; set; } = null!;
 
     }
 }

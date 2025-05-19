@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 namespace animeAlley.Models
 {
-    public class Generos
+    public class Genero
     {
         /// <summary>
         /// Identificador único do model Generos
@@ -14,6 +14,6 @@ namespace animeAlley.Models
         /// </summary>
         [StringLength(50)]
         [Required]
-        public string Genero { get; set; } = string.Empty; // Nome do gênero
+        public string GeneroNome { get; set; } = string.Empty; // Nome do gênero
     }
 }

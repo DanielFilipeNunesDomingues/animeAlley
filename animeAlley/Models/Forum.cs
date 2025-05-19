@@ -23,7 +23,7 @@ namespace animeAlley.Models
         /// <summary>
         /// Lista de tópicos associados a este fórum.
         /// </summary>
-        public ICollection<Topicos> Topicos { get; set; } = []; // Lista de tópicos associados a este fórum
+        public ICollection<Topico> Topicos { get; set; } = []; // Lista de tópicos associados a este fórum
 
     }
 }

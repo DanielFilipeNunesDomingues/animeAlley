@@ -28,7 +28,7 @@ namespace animeAlley.Models
         /// FK para Shows
         /// </summary>
         [ValidateNever]
-        public Shows Show { get; set; } = null!; // FK para o Show
+        public Show Show { get; set; } = null!; // FK para o Show
 
         /// <summary>
         /// FK para a tabela lista que contém os shows associados a esta lista.
