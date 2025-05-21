@@ -20,22 +20,21 @@ public class Utilizador
     public string Nome { get; set; } = string.Empty; // Nome do utilizador
 
     /// <summary>
-    /// E-mail do utilizador.
-    /// </summary>
-    [MaxLength(200)]
-    [Required(ErrorMessage = "O e-mail é obrigatório.")]
-    public string Email { get; set; } = string.Empty; // E-mail do utilizador
-
-    [MaxLength(24)]
-    [Required(ErrorMessage = "A senha é obrigatória.")]
-    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", ErrorMessage = "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula e um número.")]
-    public string Password { get; set; } = string.Empty; // Password do utilizador
-
-    /// <summary>
     /// Foto do utilizador.
     /// </summary>
     [MaxLength(200)]
     public string Foto { get; set; } = string.Empty; // Foto do Utilizador
+
+    [Required]
+    public bool isAdmin { get; set; } = false;
+
+    /// <summary>
+    /// Este atributo servirá para fazer a 'ponte' 
+    /// entre a tabela dos Utilizadores e a 
+    /// tabela da Autenticação da Microsoft Identity
+    /// </summary>
+    [StringLength(50)]
+    public string UserName { get; set; } = string.Empty;
 
     // FK M-N
     /// <summary>

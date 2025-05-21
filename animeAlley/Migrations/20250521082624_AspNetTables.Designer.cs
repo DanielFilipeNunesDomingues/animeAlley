@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250521082624_AspNetTables")]
+    partial class AspNetTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,15 +154,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "685f54de-1ccd-480e-9ac2-b263cfd30548",
+                            ConcurrencyStamp = "d685f710-b5ae-4682-897e-f2bae0d231f5",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAELtWyBXsC5vCTKHsODv3vSzq3HXItJiEKlrWIYfZQidZvsJVvVDgpvloVhH5B1m2uQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEAMRCCouNb4rHbBvgC56clo+l/LmiRA0V82SiHODKqvlsMJ+cqLz8DC01gxu0tK0pg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "3cf9f25f-c7b2-4037-9972-28435683c18d",
+                            SecurityStamp = "8f4833d8-35de-4872-bce2-f83d64664e8d",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -602,6 +605,11 @@ namespace animeAlley.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Foto")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -612,13 +620,10 @@ namespace animeAlley.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("isAdmin")
-                        .HasColumnType("bit");
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
 
                     b.HasKey("Id");
 
