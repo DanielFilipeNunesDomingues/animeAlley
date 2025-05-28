@@ -75,7 +75,7 @@ namespace animeAlley.Data
 
         public DbSet<Show> Shows { get; set; }
 
-        public DbSet<Studio> Stuidos { get; set; }
+        public DbSet<Studio> Studios { get; set; }
 
         public DbSet<Topico> Topicos { get; set; }
 

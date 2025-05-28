@@ -27,6 +27,8 @@ public class Studio
     /// </summary>
     public Estado Status { get; set; } // Estado do estúdio (Ativo/Inativo)
 
+    // FK 1-N com Show
+    public ICollection<Show> Shows { get; set; } = [];
 
 }
 

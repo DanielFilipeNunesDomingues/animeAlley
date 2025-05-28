@@ -19,7 +19,7 @@ public class Personagem
     /// <summary>
     /// Função da personagem na obra (Protagonista, Antagonista, Secundário, Figurante)
     /// </summary>
-    public TipoPersonagem TipoPersonagem { get; set; } // Tipo de personagem (Protagonista, Antagonista, Secundário, Figurante)
+    public TiposPersonagem TipoPersonagem { get; set; } // Tipo de personagem (Protagonista, Antagonista, Secundário, Figurante)
 
     /// <summary>
     /// Descrição da personagem
@@ -37,12 +37,15 @@ public class Personagem
     //FK M-N
 
     /// <summary>
-    /// Lista de obras a que a personagem pertence
+    /// Lista de shows a que a personagem pertence
     /// </summary>
-    public ICollection<Obra> ObrasPersonagem { get; set; } = []; // FK para as obras a que a personagem pertence
+    public ICollection<Show> Shows { get; set; } = [];
+
 }
 
-public enum TipoPersonagem
+
+
+public enum TiposPersonagem
 {
     Protagonista,
     Antagonista,

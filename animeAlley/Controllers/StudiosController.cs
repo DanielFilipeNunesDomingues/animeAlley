@@ -22,7 +22,7 @@ namespace animeAlley.Controllers
         // GET: Studios
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Stuidos.ToListAsync());
+            return View(await _context.Studios.ToListAsync());
         }
 
         // GET: Studios/Details/5
@@ -33,7 +33,7 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            var studio = await _context.Stuidos
+            var studio = await _context.Studios
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (studio == null)
             {
@@ -73,7 +73,7 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            var studio = await _context.Stuidos.FindAsync(id);
+            var studio = await _context.Studios.FindAsync(id);
             if (studio == null)
             {
                 return NotFound();
@@ -124,7 +124,7 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            var studio = await _context.Stuidos
+            var studio = await _context.Studios
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (studio == null)
             {
@@ -139,10 +139,10 @@ namespace animeAlley.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var studio = await _context.Stuidos.FindAsync(id);
+            var studio = await _context.Studios.FindAsync(id);
             if (studio != null)
             {
-                _context.Stuidos.Remove(studio);
+                _context.Studios.Remove(studio);
             }
 
             await _context.SaveChangesAsync();
@@ -151,7 +151,7 @@ namespace animeAlley.Controllers
 
         private bool StudioExists(int id)
         {
-            return _context.Stuidos.Any(e => e.Id == id);
+            return _context.Studios.Any(e => e.Id == id);
         }
     }
 }

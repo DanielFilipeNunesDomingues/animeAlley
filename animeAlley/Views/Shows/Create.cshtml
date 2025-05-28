@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Nome" class="control-label"></label>
@@ -24,18 +24,24 @@
             </div>
             <div class="form-group">
                 <label asp-for="Tipo" class="control-label"></label>
-                <select asp-for="Tipo" class="form-control"></select>
+                <select asp-for="Tipo" class="form-control"
+                        asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
+                    <option value="">-- Selecione --</option>
+                </select>
                 <span asp-validation-for="Tipo" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control"></select>
+                <select asp-for="Status" class="form-control"
+                        asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
+                    <option value="">-- Selecione --</option>
+                </select>
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Nota" class="control-label"></label>
-                <input asp-for="Nota" class="form-control" />
-                <span asp-validation-for="Nota" class="text-danger"></span>
+                <label asp-for="NotaAux" class="control-label"></label>
+                <input asp-for="NotaAux" class="form-control" />
+                <span asp-validation-for="NotaAux" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Ano" class="control-label"></label>
@@ -44,7 +50,10 @@
             </div>
             <div class="form-group">
                 <label asp-for="Imagem" class="control-label"></label>
-                <input asp-for="Imagem" class="form-control" />
+                <input type="file"
+                       accept=".png,.jpeg,.jpg"
+                       name="showFoto"
+                       class="form-control" />
                 <span asp-validation-for="Imagem" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -59,13 +68,11 @@
             </div>
             <div class="form-group">
                 <label asp-for="Fonte" class="control-label"></label>
-                <select asp-for="Fonte" class="form-control"></select>
+                <select asp-for="Fonte" class="form-control"
+                        asp-items="Html.GetEnumSelectList<animeAlley.Models.Fonte>()">
+                    <option value="">-- Selecione --</option>
+                </select>
                 <span asp-validation-for="Fonte" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsAnime" /> @Html.DisplayNameFor(model => model.IsAnime)
-                </label>
             </div>
             <div class="form-group">
                 <label asp-for="StudioFK" class="control-label"></label>

@@ -19,7 +19,10 @@
             </div>
             <div class="form-group">
                 <label asp-for="TipoPersonagem" class="control-label"></label>
-                <select asp-for="TipoPersonagem" class="form-control"></select>
+                <select asp-for="TipoPersonagem" class="form-control"
+                        asp-items="Html.GetEnumSelectList<animeAlley.Models.TiposPersonagem>()">
+                    <option value="">-- Selecione --</option>
+                </select>
                 <span asp-validation-for="TipoPersonagem" class="text-danger"></span>
             </div>
             <div class="form-group">

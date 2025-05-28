@@ -15,23 +15,27 @@ public class Show
     /// <summary>
     /// Nome do show
     /// </summary>
+    [Required]
     [MaxLength(200)]
     public string Nome { get; set; } = string.Empty; // Nome do show
 
     /// <summary>
     /// Descrição do show
     /// </summary>
+    [Required]
     [MaxLength(500)]
     public string Sinopse { get; set; } = string.Empty; // Sinopse do show
 
     /// <summary>
     /// Tipo do show (Manga ou Anime)
     /// </summary>
+    [Required]
     public Tipo Tipo { get; set; } // Tipo do show (Manga/Anime)
 
     /// <summary>
     /// Estado atual do show, pode estar Ainda Ativo (ainda em exibição) ou Finalizado (já terminou)
     /// </summary>
+    [Required]
     public Status Status { get; set; } // Estado do show (Ainda ativo/Finalizado)
 
     /// <summary>
@@ -52,13 +56,14 @@ public class Show
     public string NotaAux { get; set; } = string.Empty; // Auxiliar durante o armazenamento da nota (0.0-100.0)
 
     /// <summary>
-    /// Ano em que o show foi lamçado
+    /// Ano em que o show foi lançado
     /// </summary>
     public int Ano { get; set; } // Ano de lançamento do show
 
     /// <summary>
     /// Capa do show
     /// </summary>
+    [Required]
     [MaxLength(200)]
     public string Imagem { get; set; } = string.Empty; // URL da capa do show
 
@@ -76,12 +81,8 @@ public class Show
     /// <summary>
     /// Fonte onde a obra é originada (Original/Manga/LightNovel/VisualNovel/Jogo)
     /// </summary>
+    [Required]
     public Fonte Fonte { get; set; } // Fonte do show (Original/Manga/LightNovel/VisualNovel/Jogo)
-
-    /// <summary>
-    /// Indica se o show é um anime ou não
-    /// </summary>
-    public Boolean IsAnime { get; set; } // Se o show é um anime ou não
 
     //FK 1-N
     /// <summary>

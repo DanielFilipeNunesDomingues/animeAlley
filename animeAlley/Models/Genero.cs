@@ -15,5 +15,8 @@ namespace animeAlley.Models
         [StringLength(50)]
         [Required]
         public string GeneroNome { get; set; } = string.Empty; // Nome do gênero
+
+        // FK M-N com Show
+        public ICollection<Show> Shows { get; set; } = [];
     }
 }

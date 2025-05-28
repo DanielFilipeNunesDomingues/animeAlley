@@ -7,20 +7,24 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using animeAlley.Data;
 using animeAlley.Models;
+using System.Globalization;
+using Microsoft.AspNetCore.Hosting;
 
 namespace animeAlley.Controllers
 {
     public class ShowsController : Controller
     {
-
-        /// <summary>
-        /// referencia a base de dados
-        /// </summary>
         private readonly ApplicationDbContext _context;
 
-        public ShowsController(ApplicationDbContext context)
+        /// <summary>
+        /// objeto que contém todas as características do Servidor
+        /// </summary>
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public ShowsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Shows
@@ -53,29 +57,99 @@ namespace animeAlley.Controllers
         // GET: Shows/Create
         public IActionResult Create()
         {
-
-            // mostra a View de nome 'Create',
-            // que está na pasta 'Categorias'
-            ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Foto");
-            ViewData["StudioFK"] = new SelectList(_context.Stuidos, "Id", "Nome");
+            ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Nome");
+            ViewData["StudioFK"] = new SelectList(_context.Studios, "Id", "Nome");
             return View();
         }
 
         // POST: Shows/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost] // Responde a uma resposta do browser feita em POST
-        [ValidateAntiForgeryToken] // Proteção contra ataques
-        public async Task<IActionResult> Create([Bind("Id,Nome,Sinopse,Tipo,Status,Nota,Ano,Imagem,Trailer,Views,Fonte,IsAnime,StudioFK,AutorFK")] Show show)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id,Nome,Sinopse,Tipo,Status,NotaAux,Ano,Imagem,Trailer,Views,Fonte,StudioFK,AutorFK")] Show show, IFormFile showFoto)
         {
-            if (ModelState.IsValid)
+            bool hasError = false;
+            string imagePath = string.Empty;
+
+            if (show.AutorFK <= 0)
             {
+                // Erro. Não foi escolhida uma categoria
+                hasError = true;
+                // crio msg de erro
+                ModelState.AddModelError("", "Tem de escolher um Autor");
+            }
+
+            if (show.StudioFK <= 0)
+            {
+                // Erro. Não foi escolhida uma categoria
+                hasError = true;
+                // crio msg de erro
+                ModelState.AddModelError("", "Tem de escolher um Studio");
+            }
+
+            if(showFoto == null)
+            {
+                hasError = true;
+                ModelState.AddModelError("", "Tem de submeter uma Fotografia do Show");
+            } 
+            else
+            {
+                if (showFoto.ContentType != "image/jpeg" && showFoto.ContentType != "image/png")
+                {
+                    // !(A==b || A==c) <=> (A!=b && A!=c)
+
+                    // não há imagem
+                    hasError = true;
+                    // construo a msg de erro
+                    ModelState.AddModelError("", "Tem de submeter uma Fotografia");
+                } 
+                else
+                {
+                    // há imagem,
+                    // vamos processá-la
+                    // *******************************
+                    // Novo nome para o ficheiro
+                    Guid g = Guid.NewGuid();
+                    imagePath = g.ToString();
+                    string extensao = Path.GetExtension(showFoto.FileName).ToLowerInvariant();
+                    imagePath += extensao;
+
+                    // guardar este nome na BD
+                    show.Imagem = imagePath;
+                }
+            }
+
+            ModelState.Remove("Imagem");
+
+
+            if (ModelState.IsValid && !hasError)
+            {
+
+                show.Nota = Convert.ToDecimal(show.NotaAux.Replace(".", ","), new CultureInfo("pt-PT"));
+
                 _context.Add(show);
                 await _context.SaveChangesAsync();
+
+                string localizacaoImagem = _webHostEnvironment.WebRootPath;
+                localizacaoImagem = Path.Combine(localizacaoImagem, "images/showCover");
+                if (!Directory.Exists(localizacaoImagem))
+                {
+                    Directory.CreateDirectory(localizacaoImagem);
+                }
+                // gerar o caminho completo para a imagem
+                imagePath = Path.Combine(localizacaoImagem, imagePath);
+                // agora, temos condições para guardar a imagem
+                using var stream = new FileStream(
+                   imagePath, FileMode.Create
+                   );
+                await showFoto.CopyToAsync(stream);
+                // **********************************************
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Foto", show.AutorFK);
-            ViewData["StudioFK"] = new SelectList(_context.Stuidos, "Id", "Nome", show.StudioFK);
+            ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Nome", show.AutorFK);
+            ViewData["StudioFK"] = new SelectList(_context.Studios, "Id", "Nome", show.StudioFK);
             return View(show);
         }
 
@@ -92,8 +166,8 @@ namespace animeAlley.Controllers
             {
                 return NotFound();
             }
-            ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Foto", show.AutorFK);
-            ViewData["StudioFK"] = new SelectList(_context.Stuidos, "Id", "Nome", show.StudioFK);
+            ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Nome", show.AutorFK);
+            ViewData["StudioFK"] = new SelectList(_context.Studios, "Id", "Nome", show.StudioFK);
             return View(show);
         }
 
@@ -102,7 +176,7 @@ namespace animeAlley.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Sinopse,Tipo,Status,Nota,Ano,Imagem,Trailer,Views,Fonte,IsAnime,StudioFK,AutorFK")] Show show)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Sinopse,Tipo,Status,Nota,Ano,Imagem,Trailer,Views,Fonte,StudioFK,AutorFK")] Show show)
         {
             if (id != show.Id)
             {
@@ -129,8 +203,8 @@ namespace animeAlley.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Foto", show.AutorFK);
-            ViewData["StudioFK"] = new SelectList(_context.Stuidos, "Id", "Nome", show.StudioFK);
+            ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Nome", show.AutorFK);
+            ViewData["StudioFK"] = new SelectList(_context.Studios, "Id", "Nome", show.StudioFK);
             return View(show);
         }
 
