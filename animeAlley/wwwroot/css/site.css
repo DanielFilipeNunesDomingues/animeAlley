@@ -2,6 +2,7 @@
 
 h1, h2, h3, h4, h5, h6 {
     font-family: "Krona One", sans-serif;
+    color:#C4AEAE;
 }
 
 p, span, a, li {
@@ -31,4 +32,17 @@ p, span, a, li {
 
 .bg-primary {
     background-color: #1D1616 !important; 
+}
+
+.rememberme {
+    color: #C4AEAE;
+}
+
+a {
+    color: #C4AEAE;
+    text-decoration: none;
+}
+
+.button {
+    background-color: #ebd1d1;
 }
