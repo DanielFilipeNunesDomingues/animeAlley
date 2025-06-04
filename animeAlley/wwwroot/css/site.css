@@ -1,22 +1,34 @@
-html {
-  font-size: 14px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Krona+One&display=swap');
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Krona One", sans-serif;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+p, span, a, li {
+    font-family: "Inter", sans-serif;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.navbar-animeAlley-bg {
+    background-color: #2A1D1D;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+.navbar-animeAlley {
 }
 
-body {
-  margin-bottom: 60px;
+.navbar-animeAlley a {
+    color: #C4AEAE !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.navbar-animeAlley a:hover {
+    color: #eee !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.container {
+    max-width: 1600px;
+}
+
+.bg-primary {
+    background-color: #1D1616 !important; 
 }
