@@ -68,6 +68,14 @@ public class Show
     public string Imagem { get; set; } = string.Empty; // URL da capa do show
 
     /// <summary>
+    /// Banner do show
+    /// </summary>
+    [Required]
+    [MaxLength(200)]
+    public string Banner { get; set; } = string.Empty; // URL do banner do show
+
+
+    /// <summary>
     /// Url do trailer do show
     /// </summary>
     [MaxLength(500)]

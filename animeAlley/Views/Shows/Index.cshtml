@@ -1,18 +1,22 @@
 ﻿@model IEnumerable<animeAlley.Models.Show>
 
-@{
-    ViewData["Title"] = "Index";
+<div class="py-5 container">
+
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+
+    @foreach (var item in Model) {
+    <div class="show-grid-container">
+
+
+            <div class="show-grid-item">
+                <a asp-action="Details" asp-route-id="@item.Id">
+                    <img src="~/images/showCover/@item.Imagem" alt="@item.Nome" title="@item.Nome" height="100px" />
+                    <span class="score">@item.Nota</span>
+                </a>
+            </div>
+
+    </div>
 }
-
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-
-@foreach (var item in Model) {
-
-<div class="container d-flex gap-3">
-    <img src="~/images/showCover/@item.Imagem" alt="@item.Nome" title="@item.Nome" height="100px" />
 </div>
-}

@@ -4,95 +4,103 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
 
-<h4>Show</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Sinopse" class="control-label"></label>
-                <input asp-for="Sinopse" class="form-control" />
-                <span asp-validation-for="Sinopse" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Tipo" class="control-label"></label>
-                <select asp-for="Tipo" class="form-control"
-                        asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
-                    <option value="">-- Selecione --</option>
-                </select>
-                <span asp-validation-for="Tipo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control"
-                        asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
-                    <option value="">-- Selecione --</option>
-                </select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NotaAux" class="control-label"></label>
-                <input asp-for="NotaAux" class="form-control" />
-                <span asp-validation-for="NotaAux" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Ano" class="control-label"></label>
-                <input asp-for="Ano" class="form-control" />
-                <span asp-validation-for="Ano" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Imagem" class="control-label"></label>
-                <input type="file"
-                       accept=".png,.jpeg,.jpg"
-                       name="showFoto"
-                       class="form-control" />
-                <span asp-validation-for="Imagem" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Trailer" class="control-label"></label>
-                <input asp-for="Trailer" class="form-control" />
-                <span asp-validation-for="Trailer" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Views" class="control-label"></label>
-                <input asp-for="Views" class="form-control" />
-                <span asp-validation-for="Views" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Fonte" class="control-label"></label>
-                <select asp-for="Fonte" class="form-control"
-                        asp-items="Html.GetEnumSelectList<animeAlley.Models.Fonte>()">
-                    <option value="">-- Selecione --</option>
-                </select>
-                <span asp-validation-for="Fonte" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StudioFK" class="control-label"></label>
-                <select asp-for="StudioFK" class ="form-control" asp-items="ViewBag.StudioFK"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="AutorFK" class="control-label"></label>
-                <select asp-for="AutorFK" class ="form-control" asp-items="ViewBag.AutorFK"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="py-5">
+    <h1>Criar - Show</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Nome" class="control-label"></label>
+                    <input asp-for="Nome" class="form-control" />
+                    <span asp-validation-for="Nome" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Sinopse" class="control-label"></label>
+                    <input asp-for="Sinopse" class="form-control" />
+                    <span asp-validation-for="Sinopse" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Tipo" class="control-label"></label>
+                    <select asp-for="Tipo" class="form-control"
+                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
+                        <option value="">-- Selecione --</option>
+                    </select>
+                    <span asp-validation-for="Tipo" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Status" class="control-label"></label>
+                    <select asp-for="Status" class="form-control"
+                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
+                        <option value="">-- Selecione --</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="NotaAux" class="control-label"></label>
+                    <input asp-for="NotaAux" class="form-control" />
+                    <span asp-validation-for="NotaAux" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Ano" class="control-label"></label>
+                    <input asp-for="Ano" class="form-control" />
+                    <span asp-validation-for="Ano" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Imagem" class="control-label"></label>
+                    <input type="file"
+                           accept=".png,.jpeg,.jpg"
+                           name="showFoto"
+                           class="form-control" />
+                    <span asp-validation-for="Imagem" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Banner" class="control-label"></label>
+                    <input type="file"
+                           accept=".png,.jpeg,.jpg"
+                           name="showBanner"
+                           class="form-control" />
+                    <span asp-validation-for="Banner" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Trailer" class="control-label"></label>
+                    <input asp-for="Trailer" class="form-control" />
+                    <span asp-validation-for="Trailer" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Views" class="control-label"></label>
+                    <input asp-for="Views" class="form-control" />
+                    <span asp-validation-for="Views" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Fonte" class="control-label"></label>
+                    <select asp-for="Fonte" class="form-control"
+                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Fonte>()">
+                        <option value="">-- Selecione --</option>
+                    </select>
+                    <span asp-validation-for="Fonte" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="StudioFK" class="control-label"></label>
+                    <select asp-for="StudioFK" class ="form-control" asp-items="ViewBag.StudioFK"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AutorFK" class="control-label"></label>
+                    <select asp-for="AutorFK" class ="form-control" asp-items="ViewBag.AutorFK"></select>
+                </div>
+                <div class="form-group mt-4">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Index">Back to List</a>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

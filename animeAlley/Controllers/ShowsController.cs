@@ -67,10 +67,11 @@ namespace animeAlley.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Sinopse,Tipo,Status,NotaAux,Ano,Imagem,Trailer,Views,Fonte,StudioFK,AutorFK")] Show show, IFormFile showFoto)
+        public async Task<IActionResult> Create([Bind("Id,Nome,Sinopse,Tipo,Status,NotaAux,Ano,Imagem,Banner,Trailer,Views,Fonte,StudioFK,AutorFK")] Show show, IFormFile showFoto, IFormFile showBanner)
         {
             bool hasError = false;
             string imagePath = string.Empty;
+            string bannerPath = string.Empty;
 
             if (show.AutorFK <= 0)
             {
@@ -88,17 +89,15 @@ namespace animeAlley.Controllers
                 ModelState.AddModelError("", "Tem de escolher um Studio");
             }
 
-            if(showFoto == null)
+            if(showFoto == null || showBanner == null)
             {
                 hasError = true;
                 ModelState.AddModelError("", "Tem de submeter uma Fotografia do Show");
             } 
             else
             {
-                if (showFoto.ContentType != "image/jpeg" && showFoto.ContentType != "image/png")
+                if ((showFoto.ContentType != "image/jpeg" && showFoto.ContentType != "image/png") || (showBanner.ContentType != "image/jpeg" && showBanner.ContentType != "image/png"))
                 {
-                    // !(A==b || A==c) <=> (A!=b && A!=c)
-
                     // não há imagem
                     hasError = true;
                     // construo a msg de erro
@@ -112,15 +111,23 @@ namespace animeAlley.Controllers
                     // Novo nome para o ficheiro
                     Guid g = Guid.NewGuid();
                     imagePath = g.ToString();
-                    string extensao = Path.GetExtension(showFoto.FileName).ToLowerInvariant();
-                    imagePath += extensao;
+                    bannerPath = g.ToString();
+
+                    string extensaoImagem = Path.GetExtension(showFoto.FileName).ToLowerInvariant();
+                    imagePath += extensaoImagem;
+
+                    string extensaoBanner = Path.GetExtension(showBanner.FileName).ToLowerInvariant();
+                    bannerPath += extensaoBanner;
+
 
                     // guardar este nome na BD
                     show.Imagem = imagePath;
+                    show.Banner = bannerPath;
                 }
             }
 
             ModelState.Remove("Imagem");
+            ModelState.Remove("Banner");
 
 
             if (ModelState.IsValid && !hasError)
@@ -132,18 +139,31 @@ namespace animeAlley.Controllers
                 await _context.SaveChangesAsync();
 
                 string localizacaoImagem = _webHostEnvironment.WebRootPath;
+                string localizacaoBanner = _webHostEnvironment.WebRootPath;
                 localizacaoImagem = Path.Combine(localizacaoImagem, "images/showCover");
+                localizacaoBanner = Path.Combine(localizacaoBanner, "images/showBanner");
                 if (!Directory.Exists(localizacaoImagem))
                 {
                     Directory.CreateDirectory(localizacaoImagem);
                 }
+                if (!Directory.Exists(localizacaoBanner))
+                {
+                    Directory.CreateDirectory(localizacaoBanner);
+                }
                 // gerar o caminho completo para a imagem
                 imagePath = Path.Combine(localizacaoImagem, imagePath);
+                bannerPath = Path.Combine(localizacaoBanner, bannerPath);
+
                 // agora, temos condições para guardar a imagem
-                using var stream = new FileStream(
+                using var streamImage = new FileStream(
                    imagePath, FileMode.Create
                    );
-                await showFoto.CopyToAsync(stream);
+                await showFoto.CopyToAsync(streamImage);
+
+                using var streamBanner = new FileStream(
+                   bannerPath, FileMode.Create
+                   );
+                await showBanner.CopyToAsync(streamBanner);
                 // **********************************************
 
                 return RedirectToAction(nameof(Index));
