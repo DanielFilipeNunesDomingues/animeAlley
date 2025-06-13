@@ -10,15 +10,58 @@
 <div class="bg-secondary">
     <div class="show-header container">
         <div class="show-cover">
-            <img src="~/images/showCover/@Html.DisplayFor(Model => Model.Imagem)" alt="@Html.DisplayFor(Model => Model.Nome)" />
-            <a href="#">Adicionar</a>
+            <div class="cover">
+                <img src="~/images/showCover/@Html.DisplayFor(Model => Model.Imagem)" alt="@Html.DisplayFor(Model => Model.Nome)" />
+            </div>      
+            <a href="#">Adicionar +</a>
         </div>
-
         <div class="show-sinopse">
-            <h2>@Html.DisplayFor(Model => Model.Nome)</h2>
-
+            <h2 class="fw-bold">@Html.DisplayFor(Model => Model.Nome)</h2>
             <p>@Html.DisplayFor(Model => Model.Sinopse)</p>
         </div>
+    </div>
+</div>
+
+<div class="container py-5 px-0 show-content">
+    <div class="show-info bg-secondary">
+        <div class="data">
+            <h3>Status</h3>
+            <p>@Html.DisplayFor(Model => Model.Status)</p>
+        </div>
+
+        <div class="data">
+            <h3>Ano de Lançamento</h3>
+            <p>@Html.DisplayFor(Model => Model.Ano)</p>
+        </div>
+
+        <div class="data">
+            <h3>Avaliação</h3>
+            <p>@Html.DisplayFor(Model => Model.Nota)</p>
+        </div>
+
+        <div class="data">
+            <h3>Popularidade</h3>
+            <p>@Html.DisplayFor(Model => Model.Views)</p>
+        </div>
+
+        <div class="data">
+            <h3>Estúdio</h3>
+            <p>@Html.DisplayFor(Model => Model.Studio.Nome)</p>
+        </div>
+
+        <div class="data">
+            <h3>Origem</h3>
+            <p>@Html.DisplayFor(Model => Model.Fonte)</p>
+        </div>
+
+        <div class="data">
+            <h3>Gêneros</h3>
+            <p>@Html.DisplayFor(Model => Model.GenerosShows)</p>
+        </div>
+    </div>
+
+    <div class="">
+
     </div>
 </div>
 

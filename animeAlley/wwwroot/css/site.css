@@ -164,15 +164,123 @@ span {
 }
 
 .show-banner-shadow {
-    background: linear-gradient(0deg,rgba(61, 48, 48, .2) 0%, rgba(237, 221, 83, 0) 100%);
+    background: linear-gradient(0deg,rgba(61, 48, 48, .65) 0%, rgba(237, 221, 83, 0) 100%);
     height: 100%;
     width: 100%;
 }
 
 .show-header {
     display:flex;
+    justify-content: right;
+    align-content: center;
+    position: relative;
+    padding: 1.2rem;
+    height: 240px;
+}
+
+.show-cover {
+    position: absolute;
+    left: 0;
+    top: -160px;
+    width: 230px;
+}
+
+.show-cover a {
+    display: flex;
     justify-content: center;
     align-content: center;
+    background-color: #59D840;
+    padding: 6px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #3D3030;
+    font-size: 1.05rem;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
+}
+
+.show-cover .cover {
+    display: inline-block;
+    cursor: pointer;
+    height: 325px;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
+    border-radius: 0.4rem;
+    margin-bottom: 15px;
+}
+
+.show-cover .cover img {
+    height: 100%;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.show-sinopse {
+    height: auto;
+    margin: auto 0;
+    max-width: 1300px;
+}
+
+.show-sinopse h2 {
+    font-family: "Inter", sans-serif;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.show-sinopse p {
+    color: #C4AEAE;
+    line-height: 1.6rem;
+    line-break: auto;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.show-content {
+    display: grid;
+    grid-template-columns: clamp(180px, 25%, 230px) 1fr;
+}
+
+.show-info {
+    padding: 1.2rem;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    gap: 20px
+}
+
+.show-info .data {
+    position: relative;
+}
+
+.show-info .data h3 {
+    font-family: "Inter", sans-serif;
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+    font-weight: normal;
+}
+
+.show-info .data:before {
+    content: "" ;
+    display: inline-block;
+    position: absolute;
+
+    width: 2px;
+    height: 100%;
+    left: -5px;
+    background-color: #C4AEAE;
+    border-radius: 50%;
+} 
+
+.show-info .data p {
+    font-size: 0.8rem;
+    color: #C4AEAE;
+    margin: 0;
 }
 
 @media (max-width: 100rem) {
