@@ -200,7 +200,6 @@ span {
 
 .show-cover .cover {
     display: inline-block;
-    cursor: pointer;
     height: 325px;
     position: relative;
     overflow: hidden;
@@ -242,6 +241,7 @@ span {
 .show-content {
     display: grid;
     grid-template-columns: clamp(180px, 25%, 230px) 1fr;
+    gap: 3rem;
 }
 
 .show-info {
@@ -269,18 +269,77 @@ span {
     content: "" ;
     display: inline-block;
     position: absolute;
-
     width: 2px;
     height: 100%;
     left: -5px;
     background-color: #C4AEAE;
-    border-radius: 50%;
+    border-radius: 20px;
 } 
 
 .show-info .data p {
     font-size: 0.8rem;
     color: #C4AEAE;
     margin: 0;
+}
+
+.show-section h3 {
+    font-family: "Inter", sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-weight: normal;
+}
+
+.show-personagens {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    justify-content: space-between;
+    align-content: center;
+    gap: 1rem;
+}
+
+.show-personagens .personagem {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    height: 120px;
+    width: auto;
+    border-radius: 0 0.4rem 0.4rem 0;
+}
+
+.show-personagens .personagem .cover {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    width: 100px;
+    height: 100%;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
+    border-radius: 0.4rem 0 0 0.4rem;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.show-personagens .personagem p {
+    padding: .5rem;
+    display: block;
+    margin: 0;
+    justify-self: start;
+    align-self: start;
+    white-space: nowrap;
+}
+
+.show-personagens .personagem .info {
+    color: #C4AEAE;
+    font-size: 0.8rem;
+    justify-self: end;
+    align-self: end;
+} 
+
+.show-personagens .personagem .cover img {
+    height: 100%;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 100%;
 }
 
 @media (max-width: 100rem) {

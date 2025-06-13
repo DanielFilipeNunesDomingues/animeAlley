@@ -45,7 +45,9 @@ namespace animeAlley.Controllers
             var show = await _context.Shows
                 .Include(s => s.Autor)
                 .Include(s => s.Studio)
+                .Include(s => s.Personagens)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (show == null)
             {
                 return NotFound();
