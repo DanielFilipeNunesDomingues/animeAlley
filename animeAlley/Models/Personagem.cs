@@ -1,5 +1,9 @@
 ﻿namespace animeAlley.Models;
+
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class Personagem
 {
@@ -33,17 +37,22 @@ public class Personagem
     [MaxLength(500)] // para o campo historia
     public string Foto { get; set; } = string.Empty; // URL da foto da personagem
 
-
-    //FK M-N
+    //FK 1-N para Show
 
     /// <summary>
-    /// Lista de shows a que a personagem pertence
+    /// FK para a tabela dos Shows
     /// </summary>
-    public ICollection<Show> Shows { get; set; } = [];
+    [ForeignKey(nameof(Show))]
+    [Display(Name = "Show")]
+    public int ShowFK { get; set; } // FK para o show (pode ser null)
+
+    /// <summary>
+    /// Navegação para o Show
+    /// </summary>
+    [ValidateNever]
+    public Show Show { get; set; } = null!; // Navegação para o show
 
 }
-
-
 
 public enum TiposPersonagem
 {

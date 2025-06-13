@@ -118,9 +118,9 @@ public class Show
     //FK M-N
 
     /// <summary>
-    /// Lista de personagens que tem no show
+    /// Lista de personagens que pertencem a este show
     /// </summary>
-    public ICollection<Personagem> PersonagensShows { get; set; } = []; // FK para as personagens do show   
+    public ICollection<Personagem> Personagens { get; set; } = [];
 
     /// <summary>
     /// Lista de generos que tem no show
