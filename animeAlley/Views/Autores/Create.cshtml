@@ -1,46 +1,49 @@
 ﻿@model animeAlley.Models.Autor
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Criar Autor";
 }
 
-<h1>Create</h1>
-
-<h4>Autor</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DateNasc" class="control-label"></label>
-                <input asp-for="DateNasc" class="form-control" />
-                <span asp-validation-for="DateNasc" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Sobre" class="control-label"></label>
-                <input asp-for="Sobre" class="form-control" />
-                <span asp-validation-for="Sobre" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Foto" class="control-label"></label>
-                <input asp-for="Foto" class="form-control" />
-                <span asp-validation-for="Foto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="py-5 container">
+    <h1>Criar - Autor</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Nome" class="control-label"></label>
+                    <input asp-for="Nome" class="form-control" />
+                    <span asp-validation-for="Nome" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="DateNasc" class="control-label"></label>
+                    <input asp-for="DateNasc" class="form-control" />
+                    <span asp-validation-for="DateNasc" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Sobre" class="control-label"></label>
+                    <input asp-for="Sobre" class="form-control" />
+                    <span asp-validation-for="Sobre" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Foto" class="control-label"></label>
+                    <input type="file"
+                           accept=".png,.jpeg,.jpg"
+                           name="autorFoto"
+                           class="form-control" />
+                    <span asp-validation-for="Foto" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+
 </div>
 
 @section Scripts {

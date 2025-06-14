@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250614110734_IncreaseAutorSobreMaxLength")]
+    partial class IncreaseAutorSobreMaxLength
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,15 +169,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "1f555ef1-86a0-49d7-ba76-b505dabb5a35",
+                            ConcurrencyStamp = "f0f63688-7330-45db-87e5-020da8646521",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEI9ENc4Qvkrag0RJILBFTiZcdDRnlQ+Us9msNQ61KxyeWBmcedG+zvQk73CYD57/Rw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFHFrU28qU164m0wuK9GAbbxc8xZogdRUgvCp22ToECoWtBs6KCwThG2dc9NkR5xCg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "fe021883-5931-4522-bd5e-c56277c5eb9b",
+                            SecurityStamp = "e5611eca-1a82-401e-8784-913398bca785",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -455,8 +458,8 @@ namespace animeAlley.Migrations
 
                     b.Property<string>("Sinopse")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("TipoPersonagem")
                         .HasColumnType("int");
@@ -505,8 +508,8 @@ namespace animeAlley.Migrations
 
                     b.Property<string>("Sinopse")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

@@ -1,7 +1,7 @@
 ﻿@model animeAlley.Models.Show
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Nome;
 }
 
 <div class="show-banner" style="background-image: url('/images/showBanner/@Html.DisplayFor(Model => Model.Banner)')">
