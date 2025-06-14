@@ -23,7 +23,7 @@ public class Show
     /// Descrição do show
     /// </summary>
     [Required]
-    [MaxLength(500)]
+    [MaxLength(1000)]
     public string Sinopse { get; set; } = string.Empty; // Sinopse do show
 
     /// <summary>
