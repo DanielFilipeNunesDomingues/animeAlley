@@ -9,6 +9,8 @@ using animeAlley.Data;
 using animeAlley.Models;
 using System.Globalization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace animeAlley.Controllers
 {
@@ -60,6 +62,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Create
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             // Buscar todos os shows para popular o dropdown
@@ -74,6 +77,7 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Create
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,ShowFK")] Personagem personagem, IFormFile personagemFoto)
@@ -149,6 +153,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -175,6 +180,7 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Edit/5
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,ShowFK")] Personagem personagem, IFormFile personagemFoto)
@@ -254,6 +260,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -274,6 +281,7 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Delete/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

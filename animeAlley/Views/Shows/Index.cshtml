@@ -5,10 +5,12 @@
 }
 
 <div class="py-5 container">
-
-    <p>
-        <a asp-action="Create">Create New</a>
-    </p>
+    @if (!User.IsInRole("Admin"))
+    {
+        <p>
+            <a asp-action="Create">Create New</a>
+        </p>
+    }
 
     <div class="show-grid-container">
     @foreach (var item in Model) {

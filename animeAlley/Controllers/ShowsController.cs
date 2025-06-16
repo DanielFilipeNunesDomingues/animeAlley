@@ -464,6 +464,7 @@ namespace animeAlley.Controllers
                 .Include(s => s.Autor)
                 .Include(s => s.Studio)
                 .Include(s => s.GenerosShows)
+                .Include(s => s.Personagens)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (show == null)

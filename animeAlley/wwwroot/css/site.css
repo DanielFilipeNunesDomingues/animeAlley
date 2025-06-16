@@ -1,5 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Krona+One&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Krona+One&display=swap'); 
 
+/* Normal Reset */
 h1, h2, h3, h4, h5, h6 {
     font-family: "Krona One", sans-serif;
     color: #eee;
@@ -33,6 +34,7 @@ span {
 
 .container {
     max-width: 1600px;
+    padding: 0.2rem 0;
 }
 
 .bg-primary {
@@ -47,6 +49,13 @@ span {
     color: #EEEEEE;
 }
 
+#genero-count, .form-text, .text-muted {
+    color: #C4AEAE !important;
+}
+
+/* End Normal Reset */
+
+/* Form Style*/
 .form-group {
     display: flex;
     flex-direction: column;
@@ -54,15 +63,32 @@ span {
     margin-bottom: 0.1rem;
 }
 
-.form-control {
+.form-control{
     padding: 0.8rem 1rem;
     background-color: #3D3030;
     border: none;
     outline: none;
     color: #eee;
+    border-radius: 0.4rem;
 }
 
-.form-control:focus {
+.form-control::placeholder {
+    color: #C4AEAE;
+}
+
+
+    .form-select {
+        padding: 0.8rem 1rem;
+        background-color: #3D3030;
+        border: none;
+        outline: none;
+        color: #eee;
+        border-radius: 0.4rem;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='white' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    }
+
+
+.form-control:focus, .form-select:focus {
     padding: 0.8rem 1rem;
     background-color: #3D3030;
     border: none;
@@ -71,8 +97,30 @@ span {
     box-shadow: 0px 0px 5px 5px rgba(216,64,67,0.1);
 }
 
+input[type="file"].form-control::file-selector-button {
+    background-color: #D84043;
+    color: #eee;
+    border: none;
+    padding: 0.375rem 0.75rem;
+    margin-right: 0.75rem;
+    border-radius: 0.2rem;
+}
+
+input[type="file"].form-control::file-selector-button:hover {
+    background-color: #8E1616 !important;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+    border-radius: 0.4rem;
+}
+
 .text-danger {
     color: #D84043 !important;
+    font-size: 0.875em;
+    margin-top: 5px;
+    display: block;
 }
 
 .btn {
@@ -80,11 +128,147 @@ span {
 }
 
 .btn-primary {
-    background-color: #409ED8 !important;
+    background-color: #D84043 !important;
     border: none;
     outline: none;
+    display: block;
+    font-size: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: 0.4rem;
 }
 
+.btn-outline-secondary {
+    outline: none;
+    display: block;
+    font-size: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: 0.4rem;
+}
+
+.control-label {
+    font-weight: 500;
+    color: #c0c0c0;
+    margin-bottom: 8px;
+    display: block;
+}
+
+select[name="selectedGeneros"] {
+    min-height: 150px;
+    border-radius: 0.4rem;
+    outline: none;
+    color: #eee;
+    background-image: none;
+    overflow-y: auto;
+}
+
+select[name="selectedGeneros"] option {
+    padding: 0.6rem 1rem;
+    color: #eee;
+    border-bottom: 1px solid rgba(196, 174, 174, 0.2);
+    transition: all 0.2s ease;
+}
+
+select[name="selectedGeneros"] option:last-child {
+    border-bottom: none;
+}
+
+select[name="selectedGeneros"] option:checked {
+    background: linear-gradient(135deg, #D84043 0%, #D84043 100%);
+    border: none;
+    color: #eee;
+    font-weight: 600;
+    position: relative;
+}
+
+select[name="selectedGeneros"] option:checked::before {
+    content: "✓";
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+select[name="selectedGeneros"] option:hover:not(:checked) {
+    background-color: #2A1D1D;
+    color: #eee;
+    transform: translateX(2px);
+    border-bottom: 1px solid rgba(196, 174, 174, 0);
+    transition: all 0.2s ease;
+}
+
+div > a[asp-action="Index"] {
+    display: block;
+    text-align: center;
+    margin-top: 30px;
+    color: #e94560;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+div > a[asp-action="Index"]:hover {
+    color: #ff6b6b;
+    text-decoration: underline;
+}
+
+.img-thumbnail {
+    border: 1px solid #3D3030;
+    padding: 0.5rem;
+    background-color: #3D3030;
+}
+
+.preview-image, .preview-banner {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: rgba(61, 48, 48, 0.5);
+    border-radius: 0.4rem;
+    border: 1px dashed #D84040;
+}
+
+.preview-image strong, .preview-banner strong {
+    color: #e94560;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.card {
+    background-color: #2A1D1D;
+    border-radius: 0.4rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card .card-header {
+    padding: 1rem;
+    background-color: #D84040;
+}
+
+.form-label.fw-semibold {
+    margin-bottom: 0.2rem;
+}
+
+.image-container {
+    border-radius: 0.4rem;
+    overflow: hidden;
+}
+
+.current-image, .current-banner {
+    padding: 0.75rem;
+    border-radius: 0.4rem;
+}
+
+.preview-image, .preview-banner {
+    padding: 0.75rem;
+    border-radius: 0.4rem;
+}
+
+@media (max-width: 991.98px) {
+    .row.g-4 > .col-lg-8,
+    .row.g-4 > .col-lg-4 {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* End Form Style*/
+
+/* Grid Items Style */
 .show-grid-container {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -156,6 +340,9 @@ span {
     opacity: 1;
 }
 
+/* End Grid Items Style */
+
+/* Shows Details Style*/
 .show-banner {
     background-position: 50% 35%;
     background-repeat: no-repeat;
@@ -185,18 +372,36 @@ span {
     width: 230px;
 }
 
-.show-cover a {
+.show-cover .options {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-content: center;
-    background-color: #59D840;
-    padding: 6px 20px;
-    border-radius: 5px;
+    border-radius: 0.4rem;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.show-cover .options a {
+    text-align: center;
     text-decoration: none;
     color: #3D3030;
-    font-size: 1.05rem;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
+    padding: 0.4rem 1rem;
+    font-weight: bold;
+    flex-grow: 1;
 }
+
+.show-cover .options .add {
+    background-color: #59D840;
+}
+
+.show-cover .options .delete {
+    background-color: #D84043;
+}
+
+.show-cover .options .edit {
+    background-color: #409ED8;
+}
+
 
 .show-cover .cover {
     display: inline-block;
@@ -277,9 +482,14 @@ span {
     display: grid;
     grid-template-columns: clamp(180px, 25%, 230px) 1fr;
     gap: 3rem;
+    position: relative;
 }
 
 .show-info {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-top: 3rem;
     padding: 0.8rem;
     border-radius: 5px;
     display: flex;
@@ -324,6 +534,9 @@ span {
     transition: 0.2s ease all
 }
 
+.show-section {
+    grid-column: 2;
+}
 
 .show-section h3 {
     font-family: "Inter", sans-serif;
@@ -454,13 +667,7 @@ span {
     margin: 0;
     padding: .5rem;
     line-height: 1.4rem;
-    transition: 0.2s ease all;
     white-space: wrap;
-}
-
-.show-last-section .autor .info:hover {
-    color: #eee;
-    transition: 0.2s ease all;
 }
 
 .show-last-section .trailer-wrapper {
@@ -659,6 +866,34 @@ span {
     border-radius: 0.4rem;
 }
 
+.show-delete {
+    background-color: #D89940;
+    padding: 1rem 0;
+}
+
+.show-delete p {
+    margin: 0;
+}
+
+.show-delete .btn-danger {
+    background-color: #D84043;
+    border: none;
+    color: #eee;
+    padding: 0.5rem 1rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.show-delete a {
+    text-decoration: none;
+    color: #322C2C;
+    margin: 0;
+}
+
+/* End Shows Detail Style*/
+
+/* Reponsive Breakpoints */
 @media (max-width: 100rem) {
     .show-grid-container {
         grid-template-columns: repeat(7, 1fr);
@@ -768,8 +1003,7 @@ span {
     }
 
     .show-content {
-        display: grid;
-        grid-template-columns: 1fr;
+        display: block;
         gap: 3rem;
     }
 
@@ -793,6 +1027,12 @@ span {
 
     .show-cover .cover {
         height: 500px;
+    }
+
+    .show-info {
+        position: relative;
+        margin-top: 0rem;
+        margin-bottom: 2rem;
     }
 }
 

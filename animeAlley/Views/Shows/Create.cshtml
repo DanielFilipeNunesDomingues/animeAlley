@@ -4,123 +4,296 @@
     ViewData["Title"] = "Criar Show";
 }
 
-
 <div class="py-5 container">
-    <h1>Criar - Show</h1>
-    <div class="row">
-        <div class="col-md-4">
+    <h1 class="text-center mb-4">Criar Show</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
             <form asp-action="Create" method="post" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Nome" class="control-label"></label>
-                    <input asp-for="Nome" class="form-control" />
-                    <span asp-validation-for="Nome" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Sinopse" class="control-label"></label>
-                    <input asp-for="Sinopse" class="form-control" />
-                    <span asp-validation-for="Sinopse" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Tipo" class="control-label"></label>
-                    <select asp-for="Tipo" class="form-control"
-                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
-                        <option value="">-- Selecione --</option>
-                    </select>
-                    <span asp-validation-for="Tipo" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Status" class="control-label"></label>
-                    <select asp-for="Status" class="form-control"
-                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
-                        <option value="">-- Selecione --</option>
-                    </select>
-                    <span asp-validation-for="Status" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="NotaAux" class="control-label"></label>
-                    <input asp-for="NotaAux" class="form-control" />
-                    <span asp-validation-for="NotaAux" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Ano" class="control-label"></label>
-                    <input asp-for="Ano" class="form-control" />
-                    <span asp-validation-for="Ano" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Imagem" class="control-label"></label>
-                    <input type="file"
-                           accept=".png,.jpeg,.jpg"
-                           name="showFoto"
-                           class="form-control" />
-                    <span asp-validation-for="Imagem" class="text-danger"></span>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                <div class="row g-4">
+                    <!-- Left Column: General Information -->
+                    <div class="col-lg-8">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações Gerais</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <!-- First Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Nome" class="form-label fw-semibold"></label>
+                                            <input asp-for="Nome" class="form-control" placeholder="Nome do show" />
+                                            <span asp-validation-for="Nome" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Ano" class="form-label fw-semibold"></label>
+                                            <input asp-for="Ano" class="form-control" placeholder="Ano de lançamento" />
+                                            <span asp-validation-for="Ano" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Synopsis - Full Width -->
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label asp-for="Sinopse" class="form-label fw-semibold"></label>
+                                            <textarea asp-for="Sinopse" class="form-control" rows="4" placeholder="Descrição do show"></textarea>
+                                            <span asp-validation-for="Sinopse" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Second Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Tipo" class="form-label fw-semibold"></label>
+                                            <select asp-for="Tipo" class="form-select"
+                                                    asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
+                                                <option value="">-- Selecione o Tipo --</option>
+                                            </select>
+                                            <span asp-validation-for="Tipo" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Status" class="form-label fw-semibold"></label>
+                                            <select asp-for="Status" class="form-select"
+                                                    asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
+                                                <option value="">-- Selecione o Status --</option>
+                                            </select>
+                                            <span asp-validation-for="Status" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Third Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="NotaAux" class="form-label fw-semibold"></label>
+                                            <input asp-for="NotaAux" class="form-control" placeholder="Nota (0-10)" />
+                                            <span asp-validation-for="NotaAux" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Views" class="form-label fw-semibold"></label>
+                                            <input asp-for="Views" class="form-control" placeholder="Número de visualizações" />
+                                            <span asp-validation-for="Views" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fourth Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Fonte" class="form-label fw-semibold"></label>
+                                            <select asp-for="Fonte" class="form-select"
+                                                    asp-items="Html.GetEnumSelectList<animeAlley.Models.Fonte>()">
+                                                <option value="">-- Selecione a Fonte --</option>
+                                            </select>
+                                            <span asp-validation-for="Fonte" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="StudioFK" class="form-label fw-semibold"></label>
+                                            <select asp-for="StudioFK" class="form-select" asp-items="ViewBag.StudioFK">
+                                                <option value="">-- Selecione o Studio --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fifth Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="AutorFK" class="form-label fw-semibold"></label>
+                                            <select asp-for="AutorFK" class="form-select" asp-items="ViewBag.AutorFK">
+                                                <option value="">-- Selecione o Autor --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Trailer" class="form-label fw-semibold"></label>
+                                            <input asp-for="Trailer" class="form-control" placeholder="URL do trailer" />
+                                            <span asp-validation-for="Trailer" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Genres - Full Width -->
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label class="form-label fw-semibold">Gêneros</label>
+                                            <select name="selectedGeneros" class="form-select" multiple="multiple"
+                                                    asp-items="ViewBag.Generos" style="height: 120px;">
+                                            </select>
+                                            <div class="form-text text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                <span id="genero-count">Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Images -->
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-images me-2"></i>Imagens</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Cover Image Section -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Imagem de Capa</label>
+                                    <input type="file"
+                                           name="showFoto"
+                                           id="showFoto"
+                                           class="form-control form-control-sm"
+                                           accept="image/jpeg,image/png,image/jpg,image/webp" />
+                                    <div class="form-text">JPG, PNG ou WEBP (máx. 2MB)</div>
+                                </div>
+
+                                <!-- Banner Section -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Banner</label>
+                                    <input type="file"
+                                           name="showBanner"
+                                           id="showBanner"
+                                           class="form-control form-control-sm"
+                                           accept="image/jpeg,image/png,image/jpg,image/webp" />
+                                    <div class="form-text">JPG, PNG ou WEBP (máx. 2MB)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label asp-for="Banner" class="control-label"></label>
-                    <input type="file"
-                           accept=".png,.jpeg,.jpg"
-                           name="showBanner"
-                           class="form-control" />
-                    <span asp-validation-for="Banner" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Trailer" class="control-label"></label>
-                    <input asp-for="Trailer" class="form-control" />
-                    <span asp-validation-for="Trailer" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Views" class="control-label"></label>
-                    <input asp-for="Views" class="form-control" />
-                    <span asp-validation-for="Views" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Fonte" class="control-label"></label>
-                    <select asp-for="Fonte" class="form-control"
-                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Fonte>()">
-                        <option value="">-- Selecione --</option>
-                    </select>
-                    <span asp-validation-for="Fonte" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="StudioFK" class="control-label"></label>
-                    <select asp-for="StudioFK" class ="form-control" asp-items="ViewBag.StudioFK"></select>
-                </div>
-                <div class="form-group">
-                    <label asp-for="AutorFK" class="control-label"></label>
-                    <select asp-for="AutorFK" class ="form-control" asp-items="ViewBag.AutorFK"></select>
-                </div>
-                <div class="form-group">
-                    <label class="control-label">Géneros</label>
-                    <select name="selectedGeneros" class="form-control" multiple="multiple" asp-items="ViewBag.Generos" style="height: 150px;">
-                    </select>
-                    <small class="form-text text-muted">
-                        Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.
-                    </small>
-                </div>
-                <div class="form-group mt-4">
-                    <input type="submit" value="Create" class="btn btn-primary" />
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-center gap-3 flex-lg-row flex-column">
+                            <button type="submit" class="btn btn-primary">
+                                Guardar Alterações
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                Voltar à Lista
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
-
-    <div>
-        <a asp-action="Index">Back to List</a>
-    </div>
 </div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
     <script>
-        // Melhorar a experiência da seleção múltipla
         $(document).ready(function() {
-            $('select[name="selectedGeneros"]').on('change', function() {
-                var selectedCount = $(this).val() ? $(this).val().length : 0;
-                var helpText = selectedCount > 0 ? selectedCount + ' género(s) selecionado(s)' : 'Nenhum género selecionado';
-                $(this).next('.form-text').text(helpText + '. Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.');
+            // Genre selection counter
+            var updateGeneroCount = function() {
+                var selectedCount = $('select[name="selectedGeneros"]').val() ? $('select[name="selectedGeneros"]').val().length : 0;
+                var helpText = selectedCount > 0 ?
+                    `${selectedCount} género(s) selecionado(s). ` :
+                    'Nenhum género selecionado. ';
+                helpText += 'Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.';
+                $('#genero-count').html(`<i class="fas fa-info-circle me-1"></i>${helpText}`);
+            };
+
+            updateGeneroCount();
+            $('select[name="selectedGeneros"]').on('change', updateGeneroCount);
+
+            // Image preview functionality
+            function createImagePreview(input, type) {
+                var file = input.files[0];
+                var previewClass = type === 'cover' ? '.preview-image' : '.preview-banner';
+                var $parent = $(input).closest('.mb-4, .mb-3');
+
+                // Remove existing preview
+                $parent.find(previewClass).remove();
+
+                if (file) {
+                    // Validate file size (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('O arquivo é muito grande. Tamanho máximo: 2MB');
+                        $(input).val('');
+                        return;
+                    }
+
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var maxHeight = type === 'cover' ? '200px' : '120px';
+                        var previewHtml = `
+                            <div class="${previewClass.substring(1)} mt-3">
+                                <div class="small mb-2" style="color: #D84043">
+                                    <i class="fas fa-eye me-1"></i>Nova imagem selecionada:
+                                </div>
+                                <div class="image-container">
+                                    <img src="${e.target.result}"
+                                         class="img-thumbnail w-100"
+                                         style="max-height: ${maxHeight}; object-fit: cover;" />
+                                </div>
+                            </div>`;
+                        $(input).closest('.mb-4, .mb-3').append(previewHtml);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Cover image preview
+            $('input[name="showFoto"]').on('change', function() {
+                createImagePreview(this, 'cover');
+            });
+
+            // Banner preview
+            $('input[name="showBanner"]').on('change', function() {
+                createImagePreview(this, 'banner');
+            });
+
+            // Form validation enhancement
+            $('form').on('submit', function(e) {
+                var isValid = true;
+                var firstErrorField = null;
+
+                // Check required fields
+                $(this).find('input[required], select[required], textarea[required]').each(function() {
+                    if (!$(this).val()) {
+                        isValid = false;
+                        if (!firstErrorField) {
+                            firstErrorField = this;
+                        }
+                        $(this).addClass('is-invalid');
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                        $('html, body').animate({
+                            scrollTop: $(firstErrorField).offset().top - 100
+                        }, 500);
+                    }
+                }
+            });
+
+            // Remove validation errors on input
+            $('input, select, textarea').on('input change', function() {
+                $(this).removeClass('is-invalid');
             });
         });
     </script>

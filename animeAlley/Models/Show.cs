@@ -52,7 +52,7 @@ public class Show
     [Display(Name = "Nota")]
     [Required]
     [StringLength(4)]
-    [RegularExpression(@"^(\d{1,2}(\.\d{1,2})?|100(\.0{1,2})?)$", ErrorMessage = "Nota inválida. O valor deve estar entre 0.0 e 100.0.")]
+    [RegularExpression(@"^(\d{1}[.,]\d{1,2}|10[.,]0{1,2})$", ErrorMessage = "Nota inválida. O valor deve estar entre 0,0 e 10,0 (casas decimais obrigatórias).")]
     public string NotaAux { get; set; } = string.Empty; // Auxiliar durante o armazenamento da nota (0.0-100.0)
 
     /// <summary>
@@ -96,6 +96,7 @@ public class Show
     /// <summary>
     /// FK para a tabela dos Estúdios
     /// </summary>
+    [Display(Name = "Estúdio")]
     [ForeignKey(nameof(Studio))]
     public int StudioFK { get; set; } // Estúdio do show
     /// <summary>
@@ -107,6 +108,7 @@ public class Show
     /// <summary>
     /// FK para a tabela dos Autores
     /// </summary>
+    [Display(Name = "Autor")]
     [ForeignKey(nameof(Autor))]
     public int AutorFK { get; set; } // Autor do show
     /// <summary>
