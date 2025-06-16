@@ -28,13 +28,24 @@ namespace animeAlley.Controllers
         }
 
         // GET: Shows
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var applicationDbContext = _context.Shows
-                .Include(s => s.Autor)
-                .Include(s => s.Studio)
-                .Include(s => s.GenerosShows);
-            return View(await applicationDbContext.ToListAsync());
+            ViewData["CurrentFilter"] = searchString;
+
+            var shows = from s in _context.Shows
+                        select s;
+
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var lowerSearch = searchString.ToLower();
+                shows = shows.Where(s =>
+                    s.Nome.ToLower().Contains(lowerSearch) ||
+                    s.Sinopse.ToLower().Contains(lowerSearch) ||
+                    s.Studio.Nome.ToLower().Contains(lowerSearch));
+            }
+
+            return View(await shows.Include(s => s.Studio).ToListAsync());
         }
 
         // GET: Shows/Details/5

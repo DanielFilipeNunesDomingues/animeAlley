@@ -500,6 +500,7 @@ div > a[asp-action="Index"]:hover {
     grid-column: 1;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     height: auto;
+    width: 230px;
 }
 
 .show-info .data {
@@ -1033,6 +1034,7 @@ div > a[asp-action="Index"]:hover {
         position: relative;
         margin-top: 0rem;
         margin-bottom: 2rem;
+        width: 100%;
     }
 }
 

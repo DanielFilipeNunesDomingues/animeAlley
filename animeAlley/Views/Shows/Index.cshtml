@@ -12,14 +12,19 @@
         </p>
     }
 
+    <form asp-action="Index" method="get" class="mb-4">
+        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Buscar shows..." class="form-control" />
+    </form>
+
     <div class="show-grid-container">
-    @foreach (var item in Model) {
+        @foreach (var item in Model)
+        {
             <div class="show-grid-item">
                 <a asp-action="Details" asp-route-id="@item.Id">
                     <img src="~/images/showCover/@item.Imagem" alt="@item.Nome" title="@item.Nome" height="100px" />
                     <span class="score">@item.Nota</span>
                 </a>
             </div>
-    }
+        }
     </div>
 </div>
