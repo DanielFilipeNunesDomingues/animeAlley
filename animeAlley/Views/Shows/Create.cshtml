@@ -90,6 +90,14 @@
                     <label asp-for="AutorFK" class="control-label"></label>
                     <select asp-for="AutorFK" class ="form-control" asp-items="ViewBag.AutorFK"></select>
                 </div>
+                <div class="form-group">
+                    <label class="control-label">Géneros</label>
+                    <select name="selectedGeneros" class="form-control" multiple="multiple" asp-items="ViewBag.Generos" style="height: 150px;">
+                    </select>
+                    <small class="form-text text-muted">
+                        Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.
+                    </small>
+                </div>
                 <div class="form-group mt-4">
                     <input type="submit" value="Create" class="btn btn-primary" />
                 </div>
@@ -102,5 +110,18 @@
     </div>
 </div>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Melhorar a experiência da seleção múltipla
+        $(document).ready(function() {
+            $('select[name="selectedGeneros"]').on('change', function() {
+                var selectedCount = $(this).val() ? $(this).val().length : 0;
+                var helpText = selectedCount > 0 ? selectedCount + ' género(s) selecionado(s)' : 'Nenhum género selecionado';
+                $(this).next('.form-text').text(helpText + '. Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.');
+            });
+        });
+    </script>
 }

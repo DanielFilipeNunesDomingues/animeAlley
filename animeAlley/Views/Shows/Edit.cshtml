@@ -1,89 +1,184 @@
 ﻿@model animeAlley.Models.Show
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Show";
 }
 
-<h1>Edit</h1>
 
-<h4>Show</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Sinopse" class="control-label"></label>
-                <input asp-for="Sinopse" class="form-control" />
-                <span asp-validation-for="Sinopse" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Tipo" class="control-label"></label>
-                <select asp-for="Tipo" class="form-control"></select>
-                <span asp-validation-for="Tipo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control"></select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Nota" class="control-label"></label>
-                <input asp-for="Nota" class="form-control" />
-                <span asp-validation-for="Nota" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Ano" class="control-label"></label>
-                <input asp-for="Ano" class="form-control" />
-                <span asp-validation-for="Ano" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Imagem" class="control-label"></label>
-                <input asp-for="Imagem" class="form-control" />
-                <span asp-validation-for="Imagem" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Trailer" class="control-label"></label>
-                <input asp-for="Trailer" class="form-control" />
-                <span asp-validation-for="Trailer" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Views" class="control-label"></label>
-                <input asp-for="Views" class="form-control" />
-                <span asp-validation-for="Views" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Fonte" class="control-label"></label>
-                <select asp-for="Fonte" class="form-control"></select>
-                <span asp-validation-for="Fonte" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StudioFK" class="control-label"></label>
-                <select asp-for="StudioFK" class="form-control" asp-items="ViewBag.StudioFK"></select>
-                <span asp-validation-for="StudioFK" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AutorFK" class="control-label"></label>
-                <select asp-for="AutorFK" class="form-control" asp-items="ViewBag.AutorFK"></select>
-                <span asp-validation-for="AutorFK" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="py-5 container">
+    <h1>Editar - Show</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group">
+                    <label asp-for="Nome" class="control-label"></label>
+                    <input asp-for="Nome" class="form-control" />
+                    <span asp-validation-for="Nome" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Sinopse" class="control-label"></label>
+                    <textarea asp-for="Sinopse" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Sinopse" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Tipo" class="control-label"></label>
+                    <select asp-for="Tipo" class="form-control"
+                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
+                        <option value="">-- Selecione --</option>
+                    </select>
+                    <span asp-validation-for="Tipo" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Status" class="control-label"></label>
+                    <select asp-for="Status" class="form-control"
+                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
+                        <option value="">-- Selecione --</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="NotaAux" class="control-label"></label>
+                    <input asp-for="NotaAux" class="form-control" />
+                    <span asp-validation-for="NotaAux" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Ano" class="control-label"></label>
+                    <input asp-for="Ano" class="form-control" />
+                    <span asp-validation-for="Ano" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Imagem de Capa Atual</label>
+                    @if (!string.IsNullOrEmpty(Model.Imagem))
+                    {
+                        <div class="mb-2">
+                            <img src="~/images/showCover/@Model.Imagem" alt="Capa atual" style="max-width: 200px; max-height: 300px;" class="img-thumbnail" />
+                        </div>
+                    }
+                    <label for="showFoto" class="control-label">Nova Imagem de Capa (opcional)</label>
+                    <input type="file" name="showFoto" class="form-control" accept="image/jpeg,image/png" />
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Banner Atual</label>
+                    @if (!string.IsNullOrEmpty(Model.Banner))
+                    {
+                        <div class="mb-2">
+                            <img src="~/images/showBanner/@Model.Banner" alt="Banner atual" style="max-width: 300px; max-height: 150px;" class="img-thumbnail" />
+                        </div>
+                    }
+                    <label for="showBanner" class="control-label">Novo Banner (opcional)</label>
+                    <input type="file" name="showBanner" class="form-control" accept="image/jpeg,image/png" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Trailer" class="control-label"></label>
+                    <input asp-for="Trailer" class="form-control" />
+                    <span asp-validation-for="Trailer" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Views" class="control-label"></label>
+                    <input asp-for="Views" class="form-control" />
+                    <span asp-validation-for="Views" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Fonte" class="control-label"></label>
+                    <select asp-for="Fonte" class="form-control"
+                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Fonte>()">
+                        <option value="">-- Selecione --</option>
+                    </select>
+                    <span asp-validation-for="Fonte" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="StudioFK" class="control-label"></label>
+                    <select asp-for="StudioFK" class="form-control" asp-items="ViewBag.StudioFK"></select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="AutorFK" class="control-label"></label>
+                    <select asp-for="AutorFK" class="form-control" asp-items="ViewBag.AutorFK"></select>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Géneros</label>
+                    <select name="selectedGeneros" class="form-control" multiple="multiple" asp-items="ViewBag.Generos" style="height: 150px;">
+                    </select>
+                    <small class="form-text text-muted">
+                        Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.
+                    </small>
+                </div>
+
+                <div class="form-group mt-4">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Index">Back to List</a>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Melhorar a experiência da seleção múltipla
+        $(document).ready(function() {
+            var updateGeneroCount = function() {
+                var selectedCount = $('select[name="selectedGeneros"]').val() ? $('select[name="selectedGeneros"]').val().length : 0;
+                var helpText = selectedCount > 0 ? selectedCount + ' género(s) selecionado(s)' : 'Nenhum género selecionado';
+                $('select[name="selectedGeneros"]').next('.form-text').text(helpText + '. Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.');
+            };
+
+            // Atualizar contagem inicial
+            updateGeneroCount();
+
+            // Atualizar contagem quando a seleção mudar
+            $('select[name="selectedGeneros"]').on('change', updateGeneroCount);
+
+            // Preview das novas imagens selecionadas
+            $('input[name="showFoto"]').on('change', function() {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var preview = '<div class="mt-2"><strong>Nova imagem selecionada:</strong><br><img src="' + e.target.result + '" style="max-width: 200px; max-height: 300px;" class="img-thumbnail" /></div>';
+                        $('input[name="showFoto"]').parent().find('.preview-image').remove();
+                        $('input[name="showFoto"]').after('<div class="preview-image">' + preview + '</div>');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            $('input[name="showBanner"]').on('change', function() {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var preview = '<div class="mt-2"><strong>Novo banner selecionado:</strong><br><img src="' + e.target.result + '" style="max-width: 300px; max-height: 150px;" class="img-thumbnail" /></div>';
+                        $('input[name="showBanner"]').parent().find('.preview-banner').remove();
+                        $('input[name="showBanner"]').after('<div class="preview-banner">' + preview + '</div>');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
 }

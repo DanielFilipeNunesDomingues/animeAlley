@@ -11,13 +11,16 @@
     <div class="show-header container">
         <div class="show-cover">
             <div class="cover">
-                <img src="~/images/showCover/@Html.DisplayFor(Model => Model.Imagem)" alt="@Html.DisplayFor(Model => Model.Nome)" />
-            </div>      
+                <img src="~/images/showCover/@Html.DisplayFor(Model => Model.Imagem)" alt="@Html.DisplayFor(Model => Model.Nome) | Foto" />
+            </div>
             <a href="#">Adicionar +</a>
         </div>
         <div class="show-sinopse">
             <h2 class="fw-bold">@Html.DisplayFor(Model => Model.Nome)</h2>
-            <p>@Html.DisplayFor(Model => Model.Sinopse)</p>
+            <div id="sinopseWrapper" class="sinopse-collapsed">
+                <p id="sinopseText">@Html.DisplayFor(Model => Model.Sinopse)</p>
+            </div>
+            <button id="toggleSinopse" class="toggle-btn">Ler mais</button>
         </div>
     </div>
 </div>
@@ -56,7 +59,10 @@
 
         <div class="data">
             <h3>Gêneros</h3>
-            <p>@Html.DisplayFor(Model => Model.GenerosShows)</p>
+            @foreach (var g in Model.GenerosShows)
+            {
+                <p class="mt-1">@g.GeneroNome</p>
+            }
         </div>
     </div>
 
@@ -69,7 +75,7 @@
                     <div class="personagem bg-secondary">
                         <a asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">
                             <div class="cover">
-                                <img src="~/images/personagensFoto/@p.Foto" alt="@p.Nome">
+                                <img src="~/images/personagensFoto/@p.Foto" alt="@p.Nome | Foto">
                             </div>
                         </a>
                         <a class="nome" asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">@p.Nome</a>
@@ -79,22 +85,178 @@
             </div>
         </div>
 
-        <div class="mb-4">
-            <h3>Autor</h3>
-            <div class="show-personagens">
-                @foreach (var p in Model.Personagens)
-                {
-                    <div class="personagem bg-secondary">
-                        <a asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">
-                            <div class="cover">
-                                <img src="~/images/personagensFoto/@p.Foto" alt="@p.Nome">
-                            </div>
-                        </a>
-                        <a class="nome" asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">@p.Nome</a>
-                        <p class="info">@p.TipoPersonagem</p>
+        <div class="show-last-section">
+            <div>
+                <h3>Autor</h3>
+                <div class="autor bg-secondary">
+                    <a asp-controller="Autores" asp-action="Details" asp-route-id="@Model.Autor.Id">
+                        <div class="cover">
+                            <img src="~/images/autoresFoto/@Html.DisplayFor(Model => Model.Autor.Foto)" alt="@Html.DisplayFor(Model => Model.Autor.Nome) | Foto">
+                        </div>
+                    </a>
+                    
+                    <div class="about">
+                        <a class="nome" asp-controller="Autores" asp-action="Details" asp-route-id="@Model.Autor.Id">@Html.DisplayFor(Model => Model.Autor.Nome)</a>
+                        <p class="info">
+                            @Html.DisplayFor(Model => Model.Autor.Sobre)
+                        </p>
                     </div>
-                }
+                </div>
+            </div>
+
+            <div>
+                <h3>Abertura</h3>
+                <div class="trailer-wrapper">
+                    <video class="trailer" id="videoTrailer">
+                        <source src="@($"https://v.animethemes.moe/{Model.Trailer}.webm")" type="video/webm">
+                        Seu navegador não suporta a tag de vídeo.
+                    </video>
+
+                    <div class="video-controls">
+                        <button id="playPauseBtn" title="Play/Pause">
+                            <svg id="playIcon" class="control-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+
+                            <svg id="pauseIcon" class="control-icon hidden" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6 4h4v16H6zm8 0h4v16h-4z" />
+                            </svg>
+                        </button>
+                        <input type="range" id="progressBar" value="0" min="0" step="0.01">
+                        <input type="range" id="volumeBar" value="1" min="0" max="1" step="0.01">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+
+    <script>
+        const video = document.getElementById('videoTrailer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const volumeBar = document.getElementById('volumeBar');
+
+        let maxPlayedTime = 0;
+
+        const playSVG = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+        `;
+        const pauseSVG = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+        `;
+
+        volumeBar.value = video.volume;
+        volumeBar.style.setProperty('--volume-fill', (video.volume * 100) + '%');
+
+        playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playPauseBtn.innerHTML = pauseSVG; // Change to pause SVG
+            } else {
+                video.pause();
+                playPauseBtn.innerHTML = playSVG; // Change to play SVG
+            }
+        });
+
+        video.addEventListener('timeupdate', () => {
+            progressBar.value = video.currentTime;
+            progressBar.max = video.duration;
+
+            if (video.currentTime > maxPlayedTime) {
+                maxPlayedTime = video.currentTime;
+            }
+
+            const currentTimePercent = (video.currentTime / video.duration) * 100;
+            const watchedPercent = (maxPlayedTime / video.duration) * 100;
+
+            progressBar.style.setProperty('--current-time', currentTimePercent + '%');
+            progressBar.style.setProperty('--watched-progress', watchedPercent + '%');
+        });
+
+        progressBar.addEventListener('input', () => {
+            video.currentTime = progressBar.value;
+        });
+
+        volumeBar.addEventListener('input', () => {
+            video.volume = volumeBar.value;
+            volumeBar.style.setProperty('--volume-fill', (volumeBar.value * 100) + '%');
+        });
+
+        video.addEventListener('volumechange', () => {
+            volumeBar.value = video.volume;
+            volumeBar.style.setProperty('--volume-fill', (video.volume * 100) + '%');
+        });
+
+        video.addEventListener('ended', () => {
+            playPauseBtn.innerHTML = playSVG;
+        });
+
+        video.addEventListener('loadedmetadata', () => {
+             maxPlayedTime = 0;
+             volumeBar.value = video.volume;
+             volumeBar.style.setProperty('--volume-fill', (video.volume * 100) + '%');
+             playPauseBtn.innerHTML = playSVG; 
+        });
+
+        if (video.paused) {
+            playPauseBtn.innerHTML = playSVG;
+        } else {
+            playPauseBtn.innerHTML = pauseSVG;
+        }
+
+            document.addEventListener('DOMContentLoaded', function() {
+            const sinopseWrapper = document.getElementById('sinopseWrapper');
+            const toggleSinopseBtn = document.getElementById('toggleSinopse');
+
+            sinopseWrapper.style.overflow = 'visible';
+            const fullHeight = sinopseWrapper.scrollHeight;
+            sinopseWrapper.style.overflow = 'hidden';
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.classList.add('sinopse-collapsed');
+            tempDiv.style.visibility = 'hidden';
+            document.body.appendChild(tempDiv);
+            const collapsedMaxHeight = parseFloat(getComputedStyle(tempDiv).maxHeight);
+            document.body.removeChild(tempDiv);
+
+            if (fullHeight <= collapsedMaxHeight) {
+                toggleSinopseBtn.style.display = 'none';
+            } else {
+                toggleSinopseBtn.style.display = 'block';
+            }
+
+            toggleSinopseBtn.addEventListener('click', function() {
+                if (sinopseWrapper.classList.contains('sinopse-collapsed')) {
+                    sinopseWrapper.classList.remove('sinopse-collapsed');
+                    sinopseWrapper.classList.add('sinopse-expanded');
+                    toggleSinopseBtn.textContent = 'Ler menos';
+                } else {
+                    sinopseWrapper.classList.remove('sinopse-expanded');
+                    sinopseWrapper.classList.add('sinopse-collapsed');
+                    toggleSinopseBtn.textContent = 'Ler mais';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sinopseTextElement = document.getElementById('sinopseText');
+
+            if (sinopseTextElement) {
+                let originalText = sinopseTextElement.innerHTML;
+                const regex = /\bBR\b/gi;
+
+                let newText = originalText.replace(regex, '<br>');
+
+                sinopseTextElement.innerHTML = newText;
+            }
+        });
+
+    </script>
+}
