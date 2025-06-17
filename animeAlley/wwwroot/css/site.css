@@ -46,3 +46,34 @@ a {
 .button {
     background-color: #ebd1d1;
 }
+
+.card_area {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.pbody {
+    background-color: #1d1616;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.pcontent {
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+}
+
+.puser_img {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+}
+
+.pheader {
+    background-color: #292929;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
