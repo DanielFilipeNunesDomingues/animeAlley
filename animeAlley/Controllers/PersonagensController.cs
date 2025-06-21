@@ -62,7 +62,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Create
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             // Buscar todos os shows para popular o dropdown
@@ -77,10 +77,10 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Create
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,ShowFK")] Personagem personagem, IFormFile personagemFoto)
+        public async Task<IActionResult> Create([Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,ShowFK, PersonagemSexualidade, Idade, DataNasc")] Personagem personagem, IFormFile personagemFoto)
         {
             bool hasError = false;
             string imagePath = string.Empty;
@@ -153,7 +153,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Edit/5
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -180,59 +180,92 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Edit/5
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,ShowFK")] Personagem personagem, IFormFile personagemFoto)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,ShowFK, PersonagemSexualidade, Idade, DataNasc")] Personagem personagem, IFormFile personagemFoto)
         {
             if (id != personagem.Id)
             {
                 return NotFound();
             }
 
-            // Se foi enviada uma nova foto, processar
+            bool fileError = false;
+            string newImagePath = string.Empty;
+            string oldImagePath = string.Empty;
+
+            var existingPersonagem = await _context.Personagens.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+
+            if (existingPersonagem == null)
+            {
+                return NotFound();
+            }
+
+            oldImagePath = existingPersonagem.Foto;
+
+            personagem.Foto = oldImagePath;
+
             if (personagemFoto != null)
             {
-                if (personagemFoto.ContentType == "image/jpeg" || personagemFoto.ContentType == "image/png")
+                if (personagemFoto.ContentType != "image/jpeg" && personagemFoto.ContentType != "image/png")
                 {
-                    // Remover a foto antiga se existir
-                    var personagemExistente = await _context.Personagens.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
-                    if (personagemExistente != null && !string.IsNullOrWhiteSpace(personagemExistente.Foto))
-                    {
-                        var pastaImagens = Path.Combine(_webHostEnvironment.WebRootPath, "images", "personagensFoto");
-                        var caminhoImagemAntiga = Path.Combine(pastaImagens, personagemExistente.Foto);
-                        if (System.IO.File.Exists(caminhoImagemAntiga))
-                            System.IO.File.Delete(caminhoImagemAntiga);
-                    }
-
-                    // Salvar nova foto
-                    Guid g = Guid.NewGuid();
-                    string imagePath = g.ToString();
-                    string extensaoImagem = Path.GetExtension(personagemFoto.FileName).ToLowerInvariant();
-                    imagePath += extensaoImagem;
-                    personagem.Foto = imagePath;
-
-                    string localizacaoImagem = _webHostEnvironment.WebRootPath;
-                    localizacaoImagem = Path.Combine(localizacaoImagem, "images/personagensFoto");
-                    if (!Directory.Exists(localizacaoImagem))
-                    {
-                        Directory.CreateDirectory(localizacaoImagem);
-                    }
-
-                    string caminhoCompleto = Path.Combine(localizacaoImagem, imagePath);
-                    using var streamImage = new FileStream(caminhoCompleto, FileMode.Create);
-                    await personagemFoto.CopyToAsync(streamImage);
+                    fileError = true;
+                    ModelState.AddModelError("personagemFoto", "A foto deve ser em formato JPEG ou PNG.");
                 }
+                else if (personagemFoto.Length > 2 * 1024 * 1024)
+                {
+                    fileError = true;
+                    ModelState.AddModelError("personagemFoto", "O arquivo é muito grande. Tamanho máximo: 2MB.");
+                }
+                else
+                {
+                    Guid g = Guid.NewGuid();
+                    newImagePath = g.ToString();
+                    string extensaoImagem = Path.GetExtension(personagemFoto.FileName).ToLowerInvariant();
+                    newImagePath += extensaoImagem;
+
+                    // Update the model's Foto property with the new image path
+                    personagem.Foto = newImagePath;
+                }
+            }
+            else
+            {
+                personagem.Foto = oldImagePath;
             }
 
             ModelState.Remove("Foto");
+            ModelState.Remove("personagemFoto");
 
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && !fileError)
             {
                 try
                 {
                     _context.Update(personagem);
                     await _context.SaveChangesAsync();
+
+
+                    string localizacaoImagem = Path.Combine(_webHostEnvironment.WebRootPath, "images", "personagensFoto");
+
+                    if (!Directory.Exists(localizacaoImagem))
+                    {
+                        Directory.CreateDirectory(localizacaoImagem);
+                    }
+
+                    if (personagemFoto != null && !string.IsNullOrEmpty(newImagePath))
+                    {
+                        string fullNewImagePath = Path.Combine(localizacaoImagem, newImagePath);
+                        using var streamImage = new FileStream(fullNewImagePath, FileMode.Create);
+                        await personagemFoto.CopyToAsync(streamImage);
+
+                        if (!string.IsNullOrEmpty(oldImagePath) && oldImagePath != newImagePath)
+                        {
+                            string fullOldImagePath = Path.Combine(localizacaoImagem, oldImagePath);
+                            if (System.IO.File.Exists(fullOldImagePath))
+                            {
+                                System.IO.File.Delete(fullOldImagePath);
+                            }
+                        }
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -248,7 +281,8 @@ namespace animeAlley.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Se chegou aqui, recarregar dropdown
+            // If we reached here, there was a validation error or file error.
+            // Reload dropdown for ShowFK
             var shows = await _context.Shows
                 .Select(s => new { s.Id, s.Nome })
                 .OrderBy(s => s.Nome)
@@ -260,7 +294,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Delete/5
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -281,7 +315,7 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Delete/5
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

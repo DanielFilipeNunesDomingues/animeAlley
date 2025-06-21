@@ -372,7 +372,7 @@ div > a[asp-action="Index"]:hover {
     width: 230px;
 }
 
-.show-cover .options {
+.show-cover .options, .foto-wrap .options {
     display: flex;
     justify-content: space-between;
     align-content: center;
@@ -381,7 +381,11 @@ div > a[asp-action="Index"]:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.show-cover .options a {
+.show-cover .options a, .foto-wrap .options a {
+    display:flex;
+    justify-content:center;
+    align-content:center;
+    gap: 0.3rem;
     text-align: center;
     text-decoration: none;
     color: #3D3030;
@@ -394,11 +398,11 @@ div > a[asp-action="Index"]:hover {
     background-color: #59D840;
 }
 
-.show-cover .options .delete {
+.show-cover .options .delete, .foto-wrap .options .delete {
     background-color: #D84043;
 }
 
-.show-cover .options .edit {
+.show-cover .options .edit, .foto-wrap .options .edit {
     background-color: #409ED8;
 }
 
@@ -894,6 +898,80 @@ div > a[asp-action="Index"]:hover {
 
 /* End Shows Detail Style*/
 
+/* Personagem Detail Style */
+
+.personagem-header {
+    display: grid;
+    grid-template-columns: 0.2fr 1fr;
+    gap: 2rem;
+}
+
+.personagem-header div {
+    grid-column: 2;
+   
+}
+
+.personagem-header div h1 {
+    font-family: "Inter", sans-serif;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.personagem-info {
+    position:relative;
+    display: grid;
+    grid-template-columns: 0.2fr 1fr;
+    gap: 2rem;
+}
+
+.personagem-info .info {
+    grid-column: 2;
+}
+
+.personagem-info .info p {
+    color: #C4AEAE;
+    line-height: 1.6rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    transition: 0.2s ease all;
+}
+
+.personagem-info .info p:hover {
+    color: #eee;
+    transition: 0.2s ease all;
+}
+
+.personagem-info .info p b {
+    color: #eee;
+}
+
+
+.personagem-info .foto-wrap {
+    position: absolute;
+    left: 0;
+    top: -120px;
+    width: 250px;
+}
+
+.personagem-info .foto-wrap .cover {
+    display: inline-block;
+    height: 400px;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
+    border-radius: 0.4rem;
+    margin-bottom: 0.7rem;
+}
+
+.personagem-info .foto-wrap .cover img {
+    height: 100%;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
 /* Reponsive Breakpoints */
 @media (max-width: 100rem) {
     .show-grid-container {
@@ -916,6 +994,14 @@ div > a[asp-action="Index"]:hover {
 
     .show-sinopse {
         max-width: 1100px;
+    }
+
+    .personagem-header {
+        grid-template-columns: 0.22fr 1fr;
+    }
+
+    .personagem-info {
+        grid-template-columns: 0.22fr 1fr;
     }
 
 }
@@ -943,6 +1029,14 @@ div > a[asp-action="Index"]:hover {
     .show-sinopse {
         max-width: 900px;
     }
+
+    .personagem-header {
+        grid-template-columns: 0.26fr 1fr;
+    }
+
+    .personagem-info {
+        grid-template-columns: 0.26fr 1fr;
+    }
 }
 
 @media (max-width: 70rem) {
@@ -956,6 +1050,14 @@ div > a[asp-action="Index"]:hover {
 
     .show-sinopse {
         max-width: 700px;
+    }
+
+    .personagem-header {
+        grid-template-columns: 0.34fr 1fr;
+    }
+
+    .personagem-info {
+        grid-template-columns: 0.34fr 1fr;
     }
 }
 
@@ -990,6 +1092,14 @@ div > a[asp-action="Index"]:hover {
 
     .show-header {
         height: 300px;
+    }
+
+    .personagem-header {
+        grid-template-columns: 0.46fr 1fr;
+    }
+
+    .personagem-info {
+        grid-template-columns: 0.46fr 1fr;
     }
 }
 
@@ -1035,6 +1145,24 @@ div > a[asp-action="Index"]:hover {
         margin-top: 0rem;
         margin-bottom: 2rem;
         width: 100%;
+    }
+
+    .personagem-header {
+        display: block;
+        text-align:center;
+    }
+
+    .personagem-info {
+        display: block;
+    }
+
+    .personagem-info .foto-wrap {
+        position: relative;
+        left: 0;
+        top: 0;
+        width: 250px;
+        margin: 0 auto;
+        margin-bottom: 2rem;
     }
 }
 

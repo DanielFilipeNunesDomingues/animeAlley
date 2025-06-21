@@ -5,55 +5,150 @@
 }
 
 <div class="py-5 container">
-    <h1>Criar - Personagem</h1>
-    <div class="row">
-        <div class="col-md-4">
+    <h1 class="text-center mb-4">Criar Personagem</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
             <form asp-action="Create" method="post" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Nome" class="control-label"></label>
-                    <input asp-for="Nome" class="form-control" />
-                    <span asp-validation-for="Nome" class="text-danger"></span>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Informações do Personagem</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Nome" class="form-label fw-semibold"></label>
+                                    <input asp-for="Nome" class="form-control" placeholder="Nome do personagem" />
+                                    <span asp-validation-for="Nome" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="TipoPersonagem" class="form-label fw-semibold"></label>
+                                    <select asp-for="TipoPersonagem" class="form-select"
+                                            asp-items="Html.GetEnumSelectList<animeAlley.Models.TiposPersonagem>()">
+                                        <option value="">-- Selecione --</option>
+                                    </select>
+                                    <span asp-validation-for="TipoPersonagem" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="PersonagemSexualidade" class="form-label fw-semibold"></label>
+                                    <select asp-for="PersonagemSexualidade" class="form-select"
+                                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Sexualidade>()">
+                                        <option value="">-- Selecione --</option>
+                                    </select>
+                                    <span asp-validation-for="PersonagemSexualidade" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Idade" class="form-label fw-semibold"></label>
+                                    <input asp-for="Idade" class="form-control" type="number" placeholder="Idade (opcional)" />
+                                    <span asp-validation-for="Idade" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="DataNasc" class="form-label fw-semibold"></label>
+                                    <input asp-for="DataNasc" class="form-control" type="date" />
+                                    <span asp-validation-for="DataNasc" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label asp-for="ShowFK" class="form-label fw-semibold">Show</label>
+                                    <select asp-for="ShowFK" class="form-select" asp-items="ViewBag.Shows">
+                                        <option value="">-- Selecione o Show --</option>
+                                    </select>
+                                    <span asp-validation-for="ShowFK" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label asp-for="Sinopse" class="form-label fw-semibold"></label>
+                                    <textarea asp-for="Sinopse" class="form-control" rows="4" placeholder="Descrição do/a personagem..."></textarea>
+                                    <span asp-validation-for="Sinopse" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label fw-semibold">Foto do Personagem</label>
+                                    <input type="file"
+                                           accept=".png,.jpeg,.jpg"
+                                           name="personagemFoto"
+                                           id="personagemFoto"
+                                           class="form-control form-control-sm" />
+                                    <span asp-validation-for="Foto" class="text-danger"></span>
+                                    <div class="form-text">JPG ou PNG (máx. 2MB)</div>
+
+                                    <div id="previewContainer" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label asp-for="TipoPersonagem" class="control-label"></label>
-                    <select asp-for="TipoPersonagem" class="form-control"
-                            asp-items="Html.GetEnumSelectList<animeAlley.Models.TiposPersonagem>()">
-                        <option value="">-- Selecione --</option>
-                    </select>
-                    <span asp-validation-for="TipoPersonagem" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="ShowFK" class="control-label">Show</label>
-                    <select asp-for="ShowFK" class="form-control" asp-items="ViewBag.Shows">
-                        <option value="">-- Selecione o Show --</option>
-                    </select>
-                    <span asp-validation-for="ShowFK" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Sinopse" class="control-label"></label>
-                    <input asp-for="Sinopse" class="form-control" />
-                    <span asp-validation-for="Sinopse" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Foto" class="control-label"></label>
-                    <input type="file"
-                           accept=".png,.jpeg,.jpg"
-                           name="personagemFoto"
-                           class="form-control" />
-                    <span asp-validation-for="Foto" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
+
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Criar Personagem
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Voltar à Lista
+                    </a>
                 </div>
             </form>
         </div>
     </div>
-
-    <div>
-        <a asp-action="Index">Back to List</a>
-    </div>
 </div>
+
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            function showImagePreview(input) {
+                const file = input.files[0];
+                const $previewContainer = $('#previewContainer');
+                $previewContainer.empty();
+
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert("O arquivo é muito grande. Tamanho máximo: 2MB.");
+                        $(input).val('');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const previewHtml = `
+                            <div class="preview-image">
+                                <div class="small mb-2 text-danger">
+                                    <i class="fas fa-eye me-1"></i>Nova imagem selecionada:
+                                </div>
+                                <img src="${e.target.result}" class="img-thumbnail" style="object-fit: cover; max-width: 500px;" />
+                            </div>`;
+                        $previewContainer.html(previewHtml);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            $('#personagemFoto').on('change', function () {
+                showImagePreview(this);
+            });
+        });
+    </script>
 }
