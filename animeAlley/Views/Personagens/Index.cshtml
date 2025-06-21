@@ -6,9 +6,16 @@
 
 <div class="py-5 container">
 
-    <p>
-        <a asp-action="Create">Create New</a>
-    </p>
+    @if (!User.IsInRole("Admin"))
+    {
+        <p>
+            <a asp-action="Create">Create New</a>
+        </p>
+    }
+
+    <form asp-action="Index" method="get" class="mb-4">
+        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Buscar personagens..." class="form-control" />
+    </form>
 
     <div class="show-grid-container">
         @foreach (var item in Model)

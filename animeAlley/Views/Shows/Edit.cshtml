@@ -19,14 +19,14 @@
                     <div class="col-lg-8">
                         <div class="card h-100">
                             <div class="card-header">
-                                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações Gerais</h5>
+                                <h5 class="mb-0">Informações Gerais</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
                                     <!-- First Row -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="Nome" class="form-label fw-semibold"></label>
+                                            <label asp-for="Nome" class="form-label fw-semibold">Nome <span class="text-danger d-inline-block">*</span></label>
                                             <input asp-for="Nome" class="form-control" placeholder="Nome do show" />
                                             <span asp-validation-for="Nome" class="text-danger"></span>
                                         </div>
@@ -34,7 +34,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="Ano" class="form-label fw-semibold"></label>
+                                            <label asp-for="Ano" class="form-label fw-semibold">Ano <span class="text-danger d-inline-block">*</span></label>
                                             <input asp-for="Ano" class="form-control" placeholder="Ano de lançamento" />
                                             <span asp-validation-for="Ano" class="text-danger"></span>
                                         </div>
@@ -43,16 +43,19 @@
                                     <!-- Synopsis - Full Width -->
                                     <div class="col-12">
                                         <div class="form-group">
-                                            <label asp-for="Sinopse" class="form-label fw-semibold"></label>
+                                            <label asp-for="Sinopse" class="form-label fw-semibold">Sinopse <span class="text-danger d-inline-block">*</span></label>
                                             <textarea asp-for="Sinopse" class="form-control" rows="4" placeholder="Descrição do show"></textarea>
                                             <span asp-validation-for="Sinopse" class="text-danger"></span>
+                                            <div class="form-text text-muted">
+                                                <span id="show-count">Escrever BR/br faz pular uma linha.</span>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <!-- Second Row -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="Tipo" class="form-label fw-semibold"></label>
+                                            <label asp-for="Tipo" class="form-label fw-semibold">Tipo <span class="text-danger d-inline-block">*</span></label>
                                             <select asp-for="Tipo" class="form-select"
                                                     asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
                                                 <option value="">-- Selecione o Tipo --</option>
@@ -63,7 +66,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="Status" class="form-label fw-semibold"></label>
+                                            <label asp-for="Status" class="form-label fw-semibold">Status <span class="text-danger d-inline-block">*</span></label>
                                             <select asp-for="Status" class="form-select"
                                                     asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
                                                 <option value="">-- Selecione o Status --</option>
@@ -75,7 +78,7 @@
                                     <!-- Third Row -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="NotaAux" class="form-label fw-semibold"></label>
+                                            <label asp-for="NotaAux" class="form-label fw-semibold">Nota <span class="text-danger d-inline-block">*</span></label>
                                             <input asp-for="NotaAux" class="form-control" placeholder="Nota (0-10)" />
                                             <span asp-validation-for="NotaAux" class="text-danger"></span>
                                         </div>
@@ -83,7 +86,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="Views" class="form-label fw-semibold"></label>
+                                            <label asp-for="Views" class="form-label fw-semibold">Views <span class="text-danger d-inline-block">*</span></label>
                                             <input asp-for="Views" class="form-control" placeholder="Número de visualizações" />
                                             <span asp-validation-for="Views" class="text-danger"></span>
                                         </div>
@@ -92,7 +95,7 @@
                                     <!-- Fourth Row -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="Fonte" class="form-label fw-semibold"></label>
+                                            <label asp-for="Fonte" class="form-label fw-semibold">Fonte <span class="text-danger d-inline-block">*</span></label>
                                             <select asp-for="Fonte" class="form-select"
                                                     asp-items="Html.GetEnumSelectList<animeAlley.Models.Fonte>()">
                                                 <option value="">-- Selecione a Fonte --</option>
@@ -103,7 +106,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="StudioFK" class="form-label fw-semibold"></label>
+                                            <label asp-for="StudioFK" class="form-label fw-semibold">Estúdio <span class="text-danger d-inline-block">*</span></label>
                                             <select asp-for="StudioFK" class="form-select" asp-items="ViewBag.StudioFK">
                                                 <option value="">-- Selecione o Studio --</option>
                                             </select>
@@ -122,7 +125,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="Trailer" class="form-label fw-semibold"></label>
+                                            <label asp-for="Trailer" class="form-label fw-semibold"> Trailer <span class="text-danger d-inline-block">*</span></label>
                                             <input asp-for="Trailer" class="form-control" placeholder="URL do trailer" />
                                             <span asp-validation-for="Trailer" class="text-danger"></span>
                                         </div>
@@ -131,7 +134,7 @@
                                     <!-- Genres - Full Width -->
                                     <div class="col-12">
                                         <div class="form-group">
-                                            <label class="form-label fw-semibold">Gêneros</label>
+                                            <label class="form-label fw-semibold">Gêneros <span class="text-danger d-inline-block">*</span></label>
                                             <select name="selectedGeneros" class="form-select" multiple="multiple"
                                                     asp-items="ViewBag.Generos" style="height: 120px;">
                                             </select>
@@ -150,12 +153,12 @@
                     <div class="col-lg-4">
                         <div class="card h-100">
                             <div class="card-header">
-                                <h5 class="mb-0"><i class="fas fa-images me-2"></i>Imagens</h5>
+                                <h5 class="mb-0">Imagens</h5>
                             </div>
                             <div class="card-body">
                                 <!-- Cover Image Section -->
                                 <div class="mb-4">
-                                    <label class="form-label fw-semibold">Imagem de Capa</label>
+                                    <label class="form-label fw-semibold">Imagem de Capa <span class="text-danger d-inline-block">*</span></label>
 
                                     @if (!string.IsNullOrEmpty(Model.Imagem))
                                     {
@@ -183,7 +186,7 @@
 
                                 <!-- Banner Section -->
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Banner</label>
+                                    <label class="form-label fw-semibold">Banner <span class="text-danger d-inline-block">*</span></label>
 
                                     @if (!string.IsNullOrEmpty(Model.Banner))
                                     {

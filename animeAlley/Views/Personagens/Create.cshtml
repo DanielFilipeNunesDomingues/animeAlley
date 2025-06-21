@@ -20,7 +20,7 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label asp-for="Nome" class="form-label fw-semibold"></label>
+                                    <label asp-for="Nome" class="form-label fw-semibold">Nome <span class="text-danger d-inline-block">*</span></label>
                                     <input asp-for="Nome" class="form-control" placeholder="Nome do personagem" />
                                     <span asp-validation-for="Nome" class="text-danger"></span>
                                 </div>
@@ -28,7 +28,7 @@
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label asp-for="TipoPersonagem" class="form-label fw-semibold"></label>
+                                    <label asp-for="TipoPersonagem" class="form-label fw-semibold">Tipo de Personagem <span class="text-danger d-inline-block">*</span></label>
                                     <select asp-for="TipoPersonagem" class="form-select"
                                             asp-items="Html.GetEnumSelectList<animeAlley.Models.TiposPersonagem>()">
                                         <option value="">-- Selecione --</option>
@@ -63,27 +63,34 @@
                                     <span asp-validation-for="DataNasc" class="text-danger"></span>
                                 </div>
                             </div>
+
                             <div class="col-12">
                                 <div class="form-group">
-                                    <label asp-for="ShowFK" class="form-label fw-semibold">Show</label>
-                                    <select asp-for="ShowFK" class="form-select" asp-items="ViewBag.Shows">
-                                        <option value="">-- Selecione o Show --</option>
+                                    <label class="form-label fw-semibold">Shows Associados <span class="text-danger d-inline-block">*</span></label>
+                                    <select name="selectedShows" class="form-select" multiple="multiple"
+                                            asp-items="ViewBag.Shows" style="height: 120px;">
                                     </select>
-                                    <span asp-validation-for="ShowFK" class="text-danger"></span>
+                                    <div class="form-text text-muted">
+                                        <span id="show-count">Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos shows.</span>
+                                    </div>
+                                    <span asp-validation-for="Shows" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <div class="col-12">
                                 <div class="form-group">
-                                    <label asp-for="Sinopse" class="form-label fw-semibold"></label>
+                                    <label asp-for="Sinopse" class="form-label fw-semibold">Sinopse <span class="text-danger d-inline-block">*</span></label>
                                     <textarea asp-for="Sinopse" class="form-control" rows="4" placeholder="Descrição do/a personagem..."></textarea>
                                     <span asp-validation-for="Sinopse" class="text-danger"></span>
+                                    <div class="form-text text-muted">
+                                        <span id="show-count">Escrever BR/br faz pular uma linha.</span>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="col-12">
                                 <div class="form-group">
-                                    <label class="form-label fw-semibold">Foto do Personagem</label>
+                                    <label class="form-label fw-semibold">Foto do Personagem <span class="text-danger d-inline-block">*</span></label>
                                     <input type="file"
                                            accept=".png,.jpeg,.jpg"
                                            name="personagemFoto"
@@ -100,10 +107,10 @@
                 </div>
 
                 <div class="d-flex justify-content-center gap-3 mt-4">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-lg">
                         Criar Personagem
                     </button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
                         Voltar à Lista
                     </a>
                 </div>
@@ -119,10 +126,11 @@
 
     <script>
         $(document).ready(function () {
+            // Preview da imagem
             function showImagePreview(input) {
                 const file = input.files[0];
-                const $previewContainer = $('#previewContainer');
-                $previewContainer.empty();
+                const $preview = $('#previewContainer');
+                $preview.empty();
 
                 if (file) {
                     if (file.size > 2 * 1024 * 1024) {
@@ -133,22 +141,62 @@
 
                     const reader = new FileReader();
                     reader.onload = function (e) {
-                        const previewHtml = `
+                        const html = `
                             <div class="preview-image">
-                                <div class="small mb-2 text-danger">
+                                <div class="small mb-2" style="color:#D84043">
                                     <i class="fas fa-eye me-1"></i>Nova imagem selecionada:
                                 </div>
-                                <img src="${e.target.result}" class="img-thumbnail" style="object-fit: cover; max-width: 500px;" />
+                                <img src="${e.target.result}"
+                                     class="img-thumbnail"
+                                     style="object-fit:cover; width: 200px;" />
                             </div>`;
-                        $previewContainer.html(previewHtml);
+                        $preview.html(html);
                     };
                     reader.readAsDataURL(file);
                 }
             }
 
+            // Event listener para mudança na seleção de arquivo
             $('#personagemFoto').on('change', function () {
                 showImagePreview(this);
             });
+
+            // Melhorar UX do select múltiplo
+            $('select[name="selectedShows"]').on('change', function() {
+                const selectedCount = $(this).val() ? $(this).val().length : 0;
+                const $showCount = $('#show-count');
+
+                if (selectedCount > 0) {
+                    $showCount.html(`${selectedCount} show(s) selecionado(s)`);
+                    $showCount.parent().removeClass('text-muted').addClass('text-success');
+                } else {
+                    $showCount.html('Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos shows.');
+                    $showCount.parent().removeClass('text-success').addClass('text-muted');
+                }
+            });
+
+            // Validação antes do submit
+            $('form').on('submit', function(e) {
+                const selectedShows = $('select[name="selectedShows"]').val();
+                const photoFile = $('#personagemFoto')[0].files[0];
+
+                if (!selectedShows || selectedShows.length === 0) {
+                    e.preventDefault();
+                    alert('Por favor, selecione pelo menos um show para o personagem.');
+                    $('select[name="selectedShows"]').focus();
+                    return false;
+                }
+
+                if (!photoFile) {
+                    e.preventDefault();
+                    alert('Por favor, selecione uma foto para o personagem.');
+                    $('#personagemFoto').focus();
+                    return false;
+                }
+            });
+
+            // Tooltip para campos obrigatórios
+            $('[data-bs-toggle="tooltip"]').tooltip();
         });
     </script>
 }

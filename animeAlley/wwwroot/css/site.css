@@ -152,7 +152,7 @@ textarea.form-control {
     display: block;
 }
 
-select[name="selectedGeneros"] {
+select[name="selectedGeneros"], select[name="selectedShows"] {
     min-height: 150px;
     border-radius: 0.4rem;
     outline: none;
@@ -161,18 +161,18 @@ select[name="selectedGeneros"] {
     overflow-y: auto;
 }
 
-select[name="selectedGeneros"] option {
+select[name="selectedGeneros"] option, select[name="selectedShows"] option{
     padding: 0.6rem 1rem;
     color: #eee;
     border-bottom: 1px solid rgba(196, 174, 174, 0.2);
     transition: all 0.2s ease;
 }
 
-select[name="selectedGeneros"] option:last-child {
+select[name="selectedGeneros"] option:last-child, select[name="selectedShows"] option:last-child{
     border-bottom: none;
 }
 
-select[name="selectedGeneros"] option:checked {
+select[name="selectedGeneros"] option:checked, select[name="selectedShows"] option:checked{
     background: linear-gradient(135deg, #D84043 0%, #D84043 100%);
     border: none;
     color: #eee;
@@ -180,13 +180,13 @@ select[name="selectedGeneros"] option:checked {
     position: relative;
 }
 
-select[name="selectedGeneros"] option:checked::before {
+select[name="selectedGeneros"] option:checked::before, select[name="selectedShows"] option:checked::before{
     content: "✓";
     font-weight: bold;
     margin-right: 0.5rem;
 }
 
-select[name="selectedGeneros"] option:hover:not(:checked) {
+select[name="selectedGeneros"] option:hover:not(:checked), select[name="selectedShows"] option:hover:not(:checked){
     background-color: #2A1D1D;
     color: #eee;
     transform: translateX(2px);

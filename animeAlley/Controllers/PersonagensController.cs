@@ -11,16 +11,11 @@ using System.Globalization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Authorization;
 
-
 namespace animeAlley.Controllers
 {
     public class PersonagensController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        /// <summary>
-        /// objeto que contém todas as características do Servidor
-        /// </summary>
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         public PersonagensController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
@@ -30,14 +25,24 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            // Incluir o show associado para mostrar na listagem
-            var personagens = await _context.Personagens
-                .Include(p => p.Show)
-                .ToListAsync();
+            ViewData["CurrentFilter"] = searchString;
 
-            return View(personagens);
+            var personagem = from p in _context.Personagens.Include(p => p.Shows)
+                             select p;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var lowerSearch = searchString.ToLower();
+                personagem = personagem.Where(p =>
+                    p.Nome.ToLower().Contains(lowerSearch) ||
+                    p.Sinopse.ToLower().Contains(lowerSearch) ||
+                    p.Shows.Any(s => s.Nome.ToLower().Contains(lowerSearch))
+                );
+            }
+
+            return View(await personagem.ToListAsync());
         }
 
         // GET: Personagens/Details/5
@@ -48,9 +53,9 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            // Incluir o show associado nos detalhes
+            // Incluir os shows associados nos detalhes
             var personagem = await _context.Personagens
-                .Include(p => p.Show)
+                .Include(p => p.Shows)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (personagem == null)
@@ -62,25 +67,24 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Create
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
-            // Buscar todos os shows para popular o dropdown
+            // Buscar todos os shows para popular o dropdown múltiplo
             var shows = await _context.Shows
                 .Select(s => new { s.Id, s.Nome })
                 .OrderBy(s => s.Nome)
                 .ToListAsync();
 
-            ViewBag.Shows = new SelectList(shows, "Id", "Nome");
+            ViewBag.Shows = new MultiSelectList(shows, "Id", "Nome");
 
             return View();
         }
 
         // POST: Personagens/Create
-        //[Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,ShowFK, PersonagemSexualidade, Idade, DataNasc")] Personagem personagem, IFormFile personagemFoto)
+        public async Task<IActionResult> Create([Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,PersonagemSexualidade,Idade,DataNasc")] Personagem personagem,
+            IFormFile personagemFoto, List<int> selectedShows)
         {
             bool hasError = false;
             string imagePath = string.Empty;
@@ -94,51 +98,64 @@ namespace animeAlley.Controllers
             {
                 if (personagemFoto.ContentType != "image/jpeg" && personagemFoto.ContentType != "image/png")
                 {
-                    // não há imagem
                     hasError = true;
-                    // construo a msg de erro
                     ModelState.AddModelError("", "Tem de submeter uma Fotografia");
                 }
                 else
                 {
-                    // há imagem,
-                    // vamos processá-la
-                    // *******************************
-                    // Novo nome para o ficheiro
+                    // Processar a imagem
                     Guid g = Guid.NewGuid();
                     imagePath = g.ToString();
-
                     string extensaoImagem = Path.GetExtension(personagemFoto.FileName).ToLowerInvariant();
                     imagePath += extensaoImagem;
-
-                    // guardar este nome na BD
                     personagem.Foto = imagePath;
                 }
             }
 
+            // Validar se pelo menos um show foi selecionado
+            if (selectedShows == null || !selectedShows.Any())
+            {
+                hasError = true;
+                ModelState.AddModelError("", "Selecione pelo menos um show para o personagem");
+            }
+
             ModelState.Remove("Foto");
+            ModelState.Remove("Shows");
 
             if (ModelState.IsValid && !hasError)
             {
-                // Adicionar a personagem à base de dados (o ShowFK já vai ser salvo automaticamente)
-                _context.Add(personagem);
-                await _context.SaveChangesAsync();
-
-                // Salvar a imagem fisicamente
-                string localizacaoImagem = _webHostEnvironment.WebRootPath;
-                localizacaoImagem = Path.Combine(localizacaoImagem, "images/personagensFoto");
-                if (!Directory.Exists(localizacaoImagem))
+                try
                 {
-                    Directory.CreateDirectory(localizacaoImagem);
+                    // Buscar os shows selecionados
+                    var showsSelecionados = await _context.Shows
+                        .Where(s => selectedShows.Contains(s.Id))
+                        .ToListAsync();
+
+                    // Associar os shows ao personagem
+                    personagem.Shows = showsSelecionados;
+
+                    // Adicionar a personagem à base de dados
+                    _context.Add(personagem);
+                    await _context.SaveChangesAsync();
+
+                    // Salvar a imagem fisicamente
+                    string localizacaoImagem = _webHostEnvironment.WebRootPath;
+                    localizacaoImagem = Path.Combine(localizacaoImagem, "images/personagensFoto");
+                    if (!Directory.Exists(localizacaoImagem))
+                    {
+                        Directory.CreateDirectory(localizacaoImagem);
+                    }
+
+                    imagePath = Path.Combine(localizacaoImagem, imagePath);
+                    using var streamImage = new FileStream(imagePath, FileMode.Create);
+                    await personagemFoto.CopyToAsync(streamImage);
+
+                    return RedirectToAction(nameof(Index));
                 }
-                // gerar o caminho completo para a imagem
-                imagePath = Path.Combine(localizacaoImagem, imagePath);
-
-                // agora, temos condições para guardar a imagem
-                using var streamImage = new FileStream(imagePath, FileMode.Create);
-                await personagemFoto.CopyToAsync(streamImage);
-
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Erro ao salvar: " + ex.Message);
+                }
             }
 
             // Se chegou aqui, algo correu mal, recarregar a lista de shows
@@ -147,13 +164,12 @@ namespace animeAlley.Controllers
                 .OrderBy(s => s.Nome)
                 .ToListAsync();
 
-            ViewBag.Shows = new SelectList(shows, "Id", "Nome", personagem.ShowFK);
+            ViewBag.Shows = new MultiSelectList(shows, "Id", "Nome", selectedShows);
 
             return View(personagem);
         }
 
         // GET: Personagens/Edit/5
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -161,7 +177,9 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            var personagem = await _context.Personagens.FindAsync(id);
+            var personagem = await _context.Personagens
+                .Include(p => p.Shows)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (personagem == null)
             {
@@ -174,16 +192,19 @@ namespace animeAlley.Controllers
                 .OrderBy(s => s.Nome)
                 .ToListAsync();
 
-            ViewBag.Shows = new SelectList(shows, "Id", "Nome", personagem.ShowFK);
+            // IDs dos shows já associados ao personagem
+            var showsAssociados = personagem.Shows.Select(s => s.Id).ToList();
+
+            ViewBag.Shows = new MultiSelectList(shows, "Id", "Nome", showsAssociados);
 
             return View(personagem);
         }
 
         // POST: Personagens/Edit/5
-        //[Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,ShowFK, PersonagemSexualidade, Idade, DataNasc")] Personagem personagem, IFormFile personagemFoto)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,PersonagemSexualidade,Idade,DataNasc")] Personagem personagem,
+            IFormFile personagemFoto, List<int> selectedShows)
         {
             if (id != personagem.Id)
             {
@@ -194,7 +215,9 @@ namespace animeAlley.Controllers
             string newImagePath = string.Empty;
             string oldImagePath = string.Empty;
 
-            var existingPersonagem = await _context.Personagens.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+            var existingPersonagem = await _context.Personagens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (existingPersonagem == null)
             {
@@ -202,7 +225,6 @@ namespace animeAlley.Controllers
             }
 
             oldImagePath = existingPersonagem.Foto;
-
             personagem.Foto = oldImagePath;
 
             if (personagemFoto != null)
@@ -223,27 +245,58 @@ namespace animeAlley.Controllers
                     newImagePath = g.ToString();
                     string extensaoImagem = Path.GetExtension(personagemFoto.FileName).ToLowerInvariant();
                     newImagePath += extensaoImagem;
-
-                    // Update the model's Foto property with the new image path
                     personagem.Foto = newImagePath;
                 }
             }
-            else
+
+            // Validar se pelo menos um show foi selecionado
+            if (selectedShows == null || !selectedShows.Any())
             {
-                personagem.Foto = oldImagePath;
+                fileError = true;
+                ModelState.AddModelError("", "Selecione pelo menos um show para o personagem");
             }
 
             ModelState.Remove("Foto");
             ModelState.Remove("personagemFoto");
+            ModelState.Remove("Shows");
 
             if (ModelState.IsValid && !fileError)
             {
                 try
                 {
-                    _context.Update(personagem);
+                    // Buscar o personagem com os shows atuais
+                    var personagemComShows = await _context.Personagens
+                        .Include(p => p.Shows)
+                        .FirstOrDefaultAsync(p => p.Id == id);
+
+                    if (personagemComShows == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Atualizar propriedades básicas
+                    personagemComShows.Nome = personagem.Nome;
+                    personagemComShows.TipoPersonagem = personagem.TipoPersonagem;
+                    personagemComShows.Sinopse = personagem.Sinopse;
+                    personagemComShows.PersonagemSexualidade = personagem.PersonagemSexualidade;
+                    personagemComShows.Idade = personagem.Idade;
+                    personagemComShows.DataNasc = personagem.DataNasc;
+                    personagemComShows.Foto = personagem.Foto;
+
+                    // Atualizar associações com shows
+                    personagemComShows.Shows.Clear();
+                    var showsSelecionados = await _context.Shows
+                        .Where(s => selectedShows.Contains(s.Id))
+                        .ToListAsync();
+
+                    foreach (var show in showsSelecionados)
+                    {
+                        personagemComShows.Shows.Add(show);
+                    }
+
                     await _context.SaveChangesAsync();
 
-
+                    // Processar imagem se necessário
                     string localizacaoImagem = Path.Combine(_webHostEnvironment.WebRootPath, "images", "personagensFoto");
 
                     if (!Directory.Exists(localizacaoImagem))
@@ -281,20 +334,18 @@ namespace animeAlley.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // If we reached here, there was a validation error or file error.
-            // Reload dropdown for ShowFK
+            // Se chegou aqui, houve erro. Recarregar dropdown
             var shows = await _context.Shows
                 .Select(s => new { s.Id, s.Nome })
                 .OrderBy(s => s.Nome)
                 .ToListAsync();
 
-            ViewBag.Shows = new SelectList(shows, "Id", "Nome", personagem.ShowFK);
+            ViewBag.Shows = new MultiSelectList(shows, "Id", "Nome", selectedShows);
 
             return View(personagem);
         }
 
         // GET: Personagens/Delete/5
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -303,7 +354,7 @@ namespace animeAlley.Controllers
             }
 
             var personagem = await _context.Personagens
-                .Include(p => p.Show)
+                .Include(p => p.Shows)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (personagem == null)
@@ -315,36 +366,34 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Delete/5
-        //[Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // 1) Obter o registo
-            var personagem = await _context.Personagens.FindAsync(id);
+            var personagem = await _context.Personagens
+                .Include(p => p.Shows)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (personagem == null)
                 return NotFound();
 
-            // 2) Remover o ficheiro físico, se existir
+            // Remover o ficheiro físico, se existir
             if (!string.IsNullOrWhiteSpace(personagem.Foto))
             {
-                // 2.1) Construir o caminho completo até à imagem
                 var pastaImagens = Path.Combine(
-                    _webHostEnvironment.WebRootPath,       // wwwroot
-                    "images", "personagensFoto"            // sub‑pastas
+                    _webHostEnvironment.WebRootPath,
+                    "images", "personagensFoto"
                 );
                 var caminhoImagem = Path.Combine(pastaImagens, personagem.Foto);
 
-                // 2.2) Apagar o ficheiro
                 if (System.IO.File.Exists(caminhoImagem))
                     System.IO.File.Delete(caminhoImagem);
             }
 
-            // 3) Remover o registo da BD
+            // As associações N-M serão removidas automaticamente pelo EF Core
             _context.Personagens.Remove(personagem);
             await _context.SaveChangesAsync();
 
-            // 4) Voltar à lista
             return RedirectToAction(nameof(Index));
         }
 

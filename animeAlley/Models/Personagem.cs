@@ -1,5 +1,4 @@
 ﻿namespace animeAlley.Models;
-
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -16,8 +15,8 @@ public class Personagem
     /// <summary>
     /// Nome da personagem
     /// </summary>
-    [MaxLength(100)] // MaxLength(100) para o campo nome
-    [Required] // Campo obrigatório
+    [MaxLength(100)]
+    [Required]
     public string Nome { get; set; } = string.Empty; // Nome da personagem
 
     /// <summary>
@@ -56,21 +55,42 @@ public class Personagem
     [MaxLength(500)] // para o campo historia
     public string Foto { get; set; } = string.Empty; // URL da foto da personagem
 
-    //FK 1-N para Show
-
     /// <summary>
-    /// FK para a tabela dos Shows
-    /// </summary>
-    [ForeignKey(nameof(Show))]
-    [Display(Name = "Show")]
-    public int ShowFK { get; set; } // FK para o show (pode ser null)
-
-    /// <summary>
-    /// Navegação para o Show
+    /// Lista de shows em que este personagem aparece (relação N-M)
     /// </summary>
     [ValidateNever]
-    public Show Show { get; set; } = null!; // Navegação para o show
+    public ICollection<Show> Shows { get; set; } = new List<Show>();
 
+    /// <summary>
+    /// Lista de IDs dos shows selecionados no formulário (não mapeada na BD)
+    /// </summary>
+    [NotMapped]
+    public List<int> SelectedShowIds { get; set; } = new List<int>();
+}
+
+public class PersonagemShow
+{
+    [Key, Column(Order = 0)]
+    public int PersonagemId { get; set; }
+
+    [Key, Column(Order = 1)]
+    public int ShowId { get; set; }
+
+    [ForeignKey("PersonagemId")]
+    public Personagem Personagem { get; set; } = null!;
+
+    [ForeignKey("ShowId")]
+    public Show Show { get; set; } = null!;
+
+    /// <summary>
+    /// Papel específico do personagem neste show
+    /// </summary>
+    public string? PapelNoShow { get; set; }
+
+    /// <summary>
+    /// Data de primeira aparição neste show
+    /// </summary>
+    public DateTime? PrimeiraAparicao { get; set; }
 }
 
 public enum TiposPersonagem
