@@ -26,7 +26,7 @@ public class Autor
     /// <summary>
     /// Descrição do autor
     /// </summary>
-    [MaxLength(200)]
+    [MaxLength(1000)]
     public string Sobre { get; set; } = string.Empty; // Descrição do autor
 
     /// <summary>

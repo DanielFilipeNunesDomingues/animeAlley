@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250604095638_ShowNewBannerData")]
+    partial class ShowNewBannerData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,15 +169,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "a8100233-e3c1-44c5-90a7-b983d7811053",
+                            ConcurrencyStamp = "73a333fc-0288-48f3-ad77-6e3505af0c17",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM+sePmYT7w4+4G7kiypZCERXaLWWSznNTg0ly/yK2eOt/Waiem66u1g/7w3GwcZ+w==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIxOUue5fX3WqAFcewt/LHmiYwKzkwLsbKQIZVIo9KuqYipd4Su5kQ/tT+ewr3sWTg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "8144c093-b212-4656-beff-bd296802a83f",
+                            SecurityStamp = "aa45054b-cc1b-49a6-a274-e6697bfb5c5c",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -274,13 +277,13 @@ namespace animeAlley.Migrations
 
             modelBuilder.Entity("PersonagemShow", b =>
                 {
-                    b.Property<int>("PersonagensId")
+                    b.Property<int>("PersonagensShowsId")
                         .HasColumnType("int");
 
                     b.Property<int>("ShowsId")
                         .HasColumnType("int");
 
-                    b.HasKey("PersonagensId", "ShowsId");
+                    b.HasKey("PersonagensShowsId", "ShowsId");
 
                     b.HasIndex("ShowsId");
 
@@ -310,8 +313,8 @@ namespace animeAlley.Migrations
 
                     b.Property<string>("Sobre")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -455,29 +458,20 @@ namespace animeAlley.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("DataNasc")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Foto")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<int?>("Idade")
-                        .HasColumnType("int");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("PersonagemSexualidade")
-                        .HasColumnType("int");
-
                     b.Property<string>("Sinopse")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("TipoPersonagem")
                         .HasColumnType("int");
@@ -524,8 +518,8 @@ namespace animeAlley.Migrations
 
                     b.Property<string>("Sinopse")
                         .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -716,7 +710,7 @@ namespace animeAlley.Migrations
                 {
                     b.HasOne("animeAlley.Models.Personagem", null)
                         .WithMany()
-                        .HasForeignKey("PersonagensId")
+                        .HasForeignKey("PersonagensShowsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -1,53 +1,30 @@
 ﻿@model IEnumerable<animeAlley.Models.Personagem>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Personagens";
 }
 
-<h1>Index</h1>
+<div class="py-5 container">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nome)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TipoPersonagem)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Sinopse)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Foto)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nome)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TipoPersonagem)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Sinopse)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Foto)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    @if (!User.IsInRole("Admin"))
+    {
+        <p>
+            <a asp-action="Create">Create New</a>
+        </p>
+    }
+
+    <form asp-action="Index" method="get" class="mb-4">
+        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Buscar personagens..." class="form-control" />
+    </form>
+
+    <div class="show-grid-container">
+        @foreach (var item in Model)
+        {
+            <div class="show-grid-item">
+                <a asp-action="Details" asp-route-id="@item.Id">
+                    <img src="~/images/personagensFoto/@item.Foto" alt="@item.Nome" title="@item.Nome" height="100px" />
+                </a>
+            </div>
+        }
+    </div>
+</div>

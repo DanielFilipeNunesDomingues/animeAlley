@@ -96,6 +96,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // come�ar a usar, realmente, os 'cookies'

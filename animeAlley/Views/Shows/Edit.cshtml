@@ -1,89 +1,339 @@
 ﻿@model animeAlley.Models.Show
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar " + Model.Nome;
 }
 
-<h1>Edit</h1>
+<div class="py-5 container">
+    <h1 class="text-center mb-4">Editar Show</h1>
 
-<h4>Show</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Sinopse" class="control-label"></label>
-                <input asp-for="Sinopse" class="form-control" />
-                <span asp-validation-for="Sinopse" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Tipo" class="control-label"></label>
-                <select asp-for="Tipo" class="form-control"></select>
-                <span asp-validation-for="Tipo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control"></select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Nota" class="control-label"></label>
-                <input asp-for="Nota" class="form-control" />
-                <span asp-validation-for="Nota" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Ano" class="control-label"></label>
-                <input asp-for="Ano" class="form-control" />
-                <span asp-validation-for="Ano" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Imagem" class="control-label"></label>
-                <input asp-for="Imagem" class="form-control" />
-                <span asp-validation-for="Imagem" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Trailer" class="control-label"></label>
-                <input asp-for="Trailer" class="form-control" />
-                <span asp-validation-for="Trailer" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Views" class="control-label"></label>
-                <input asp-for="Views" class="form-control" />
-                <span asp-validation-for="Views" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Fonte" class="control-label"></label>
-                <select asp-for="Fonte" class="form-control"></select>
-                <span asp-validation-for="Fonte" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StudioFK" class="control-label"></label>
-                <select asp-for="StudioFK" class="form-control" asp-items="ViewBag.StudioFK"></select>
-                <span asp-validation-for="StudioFK" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AutorFK" class="control-label"></label>
-                <select asp-for="AutorFK" class="form-control" asp-items="ViewBag.AutorFK"></select>
-                <span asp-validation-for="AutorFK" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+            <form asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row g-4">
+                    <!-- Left Column: General Information -->
+                    <div class="col-lg-8">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">Informações Gerais</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <!-- First Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Nome" class="form-label fw-semibold">Nome <span class="text-danger d-inline-block">*</span></label>
+                                            <input asp-for="Nome" class="form-control" placeholder="Nome do show" />
+                                            <span asp-validation-for="Nome" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Ano" class="form-label fw-semibold">Ano <span class="text-danger d-inline-block">*</span></label>
+                                            <input asp-for="Ano" class="form-control" placeholder="Ano de lançamento" />
+                                            <span asp-validation-for="Ano" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Synopsis - Full Width -->
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label asp-for="Sinopse" class="form-label fw-semibold">Sinopse <span class="text-danger d-inline-block">*</span></label>
+                                            <textarea asp-for="Sinopse" class="form-control" rows="4" placeholder="Descrição do show"></textarea>
+                                            <span asp-validation-for="Sinopse" class="text-danger"></span>
+                                            <div class="form-text text-muted">
+                                                <span id="show-count">Escrever BR/br faz pular uma linha.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Second Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Tipo" class="form-label fw-semibold">Tipo <span class="text-danger d-inline-block">*</span></label>
+                                            <select asp-for="Tipo" class="form-select"
+                                                    asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
+                                                <option value="">-- Selecione o Tipo --</option>
+                                            </select>
+                                            <span asp-validation-for="Tipo" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Status" class="form-label fw-semibold">Status <span class="text-danger d-inline-block">*</span></label>
+                                            <select asp-for="Status" class="form-select"
+                                                    asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
+                                                <option value="">-- Selecione o Status --</option>
+                                            </select>
+                                            <span asp-validation-for="Status" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Third Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="NotaAux" class="form-label fw-semibold">Nota <span class="text-danger d-inline-block">*</span></label>
+                                            <input asp-for="NotaAux" class="form-control" placeholder="Nota (0-10)" />
+                                            <span asp-validation-for="NotaAux" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Views" class="form-label fw-semibold">Views <span class="text-danger d-inline-block">*</span></label>
+                                            <input asp-for="Views" class="form-control" placeholder="Número de visualizações" />
+                                            <span asp-validation-for="Views" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fourth Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Fonte" class="form-label fw-semibold">Fonte <span class="text-danger d-inline-block">*</span></label>
+                                            <select asp-for="Fonte" class="form-select"
+                                                    asp-items="Html.GetEnumSelectList<animeAlley.Models.Fonte>()">
+                                                <option value="">-- Selecione a Fonte --</option>
+                                            </select>
+                                            <span asp-validation-for="Fonte" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="StudioFK" class="form-label fw-semibold">Estúdio <span class="text-danger d-inline-block">*</span></label>
+                                            <select asp-for="StudioFK" class="form-select" asp-items="ViewBag.StudioFK">
+                                                <option value="">-- Selecione o Studio --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fifth Row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="AutorFK" class="form-label fw-semibold"></label>
+                                            <select asp-for="AutorFK" class="form-select" asp-items="ViewBag.AutorFK">
+                                                <option value="">-- Selecione o Autor --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Trailer" class="form-label fw-semibold"> Trailer <span class="text-danger d-inline-block">*</span></label>
+                                            <input asp-for="Trailer" class="form-control" placeholder="URL do trailer" />
+                                            <span asp-validation-for="Trailer" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Genres - Full Width -->
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label class="form-label fw-semibold">Gêneros <span class="text-danger d-inline-block">*</span></label>
+                                            <select name="selectedGeneros" class="form-select" multiple="multiple"
+                                                    asp-items="ViewBag.Generos" style="height: 120px;">
+                                            </select>
+                                            <div class="form-text text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                <span id="genero-count">Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Images -->
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">Imagens</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Cover Image Section -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Imagem de Capa <span class="text-danger d-inline-block">*</span></label>
+
+                                    @if (!string.IsNullOrEmpty(Model.Imagem))
+                                    {
+                                        <div class="current-image mb-3">
+                                            <div class="text-muted small mb-2">Imagem Atual:</div>
+                                            <div class="image-container">
+                                                <img src="~/images/showCover/@Model.Imagem"
+                                                     alt="Capa atual"
+                                                     class="img-thumbnail w-100"
+                                                     style="max-height: 200px; object-fit: cover;" />
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <label for="showFoto" class="form-label small">
+                                        @(string.IsNullOrEmpty(Model.Imagem) ? "Selecionar Imagem de Capa" : "Alterar Imagem de Capa")
+                                    </label>
+                                    <input type="file"
+                                           name="showFoto"
+                                           id="showFoto"
+                                           class="form-control form-control-sm"
+                                           accept="image/jpeg,image/png,image/jpg,image/webp" />
+                                    <div class="form-text">JPG, PNG ou WEBP (máx. 2MB)</div>
+                                </div>
+
+                                <!-- Banner Section -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Banner <span class="text-danger d-inline-block">*</span></label>
+
+                                    @if (!string.IsNullOrEmpty(Model.Banner))
+                                    {
+                                        <div class="current-banner mb-3">
+                                            <div class="text-muted small mb-2">Banner Atual:</div>
+                                            <div class="image-container">
+                                                <img src="~/images/showBanner/@Model.Banner"
+                                                     alt="Banner atual"
+                                                     class="img-thumbnail w-100"
+                                                     style="max-height: 120px; object-fit: cover;" />
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <label for="showBanner" class="form-label small">
+                                        @(string.IsNullOrEmpty(Model.Banner) ? "Selecionar Banner" : "Alterar Banner")
+                                    </label>
+                                    <input type="file"
+                                           name="showBanner"
+                                           id="showBanner"
+                                           class="form-control form-control-sm"
+                                           accept="image/jpeg,image/png,image/jpg,image/webp" />
+                                    <div class="form-text">JPG, PNG ou WEBP (máx. 2MB)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-center gap-3 flex-lg-row flex-column">
+                            <button type="submit" class="btn btn-primary">
+                                Guardar Alterações
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                Voltar à Lista
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Genre selection counter
+            var updateGeneroCount = function() {
+                var selectedCount = $('select[name="selectedGeneros"]').val() ? $('select[name="selectedGeneros"]').val().length : 0;
+                var helpText = selectedCount > 0 ?
+                    `${selectedCount} género(s) selecionado(s). ` :
+                    'Nenhum género selecionado. ';
+                helpText += 'Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.';
+                $('#genero-count').html(`<i class="fas fa-info-circle me-1"></i>${helpText}`);
+            };
+
+            updateGeneroCount();
+            $('select[name="selectedGeneros"]').on('change', updateGeneroCount);
+
+            // Image preview functionality
+            function createImagePreview(input, type) {
+                var file = input.files[0];
+                var previewClass = type === 'cover' ? '.preview-image' : '.preview-banner';
+                var $parent = $(input).closest('.mb-4, .mb-3');
+
+                // Remove existing preview
+                $parent.find(previewClass).remove();
+
+                if (file) {
+                    // Validate file size (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('O arquivo é muito grande. Tamanho máximo: 2MB');
+                        $(input).val('');
+                        return;
+                    }
+
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var maxHeight = type === 'cover' ? '200px' : '120px';
+                        var previewHtml = `
+                            <div class="${previewClass.substring(1)} mt-3">
+                                <div class="small mb-2" style="color: #D84043">
+                                    <i class="fas fa-eye me-1"></i>Nova imagem selecionada:
+                                </div>
+                                <div class="image-container">
+                                    <img src="${e.target.result}"
+                                         class="img-thumbnail w-100"
+                                         style="max-height: ${maxHeight}; object-fit: cover;" />
+                                </div>
+                            </div>`;
+                        $(input).closest('.mb-4, .mb-3').append(previewHtml);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Cover image preview
+            $('input[name="showFoto"]').on('change', function() {
+                createImagePreview(this, 'cover');
+            });
+
+            // Banner preview
+            $('input[name="showBanner"]').on('change', function() {
+                createImagePreview(this, 'banner');
+            });
+
+            // Form validation enhancement
+            $('form').on('submit', function(e) {
+                var isValid = true;
+                var firstErrorField = null;
+
+                // Check required fields
+                $(this).find('input[required], select[required], textarea[required]').each(function() {
+                    if (!$(this).val()) {
+                        isValid = false;
+                        if (!firstErrorField) {
+                            firstErrorField = this;
+                        }
+                        $(this).addClass('is-invalid');
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                        $('html, body').animate({
+                            scrollTop: $(firstErrorField).offset().top - 100
+                        }, 500);
+                    }
+                }
+            });
+
+            // Remove validation errors on input
+            $('input, select, textarea').on('input change', function() {
+                $(this).removeClass('is-invalid');
+            });
+        });
+    </script>
 }

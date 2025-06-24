@@ -29,4 +29,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\personagensFoto\" />
+    <Folder Include="wwwroot\images\showBanner\" />
+    <Folder Include="wwwroot\images\showCover\" />
+  </ItemGroup>
+
 </Project>
