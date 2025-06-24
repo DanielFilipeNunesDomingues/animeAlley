@@ -32,14 +32,16 @@ namespace animeAlley.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender, 
-            ApplicationDbContext context)
+            IEmailSender emailSender,
+            ApplicationDbContext context,
+            IWebHostEnvironment webHostEnvironment)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -48,6 +50,7 @@ namespace animeAlley.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -100,12 +103,23 @@ namespace animeAlley.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
 
             /// <summary>
+            /// Código Admin para tornar o utilizador administrador
+            /// </summary>
+            [Display(Name = "Código de Administrador (opcional)")]
+            public string CodigoAdmin { get; set; }
+
+            /// <summary>
+            /// Foto do utilizador (opcional)
+            /// </summary>
+            [Display(Name = "Foto de Perfil (opcional)")]
+            public IFormFile FotoUtilizador { get; set; }
+
+            /// <summary>
             /// Incorporação dos dados de um Utilizador
             /// no formulário de Registo
             /// </summary>
             public Utilizador Utilizador { get; set; }
         }
-
 
         /// <summary>
         /// Este método 'responde' aos pedidos feitos em HTTP GET
@@ -128,13 +142,9 @@ namespace animeAlley.Areas.Identity.Pages.Account
             // se o 'returnUrl' for nulo, é-lhe atribuído o valor da 'raiz' da aplicação
             returnUrl ??= Url.Content("~/");
 
-            // // Se estiverem definidos métodos alternativos de REGISTO e LOGIN, ativam essa opção
-            // ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
             // O ModelState avalia o estado do objeto da classe interna 'InputModel'
             if (ModelState.IsValid)
             {
-
                 var user = CreateUser();
 
                 // atribuir ao objeto 'user' o email e o username
@@ -155,15 +165,71 @@ namespace animeAlley.Areas.Identity.Pages.Account
 
                     // var auxiliar
                     bool haErro = false;
+                    string imagePath = "placeholder.png"; // Default placeholder
 
                     // atribuir o UserName do utilizador AspNetUser criado 
                     // ao objeto Utilizador
                     Input.Utilizador.UserName = Input.Email;
 
+                    // Verificar se é administrador usando código
+                    const string CODIGO_ADMIN = "ADMIN2025"; // Altere este código conforme necessário
+                    if (!string.IsNullOrEmpty(Input.CodigoAdmin) && Input.CodigoAdmin == CODIGO_ADMIN)
+                    {
+                        Input.Utilizador.isAdmin = true;
+                    }
+
+                    // Processar a foto do utilizador se foi enviada
+                    if (Input.FotoUtilizador != null)
+                    {
+                        if (Input.FotoUtilizador.ContentType == "image/jpeg" || Input.FotoUtilizador.ContentType == "image/png")
+                        {
+                            // Gerar nome criptografado para a imagem
+                            Guid g = Guid.NewGuid();
+                            imagePath = g.ToString();
+                            string extensaoImagem = Path.GetExtension(Input.FotoUtilizador.FileName).ToLowerInvariant();
+                            imagePath += extensaoImagem;
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("", "Formato de imagem inválido. Use apenas JPEG ou PNG.");
+                            return Page();
+                        }
+                    }
+
+                    // Atribuir o caminho da foto ao utilizador
+                    Input.Utilizador.Foto = imagePath;
+
                     try
                     {
                         _context.Add(Input.Utilizador);
                         await _context.SaveChangesAsync();
+
+                        // Adicionar role ao utilizador
+                        if (Input.Utilizador.isAdmin)
+                        {
+                            await _userManager.AddToRoleAsync(user, "Admin");
+                            await _signInManager.RefreshSignInAsync(user);
+                        }
+                        else
+                        {
+                            await _userManager.AddToRoleAsync(user, "User");
+                        }
+
+                        // Se uma foto foi enviada, salvá-la fisicamente
+                        if (Input.FotoUtilizador != null && !imagePath.Equals("placeholder.png"))
+                        {
+                            string localizacaoImagem = _webHostEnvironment.WebRootPath;
+                            localizacaoImagem = Path.Combine(localizacaoImagem, "images/userFotos");
+
+                            if (!Directory.Exists(localizacaoImagem))
+                            {
+                                Directory.CreateDirectory(localizacaoImagem);
+                            }
+
+                            string caminhoCompleto = Path.Combine(localizacaoImagem, imagePath);
+                            using var streamImage = new FileStream(caminhoCompleto, FileMode.Create);
+                            await Input.FotoUtilizador.CopyToAsync(streamImage);
+                        }
                     }
                     catch (Exception)
                     {
@@ -180,6 +246,9 @@ namespace animeAlley.Areas.Identity.Pages.Account
                         ///    - executar outras ações consideradas necessárias
                         ///          (eventualmente, eliminar a instrução 'throw'
                         haErro = true;
+
+                        // Apagar o usuário do Identity se não conseguiu salvar na BD
+                        await _userManager.DeleteAsync(user);
                         throw;
                     }
                     /* ++++++++++++++++++++++++++++++++++++ */
@@ -217,6 +286,9 @@ namespace animeAlley.Areas.Identity.Pages.Account
                             return LocalRedirect(returnUrl);
                         }
                     }
+                }
+                else
+                {
                     // se há erros, mostra-os na página de Registo
                     foreach (var error in result.Errors)
                     {
@@ -224,8 +296,6 @@ namespace animeAlley.Areas.Identity.Pages.Account
                     }
                 }
             }
-
-            // If we got this far, something failed, redisplay form
             return Page();
         }
 

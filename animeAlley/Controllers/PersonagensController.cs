@@ -67,6 +67,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Create
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             // Buscar todos os shows para popular o dropdown múltiplo
@@ -83,6 +84,7 @@ namespace animeAlley.Controllers
         // POST: Personagens/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,PersonagemSexualidade,Idade,DataNasc")] Personagem personagem,
             IFormFile personagemFoto, List<int> selectedShows)
         {
@@ -170,6 +172,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -201,6 +204,7 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Edit/5
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,PersonagemSexualidade,Idade,DataNasc")] Personagem personagem,
@@ -346,6 +350,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Personagens/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -366,6 +371,7 @@ namespace animeAlley.Controllers
         }
 
         // POST: Personagens/Delete/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

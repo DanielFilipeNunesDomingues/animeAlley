@@ -73,7 +73,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Shows/Create
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             ViewData["AutorFK"] = new SelectList(_context.Autores, "Id", "Nome");
@@ -85,7 +85,7 @@ namespace animeAlley.Controllers
         // POST: Shows/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,Sinopse,Tipo,Status,NotaAux,Ano,Imagem,Banner,Trailer,Views,Fonte,StudioFK,AutorFK")] Show show, IFormFile showFoto, IFormFile showBanner, int[] selectedGeneros)
@@ -215,7 +215,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Shows/Edit/5
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -248,7 +248,7 @@ namespace animeAlley.Controllers
         // POST: Shows/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Sinopse,Tipo,Status,NotaAux,Ano,Imagem,Banner,Trailer,Views,Fonte,StudioFK,AutorFK")] Show show, IFormFile showFoto, IFormFile showBanner, int[] selectedGeneros)
@@ -469,7 +469,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Shows/Delete/5
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -493,7 +493,7 @@ namespace animeAlley.Controllers
         }
 
         // POST: Shows/Delete/5
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

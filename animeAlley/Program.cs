@@ -1,4 +1,5 @@
 using animeAlley.Data;
+using animeAlley.Models;
 using animeAlley.Services;
 using AppFotos.Services;
 using Microsoft.AspNetCore.Identity;
@@ -69,6 +70,9 @@ builder.Services.AddScoped<TokenService>();
 // Pegar o Nome do Utilizador
 builder.Services.AddScoped<UtilizadorService>();
 
+// Novo serviço para gerenciar roles
+builder.Services.AddScoped<RoleService>(); 
+
 
 // Eliminar a proteção de 'ciclos' qd se faz uma pesquisa que envolva um relacionamento 1-N em Linq
 // https://code-maze.com/aspnetcore-handling-circular-references-when-working-with-json/
@@ -99,7 +103,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// come�ar a usar, realmente, os 'cookies'
 app.UseSession();
 
 
@@ -108,4 +111,56 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedRolesAndAdmin(services);
+}
+
+async Task SeedRolesAndAdmin(IServiceProvider serviceProvider)
+{
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+
+    string[] roleNames = { "Admin", "User" };
+    foreach (var roleName in roleNames)
+    {
+        var roleExist = await roleManager.RoleExistsAsync(roleName);
+        if (!roleExist)
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+
+    var adminEmail = "admin@animealley.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser == null)
+    {
+        adminUser = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+
+        await userManager.CreateAsync(adminUser, "Admin123!");
+        await userManager.AddToRoleAsync(adminUser, "Admin");
+
+        var utilizador = new Utilizador
+        {
+            Nome = "Administrador",
+            UserName = adminEmail,
+            isAdmin = true,
+            Foto = "placeholder.png"
+        };
+
+        context.Utilizadores.Add(utilizador);
+        await context.SaveChangesAsync();
+    }
+}
+
 app.Run();
+
+

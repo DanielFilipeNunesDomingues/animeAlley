@@ -29,6 +29,27 @@ span {
     transition: all 0.2s ease-in-out;
 }
 
+hr {
+    opacity: 0.1;
+}
+
+.dropdown-menu {
+    background-color: #3D3030;
+    border-radius: 0.4rem;
+    border: 2px solid #554646;
+}
+
+.dropdown-menu .dropdown-item, .dropdown-menu .dropdown-item > button {
+    color: #C4AEAE;
+    transition: 0.2s ease all;
+}
+
+.dropdown-menu .dropdown-item:hover, .dropdown-menu .dropdown-item:hover > button {
+    background-color: #1D1616;
+    color: #E4D6D6 !important;
+    transition: 0.2s ease all;
+}
+
 .container {
     max-width: 1600px;
     padding: 0.2rem 0;
@@ -50,8 +71,21 @@ span {
     color: #C4AEAE !important;
 }
 
-/* End Normal Reset */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.4rem;
+    border: 2px solid #2A1D1D;
+    object-fit: cover;
+    transition: 0.2s ease all;
+}
 
+.avatar:hover {
+    border: 2px solid #D84043;
+    transition: 0.2s ease all;
+}
+
+/* End Normal Reset */
 /* Form Style*/
 .form-card {
     border: 2px solid #2A1D1D;

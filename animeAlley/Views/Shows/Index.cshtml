@@ -5,7 +5,7 @@
 }
 
 <div class="py-5 container">
-    @if (!User.IsInRole("Admin"))
+    @if (User.IsInRole("Admin"))
     {
         <p>
             <a asp-action="Create">Create New</a>

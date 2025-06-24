@@ -23,7 +23,7 @@ public class Utilizador
     /// Foto do utilizador.
     /// </summary>
     [MaxLength(200)]
-    public string Foto { get; set; } = string.Empty; // Foto do Utilizador
+    public string? Foto { get; set; } // Foto do Utilizador
 
     [Required]
     public bool isAdmin { get; set; } = false;
