@@ -28,18 +28,18 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Personagens" asp-action="Index">Personagens</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                            </li>
                         </ul>
                     </div>
                     <div class="d-lg-none">
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Início</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Shows" asp-action="Index">Shows</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Personagens" asp-action="Index">Personagens</a>
                             </li>
                         </ul>
                     </div>
@@ -49,15 +49,16 @@
             </div>
         </nav>
     </header>
-    <div class="bg-primary min-vh-100">
+    <div class="bg-primary">
         <main role="main" class="">
             @RenderBody()
         </main>
     </div>
 
     <footer class="navbar-animeAlley-bg">
-        <div class="container">
-            &copy; 2025 - animeAlley - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <div class="container d-flex justify-content-center align-items-center flex-column py-4 gap-2">
+            <img src="~/img/iconAnimeAlley.svg" width="55" alt="Logo | animeAlley" />
+            <p class="text-white m-0">animeAlley. Alguns direitos reservados.</p>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

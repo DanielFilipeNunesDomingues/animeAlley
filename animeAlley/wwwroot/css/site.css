@@ -19,15 +19,12 @@ span {
     background-color: #2A1D1D;
 }
 
-.navbar-animeAlley {
-}
-
-.navbar-animeAlley a {
+.navbar-animeAlley a, .navbar-animeAlley .form-inline button {
     color: #C4AEAE !important;
     transition: all 0.2s ease-in-out;
 }
 
-.navbar-animeAlley a:hover {
+.navbar-animeAlley a:hover, .navbar-animeAlley .form-inline button:hover {
     color: #eee !important;
     transition: all 0.2s ease-in-out;
 }
@@ -56,6 +53,18 @@ span {
 /* End Normal Reset */
 
 /* Form Style*/
+.form-card {
+    border: 2px solid #2A1D1D;
+    box-shadow: 0 0 #248e5039;
+    transition: all 0.2s ease;
+}
+
+.form-card:hover {
+    box-shadow: 0 0 20px rgba(216, 64, 67, 0.31);
+    border: 2px solid #D84040;
+    transition: all 0.2s ease;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -63,29 +72,35 @@ span {
     margin-bottom: 0.1rem;
 }
 
-.form-control{
+.form-control {
     padding: 0.8rem 1rem;
     background-color: #3D3030;
     border: none;
     outline: none;
     color: #eee;
     border-radius: 0.4rem;
+    border: 2px solid #554646;
+    transition: all 0.2s ease;
+}
+
+.form-control:hover {
+    border: 2px solid #D84040;
+    transition: all 0.2s ease;
 }
 
 .form-control::placeholder {
     color: #C4AEAE;
 }
 
-
-    .form-select {
-        padding: 0.8rem 1rem;
-        background-color: #3D3030;
-        border: none;
-        outline: none;
-        color: #eee;
-        border-radius: 0.4rem;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='white' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-    }
+.form-select {
+    padding: 0.8rem 1rem;
+    background-color: #3D3030;
+    border: none;
+    outline: none;
+    color: #eee;
+    border-radius: 0.4rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='white' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
 
 
 .form-control:focus, .form-select:focus {
@@ -95,6 +110,27 @@ span {
     outline: none;
     color: #eee;
     box-shadow: 0px 0px 5px 5px rgba(216,64,67,0.1);
+    border: 2px solid #D84040;
+}
+
+.info-help {
+    text-decoration: none;
+    padding: 0.8rem;
+    background-color: #3D3030;
+    border-radius: 0.4rem;
+    color: #eee !important;
+    border: 2px solid #554646;
+    transition: all 0.2s ease;
+}
+
+.info-help:hover {
+    border: 2px solid #D84040;
+    transition: all 0.2s ease;
+}
+
+.info-help:hover > span {
+    color: #D84040;
+    transition: all 0.2s ease;
 }
 
 input[type="file"].form-control::file-selector-button {
@@ -107,7 +143,69 @@ input[type="file"].form-control::file-selector-button {
 }
 
 input[type="file"].form-control::file-selector-button:hover {
-    background-color: #8E1616 !important;
+    background-color: #BF2A2D !important;
+}
+
+.form-check-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.form-label .form-check-input + span {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #D84043;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 8px;
+    cursor: pointer;
+    position: relative;
+}
+
+.form-check-input:checked + span {
+    background-color: #D84043;
+    border-color: #D84043;
+}
+
+.form-check-input:checked + span::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 5px;
+    width: 6px; 
+    height: 12px; 
+    border: solid white; 
+    border-width: 0 3px 3px 0; 
+    transform: rotate(45deg);
+}
+
+#account p a {
+    position: relative;
+    text-decoration: none;
+    color: #eee;
+}
+
+#account p a:after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    position: absolute;
+    display: block;
+    bottom: -2px;
+    left: 0;
+    background-color: #eee;
+    border-radius: 10px;
+    transition: 0.2s ease all;
+}
+
+#account p a:hover:after {
+    content: '';
+    width: 100%;
+    transition: 0.2s ease all;
 }
 
 textarea.form-control {
@@ -125,6 +223,7 @@ textarea.form-control {
 
 .btn {
     padding: 0.8rem 1rem;
+    font-family: "Inter", sans-serif;
 }
 
 .btn-primary {
@@ -135,6 +234,12 @@ textarea.form-control {
     font-size: 1rem;
     padding: 1rem 1.2rem;
     border-radius: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #BF2A2D !important;
+    transition: all 0.2s ease;
 }
 
 .btn-outline-secondary {
@@ -972,6 +1077,9 @@ div > a[asp-action="Index"]:hover {
     top: 0;
     width: 100%;
 }
+/* End Personagem Detail Style*/
+
+
 /* Reponsive Breakpoints */
 @media (max-width: 100rem) {
     .show-grid-container {
@@ -1175,15 +1283,9 @@ div > a[asp-action="Index"]:hover {
         max-width: 350px;
     }
 }
-}
 
 .rememberme {
     color: #C4AEAE;
-}
-
-a {
-    color: #C4AEAE;
-    text-decoration: none;
 }
 
 .button {
