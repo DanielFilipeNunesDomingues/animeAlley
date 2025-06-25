@@ -10,28 +10,28 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        <li class="nav-item d-flex justify-content-center align-items-center ">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">@nomeUtilizador</a>
-        </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none;">
-                <img src="@fotoUtilizador" alt="Avatar" class="rounded-circle avatar"/>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li>
-                    <a class="dropdown-item d-flex align-items-center justify-content-center" asp-area="Identity" asp-page="/Account/Manage/Index">
-                        Configurações
-                    </a>
-                </li>
-                <li><hr></li>
-                <li>
-                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 dropdown-item">
-                        <button type="submit" class="text-center p-0" style="border: none; background: none; width: 100%;">
-                            Sair
-                        </button>
-                    </form>
-                </li>
-            </ul>
+        <li class="nav-item">
+            <div class="dropdown d-flex justify-content-center align-items-center flex-row gap-3">
+                <a class="nav-link text-dark p-0" asp-area="Identity" asp-page="/Account/Manage/Index">@nomeUtilizador</a>
+                <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none;">
+                    <img src="@fotoUtilizador" alt="Avatar" class="rounded-circle avatar" />
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center justify-content-center" asp-area="Identity" asp-page="/Account/Manage/Index">
+                            Configurações
+                        </a>
+                    </li>
+                    <li><hr></li>
+                    <li>
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 dropdown-item">
+                            <button type="submit" class="text-center p-0" style="border: none; background: none; width: 100%;">
+                                Sair
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </li>
     }
     else

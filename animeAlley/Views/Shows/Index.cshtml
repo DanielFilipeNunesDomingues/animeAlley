@@ -4,7 +4,7 @@
     ViewData["Title"] = "Shows";
 }
 
-<div class="py-5 container">
+<div class="py-5 container min-vh-100">
     @if (User.IsInRole("Admin"))
     {
         <p>
@@ -16,7 +16,7 @@
         <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Buscar shows..." class="form-control" />
     </form>
 
-    <div class="show-grid-container min-vh-100">
+    <div class="show-grid-container">
         @foreach (var item in Model)
         {
             <div class="show-grid-item">

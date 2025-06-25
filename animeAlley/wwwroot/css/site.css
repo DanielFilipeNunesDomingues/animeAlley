@@ -51,7 +51,7 @@ hr {
 }
 
 .container {
-    max-width: 1600px;
+    max-width: 1200px;
     padding: 0.2rem 0;
 }
 
@@ -410,7 +410,7 @@ div > a[asp-action="Index"]:hover {
 /* Grid Items Style */
 .show-grid-container {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 1rem;
     margin-bottom: 1rem;
     justify-items: center;
@@ -568,7 +568,7 @@ div > a[asp-action="Index"]:hover {
 
 .show-sinopse {
     height: auto;
-    max-width: 1300px;
+    max-width: 900px;
 }
 
 .show-sinopse h2 {
@@ -692,7 +692,7 @@ div > a[asp-action="Index"]:hover {
 
 .show-personagens {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     justify-content: space-between;
     align-content: center;
     gap: 1rem;
@@ -1041,7 +1041,7 @@ div > a[asp-action="Index"]:hover {
 
 .personagem-header {
     display: grid;
-    grid-template-columns: 0.2fr 1fr;
+    grid-template-columns: 0.26fr 1fr;
     gap: 2rem;
 }
 
@@ -1059,7 +1059,7 @@ div > a[asp-action="Index"]:hover {
 .personagem-info {
     position:relative;
     display: grid;
-    grid-template-columns: 0.2fr 1fr;
+    grid-template-columns: 0.26fr 1fr;
     gap: 2rem;
 }
 
@@ -1117,11 +1117,7 @@ div > a[asp-action="Index"]:hover {
 /* Reponsive Breakpoints */
 @media (max-width: 100rem) {
     .show-grid-container {
-        grid-template-columns: repeat(7, 1fr);
-    }
-
-    .container {
-        max-width: 1400px;
+        grid-template-columns: repeat(5, 1fr);
     }
 
     .show-personagens {
@@ -1135,26 +1131,26 @@ div > a[asp-action="Index"]:hover {
     }
 
     .show-sinopse {
-        max-width: 1100px;
+        max-width: 900px;
     }
 
     .personagem-header {
-        grid-template-columns: 0.22fr 1fr;
+        grid-template-columns: 0.26fr 1fr;
     }
 
     .personagem-info {
-        grid-template-columns: 0.22fr 1fr;
+        grid-template-columns: 0.26fr 1fr;
     }
 
 }
 
 @media (max-width: 85rem) {
     .show-grid-container {
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(5, 1fr);
     }
 
     .container {
-        max-width: 1200px;
+        max-width: 1000px;
     }
 
     .show-personagens {
@@ -1166,28 +1162,6 @@ div > a[asp-action="Index"]:hover {
         grid-template-columns: 1fr;
         gap: 1.5rem;
         height: auto;
-    }
-
-    .show-sinopse {
-        max-width: 900px;
-    }
-
-    .personagem-header {
-        grid-template-columns: 0.26fr 1fr;
-    }
-
-    .personagem-info {
-        grid-template-columns: 0.26fr 1fr;
-    }
-}
-
-@media (max-width: 70rem) {
-    .show-grid-container {
-        grid-template-columns: repeat(5, 1fr);
-    }
-
-    .container {
-        max-width: 1000px;
     }
 
     .show-sinopse {
@@ -1203,9 +1177,31 @@ div > a[asp-action="Index"]:hover {
     }
 }
 
-@media (max-width: 60rem) {
+@media (max-width: 70rem) {
     .show-grid-container {
         grid-template-columns: repeat(4, 1fr);
+    }
+
+    .container {
+        max-width: 800px;
+    }
+
+    .show-sinopse {
+        max-width: 530px;
+    }
+
+    .personagem-header {
+        grid-template-columns: 0.46fr 1fr;
+    }
+
+    .personagem-info {
+        grid-template-columns: 0.46fr 1fr;
+    }
+}
+
+@media (max-width: 60rem) {
+    .show-grid-container {
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .container {
@@ -1216,7 +1212,7 @@ div > a[asp-action="Index"]:hover {
     }
 
     .container {
-        max-width: 800px;
+        max-width: 600px;
     }
 
     .show-last-section .autor {
@@ -1232,9 +1228,6 @@ div > a[asp-action="Index"]:hover {
         max-width: 500px;
     }
 
-    .show-header {
-        height: 300px;
-    }
 
     .personagem-header {
         grid-template-columns: 0.46fr 1fr;
@@ -1242,22 +1235,6 @@ div > a[asp-action="Index"]:hover {
 
     .personagem-info {
         grid-template-columns: 0.46fr 1fr;
-    }
-}
-
-@media (max-width: 50rem) {
-    .show-grid-container {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-
-    .container {
-        max-width: 600px;
-    }
-
-    .show-content {
-        display: block;
-        gap: 3rem;
     }
 
     .show-header {
@@ -1291,7 +1268,7 @@ div > a[asp-action="Index"]:hover {
 
     .personagem-header {
         display: block;
-        text-align:center;
+        text-align: center;
     }
 
     .personagem-info {
@@ -1305,6 +1282,23 @@ div > a[asp-action="Index"]:hover {
         width: 250px;
         margin: 0 auto;
         margin-bottom: 2rem;
+    }
+
+
+    .show-content {
+        display: block;
+        gap: 3rem;
+    }
+}
+
+@media (max-width: 50rem) {
+    .show-grid-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+
+    .container {
+        max-width: 600px;
     }
 }
 
