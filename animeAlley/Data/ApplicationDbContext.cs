@@ -55,6 +55,26 @@ namespace animeAlley.Data
             // Associar este utilizador à role ADMIN
             modelBuilder.Entity<IdentityUserRole<string>>().HasData(
                 new IdentityUserRole<string> { UserId = "admin", RoleId = "a" });
+
+            // Configurar a relação 1:1 entre Utilizador e Lista
+            modelBuilder.Entity<Utilizador>()
+                .HasOne(u => u.Lista)
+                .WithOne(l => l.Utilizador)
+                .HasForeignKey<Lista>(l => l.UtilizadorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configurar a relação many-to-many entre Lista e Show através de ListaShows
+            modelBuilder.Entity<ListaShows>()
+                .HasOne(ls => ls.Lista)
+                .WithMany(l => l.ListaShows)
+                .HasForeignKey(ls => ls.ListaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ListaShows>()
+                .HasOne(ls => ls.Show)
+                .WithMany() // Assumindo que Show não tem navegação de volta
+                .HasForeignKey(ls => ls.ShowId)
+                .OnDelete(DeleteBehavior.Restrict); // Evita deleção em cascata de Shows
         }
 
         public DbSet<Autor> Autores { get; set; }
@@ -67,8 +87,6 @@ namespace animeAlley.Data
 
         public DbSet<Lista> Listas { get; set; }
 
-        public DbSet<ListaShows> ListasShows { get; set; }
-
         public DbSet<Obra> Obras { get; set; }
 
         public DbSet<Personagem> Personagens { get; set; }
@@ -78,6 +96,8 @@ namespace animeAlley.Data
         public DbSet<Studio> Studios { get; set; }
 
         public DbSet<Topico> Topicos { get; set; }
+
+        public DbSet<ListaShows> ListaShows { get; set; }
 
         public DbSet<Utilizador> Utilizadores { get; set; }
     }

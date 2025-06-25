@@ -42,15 +42,28 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            // Não esquecer!
-            // ADEQUAR O NOME DAS VARIÁVEIS ÀS SUAS FUNÇÕES
-            // TODAS!
             var utilizador = await _context.Utilizadores
+                .Include(u => u.Lista)
+                    .ThenInclude(l => l.ListaShows)
+                        .ThenInclude(ls => ls.Show)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (utilizador == null)
             {
                 return NotFound();
             }
+
+            // Organizar os shows por status para facilitar a exibição
+            var showsPorStatus = new Dictionary<ListaStatus, List<ListaShows>>();
+
+            if (utilizador.Lista != null && utilizador.Lista.ListaShows.Any())
+            {
+                showsPorStatus = utilizador.Lista.ListaShows
+                    .GroupBy(ls => ls.ListaStatus)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+            }
+
+            ViewBag.ShowsPorStatus = showsPorStatus;
 
             return View(utilizador);
         }
@@ -164,6 +177,22 @@ namespace animeAlley.Controllers
         private bool UtilizadorExists(int id)
         {
             return _context.Utilizadores.Any(e => e.Id == id);
+        }
+
+        /// <summary>
+        /// Método auxiliar para obter o nome de exibição do status
+        /// </summary>
+        private string GetStatusDisplayName(ListaStatus status)
+        {
+            return status switch
+            {
+                ListaStatus.Assistir => "Assistindo",
+                ListaStatus.Terminei => "Terminei",
+                ListaStatus.Pausa => "Em Pausa",
+                ListaStatus.Desisti => "Desisti",
+                ListaStatus.Pensar_Assistir => "Planejo Assistir",
+                _ => status.ToString()
+            };
         }
     }
 }

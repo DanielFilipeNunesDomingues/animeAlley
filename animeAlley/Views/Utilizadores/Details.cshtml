@@ -1,42 +1,155 @@
 ﻿@model animeAlley.Models.Utilizador
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Nome;
+    var showsPorStatus = ViewBag.ShowsPorStatus as Dictionary<ListaStatus, List<ListaShows>>;
 }
 
-<h1>Details</h1>
+@if (Model.Banner == "bannerplaceholder.png")
+{
+    <div class="show-banner" style="background-image: url('/img/@Html.DisplayFor(Model => Model.Banner)')">
+        <div class="show-banner-shadow"></div>
+    </div>
+}
+else
+{
+    <div class="show-banner" style="background-image: url('/images/userBanners/@Html.DisplayFor(Model => Model.Banner)')">
+        <div class="show-banner-shadow"></div>
+    </div>
+}
 
-<div>
-    <h4>Utilizador</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Foto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Foto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.isAdmin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.isAdmin)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UserName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UserName)
-        </dd>
-    </dl>
+<div class="bg-secondary">
+    <div class="user-header container">
+        <div class="user-cover">
+            @if (Model.Foto == "placeholder.png")
+            {
+                <div class="cover">
+                    <img src="~/img/@Html.DisplayFor(Model => Model.Foto)" alt="@Html.DisplayFor(Model => Model.Nome) | Foto" />
+                </div>
+            }
+            else
+            {
+                <div class="cover">
+                    <img src="~/images/userFotos/@Html.DisplayFor(Model => Model.Foto)" alt="@Html.DisplayFor(Model => Model.Nome) | Foto" />
+                </div>
+            }
+        </div>
+        <div class="user-name text-start">
+            <h2 class="fw-bold">@Html.DisplayFor(Model => Model.Nome)</h2>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="min-vh-100 container mt-4">
+    <div class="row">
+        <div class="col-12">
+            @if (showsPorStatus != null && showsPorStatus.Any())
+            {
+                <!-- Navegação por abas para diferentes status -->
+                <ul class="nav nav-tabs" id="statusTabs" role="tablist">
+                    @{
+                        bool isFirst = true;
+                        var statusDisplayNames = new Dictionary<ListaStatus, string>
+                        {
+                            { ListaStatus.Assistir, "Assistindo" },
+                            { ListaStatus.Terminei, "Terminei" },
+                            { ListaStatus.Pausa, "Em Pausa" },
+                            { ListaStatus.Desisti, "Desisti" },
+                            { ListaStatus.Pensar_Assistir, "Planejo Assistir" }
+                        };
+                    }
+                    
+                    @foreach (var statusGroup in showsPorStatus.OrderBy(x => (int)x.Key))
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link @(isFirst ? "active" : "")" 
+                                    id="@(statusGroup.Key.ToString().ToLower())-tab" 
+                                    data-bs-toggle="tab" 
+                                    data-bs-target="#@(statusGroup.Key.ToString().ToLower())" 
+                                    type="button" 
+                                    role="tab">
+                                @statusDisplayNames[statusGroup.Key] 
+                                <span class="badge bg-primary ms-2">@statusGroup.Value.Count</span>
+                            </button>
+                        </li>
+                        isFirst = false;
+                    }
+                </ul>
+
+                <!-- Conteúdo das abas -->
+                <div class="tab-content mt-3" id="statusTabsContent">
+                    @{
+                        isFirst = true;
+                    }
+                    
+                    @foreach (var statusGroup in showsPorStatus.OrderBy(x => (int)x.Key))
+                    {
+                        <div class="tab-pane fade @(isFirst ? "show active" : "")" 
+                             id="@(statusGroup.Key.ToString().ToLower())" 
+                             role="tabpanel">
+                            
+                            <div class="row">
+                                @foreach (var listaShow in statusGroup.Value)
+                                {
+                                    <div class="col-md-6 col-lg-4 mb-4">
+                                        <div class="card h-100">
+                                            @if (!string.IsNullOrEmpty(listaShow.Show.Imagem))
+                                            {
+                                                <img src="~/images/showCover/@listaShow.Show.Imagem" 
+                                                     class="card-img-top" 
+                                                     alt="@listaShow.Show.Nome"
+                                                     style="height: 300px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                                     style="height: 300px;">
+                                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                                </div>
+                                            }
+                                            
+                                            <div class="card-body d-flex flex-column">
+                                                <h5 class="card-title">@listaShow.Show.Nome</h5>
+                                                
+                                                @if (!string.IsNullOrEmpty(listaShow.Show.Sinopse))
+                                                {
+                                                    <p class="card-text flex-grow-1">
+                                                        @(listaShow.Show.Sinopse.Length > 100 ? 
+                                                          listaShow.Show.Sinopse.Substring(0, 100) + "..." : 
+                                                          listaShow.Show.Sinopse)
+                                                    </p>
+                                                }
+                                                
+                                                <div class="mt-auto">
+                                                    <small class="text-muted">
+                                                        <strong>Ano:</strong> @listaShow.Show.Ano<br>
+                                                        <strong>Gênero:</strong> @listaShow.Show.GenerosShows<br>
+                                                        <strong>Status:</strong> @statusDisplayNames[listaShow.ListaStatus]
+                                                    </small>
+                                                    
+                                                    <div class="mt-2">
+                                                        <a href="@Url.Action("Details", "Shows", new { id = listaShow.Show.Id })" 
+                                                           class="btn btn-primary btn-sm">
+                                                            Ver Detalhes
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        isFirst = false;
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <h4 class="alert-heading">Lista Vazia</h4>
+                    <p>Este utilizador ainda não adicionou nenhum anime à sua lista.</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>

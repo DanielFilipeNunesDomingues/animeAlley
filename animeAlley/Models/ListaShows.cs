@@ -14,7 +14,7 @@ namespace animeAlley.Models
         /// <summary>
         /// Status que o utilizador atribui ao show (Assistir, Terminei, Pausa, Desisti, Pensar Assistir)
         /// </summary>
-        public Status Status { get; set; } // Estado do show (Assistir, Terminei, Pausa, Desisti, Pensar Assistir)
+        public ListaStatus ListaStatus { get; set; } // Estado do show (Assistir, Terminei, Pausa, Desisti, Pensar Assistir)
 
         //FK 1-N
 
@@ -46,11 +46,11 @@ namespace animeAlley.Models
     }
 }
 
-public enum Status
+public enum ListaStatus
 {
-    Assistir,
-    Terminei,
-    Pausa,
-    Desisti,
-    Pensar_Assistir
+    Assistir = 0,
+    Terminei = 1,
+    Pausa = 2,
+    Desisti = 3,
+    Pensar_Assistir = 4
 }

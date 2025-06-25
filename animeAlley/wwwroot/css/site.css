@@ -2,7 +2,7 @@
 
 /* Normal Reset */
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Krona One", sans-serif;
+    font-family: "Inter", sans-serif;
     color: #eee;
 }
 
@@ -86,6 +86,7 @@ hr {
 }
 
 /* End Normal Reset */
+
 /* Form Style*/
 .form-card {
     border: 2px solid #2A1D1D;
@@ -557,31 +558,204 @@ div > a[asp-action="Index"]:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.show-cover .options a, .foto-wrap .options a {
-    display:flex;
-    justify-content:center;
-    align-content:center;
-    gap: 0.3rem;
+.add {
+    display: block;
     text-align: center;
+    width: 100%;
+    padding: 8px 15px;
+    border-radius: 0.4rem;
+    cursor: pointer;
     text-decoration: none;
-    color: #3D3030;
-    padding: 0.4rem 1rem;
-    font-weight: bold;
-    flex-grow: 1;
+    color: #C4AEAE;
+    background-color: #2A1D1D;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.show-cover .options .add {
+.add:hover {
+    background-color: #3D2D2D;
+    color: #eee;
+}
+
+.add.added {
+    color: #eee;
+    font-weight: 600;
+}
+
+.add.status-assistir {
     background-color: #59D840;
+    color: #1D1616;
 }
 
-.show-cover .options .delete, .foto-wrap .options .delete {
-    background-color: #D84043;
+.add.status-assistir:hover {
+    background-color: #3DB126;
 }
 
-.show-cover .options .edit, .foto-wrap .options .edit {
+.add.status-terminei {
     background-color: #409ED8;
 }
 
+.add.status-terminei:hover {
+    background-color: #2A82B9;
+}
+
+.add.status-pausa {
+    background-color: #D89940;
+}
+
+.add.status-pausa:hover {
+    background-color: #A97327;
+}
+
+.add.status-desisti {
+    background-color: #D84043;
+}
+
+.add.status-desisti:hover {
+    background-color: #BF2A2D;
+}
+
+.add.status-pensar-assistir {
+    background-color: #B240D8;
+}
+
+.add.status-pensar-assistir:hover {
+    background-color: #8B26AD;
+}
+
+.status-dropdown {
+    position: absolute;
+    bottom: -253px;
+    left: 0;
+    z-index: 1000;
+    width: 230px;
+    animation: slideDown 0.2s ease-out;
+}
+
+.status-dropdown .dropdown-content {
+    background-color: #2A1D1D;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    min-width: 230px;
+    border: 3px solid #3D2D2D;
+}
+
+.status-dropdown .dropdown-content .dropdown-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #eee;
+    border-bottom: 3px solid #3D2D2D;
+    padding-left: 1rem;
+}
+
+.status-dropdown .dropdown-content .dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.status-dropdown .dropdown-content .dropdown-item:hover {
+    padding-left: 1.2rem;
+    font-weight: bold;
+}
+
+.status-dropdown .dropdown-content .dropdown-item[data-status="Assistir"]:hover {
+    background: #3D2D2D;
+    color: #59D840;
+}
+
+.status-dropdown .dropdown-content .dropdown-item[data-status="Terminei"]:hover {
+    background: #3D2D2D;
+    color: #409ED8;
+}
+
+.status-dropdown .dropdown-content .dropdown-item[data-status="Pausa"]:hover {
+    background: #3D2D2D;
+    color: #D89940;
+}
+
+.status-dropdown .dropdown-content .dropdown-item[data-status="Desisti"]:hover {
+    background: #3D2D2D;
+    color: #D84043;
+}
+
+.status-dropdown .dropdown-content .dropdown-item[data-status="Pensar_Assistir"]:hover {
+    background: #3D2D2D;
+    color: #B240D8;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.status-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: #3D3030;
+    font-weight: 500;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    min-width: 300px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    animation: slideInRight 0.3s ease-out;
+}
+
+.status-notification.success {
+    background: #59D840;
+}
+
+.status-notification.error {
+    background: #D84043;
+}
+
+.status-notification button {
+    background: none;
+    border: none;
+    color: #3D3030;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-notification button:hover {
+    opacity: 0.8;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 
 .show-cover .cover {
     display: inline-block;
@@ -1185,6 +1359,57 @@ div > a[asp-action="Index"]:hover {
 
 /* End Account Management Style */
 
+/* User List Style */
+
+.user-header {
+    display: flex;
+    justify-content: right;
+    align-content: start;
+    position: relative;
+    padding: 1.2rem;
+}
+
+.user-cover {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin-bottom: 15px;
+    width: 200px;
+    height: 200px;
+    border: 4px solid #554646;
+    border-radius: 0.4rem;
+    transition: 0.2s ease all;
+}
+
+.user-cover:hover {
+    border: 4px solid #D84043;
+    transition: 0.2s ease all;
+}
+
+.user-cover .cover {
+    display: inline-block
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
+    margin-bottom: 15px;
+}
+
+.user-cover .cover img {
+    height: 100%;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.user-name {
+    width: 950px;
+}
+
+/* End User List Style */
+
 /* Reponsive Breakpoints */
 @media (max-width: 100rem) {
     .show-grid-container {
@@ -1359,6 +1584,19 @@ div > a[asp-action="Index"]:hover {
     .show-content {
         display: block;
         gap: 3rem;
+    }
+
+    .status-dropdown {
+        position: relative;
+        bottom: 0px;
+        left: 0px;
+        z-index: 0;
+        width: 100%;
+    }
+
+    .show-cover .options {
+        flex-direction: column;
+        gap: 1rem;
     }
 }
 

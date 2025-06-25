@@ -6,13 +6,16 @@
 @{
     var nomeUtilizador = await UtilizadorService.GetNomeUtilizadorAsync();
     var fotoUtilizador = await UtilizadorService.GetFotoUtilizadorAsync();
+    var idUtilizador = await UtilizadorService.GetIDUtilizadorAsync();
 }
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item">
             <div class="dropdown d-flex justify-content-center align-items-center flex-row gap-3">
-                <a class="nav-link text-dark p-0" asp-area="Identity" asp-page="/Account/Manage/Index">@nomeUtilizador</a>
+                <a class="nav-link text-dark p-0" asp-controller="Utilizadores" asp-action="Details" asp-route-id="@idUtilizador">
+                    @nomeUtilizador
+                </a>
                 <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none;">
                     <img src="@fotoUtilizador" alt="Avatar" class="avatar" />
                 </a>

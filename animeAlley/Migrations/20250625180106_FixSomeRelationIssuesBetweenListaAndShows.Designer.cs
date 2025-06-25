@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250625180106_FixSomeRelationIssuesBetweenListaAndShows")]
+    partial class FixSomeRelationIssuesBetweenListaAndShows
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,15 +169,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b8df3925-851a-4414-881e-af34887154a9",
+                            ConcurrencyStamp = "71b796a1-0f82-459a-8b56-cc19356ef9ea",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEE/zc+rIkN7Nuh9NnoO10ekxd9T6IiHF/SIlBIDuKcErfIGlEOqbp/s7QMgWk7e36Q==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEI+6GOSfD55x+zXP/hl+1yeoU3YTC+0fvwYvFTmFji9WsQP9I4ecqcSrJb9v1Lvy4g==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "3d6401cb-e514-4b4f-b416-9d3fa7afe112",
+                            SecurityStamp = "0c39caec-eecf-4ad8-8073-7599fc3c03df",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -398,8 +401,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UtilizadorId")
-                        .IsUnique();
+                    b.HasIndex("UtilizadorId");
 
                     b.ToTable("Listas");
                 });
@@ -415,13 +417,10 @@ namespace animeAlley.Migrations
                     b.Property<int>("ListaId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ListaStatus")
-                        .HasColumnType("int");
-
                     b.Property<int>("ShowId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ShowId1")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -429,8 +428,6 @@ namespace animeAlley.Migrations
                     b.HasIndex("ListaId");
 
                     b.HasIndex("ShowId");
-
-                    b.HasIndex("ShowId1");
 
                     b.ToTable("ListaShows");
                 });
@@ -754,8 +751,8 @@ namespace animeAlley.Migrations
             modelBuilder.Entity("animeAlley.Models.Lista", b =>
                 {
                     b.HasOne("animeAlley.Models.Utilizador", "Utilizador")
-                        .WithOne("Lista")
-                        .HasForeignKey("animeAlley.Models.Lista", "UtilizadorId")
+                        .WithMany("Listas")
+                        .HasForeignKey("UtilizadorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -771,14 +768,10 @@ namespace animeAlley.Migrations
                         .IsRequired();
 
                     b.HasOne("animeAlley.Models.Show", "Show")
-                        .WithMany()
-                        .HasForeignKey("ShowId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("animeAlley.Models.Show", null)
                         .WithMany("ListaShows")
-                        .HasForeignKey("ShowId1");
+                        .HasForeignKey("ShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Lista");
 
@@ -862,7 +855,7 @@ namespace animeAlley.Migrations
 
             modelBuilder.Entity("animeAlley.Models.Utilizador", b =>
                 {
-                    b.Navigation("Lista");
+                    b.Navigation("Listas");
                 });
 #pragma warning restore 612, 618
         }

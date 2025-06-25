@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = Model.Nome;
+    Html.AntiForgeryToken();
 }
 
 <div class="show-banner" style="background-image: url('/images/showBanner/@Html.DisplayFor(Model => Model.Banner)')">
@@ -14,18 +15,25 @@
                 <img src="~/images/showCover/@Html.DisplayFor(Model => Model.Imagem)" alt="@Html.DisplayFor(Model => Model.Nome) | Foto" />
             </div>
             <div class="options">
-                <a class="add" href="#">Adicionar +</a>
+                <a class="add" href="#" data-show-id="@Model.Id">Adicionar +</a> 
                 
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="edit"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#3D3030"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" /></svg></a>
-                    <a asp-action="Delete" asp-route-id="@Model.Id" class="delete"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#3D3030"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" /></svg></a>
-                }
+
+                
             </div>
             
         </div>
         <div class="show-sinopse">
-            <h2 class="fw-bold">@Html.DisplayFor(Model => Model.Nome)</h2>
+            <div class="d-flex justify-content-between align-content-center">
+                <h2 class="fw-bold">@Html.DisplayFor(Model => Model.Nome)</h2>
+                @if (User.IsInRole("Admin"))
+                {
+                    <div>
+                        <a asp-action="Edit" asp-route-id="@Model.Id"><svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#C4AEAE"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" /></svg></a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id"><svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#C4AEAE"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" /></svg></a>
+
+                    </div>
+                }
+            </div>
             <div id="sinopseWrapper" class="sinopse-collapsed">
                 <p id="sinopseText">@Html.DisplayFor(Model => Model.Sinopse)</p>
             </div>
@@ -141,8 +149,219 @@
 </div>
 
 @section Scripts {
+    @Html.AntiForgeryToken() 
 
     <script>
+        // Script para gerenciar o dropdown de adicionar shows à lista
+        document.addEventListener('DOMContentLoaded', function() {
+            // Função para criar o dropdown
+            function criarDropdown(showId) {
+                const dropdown = document.createElement('div');
+                dropdown.className = 'status-dropdown';
+                dropdown.innerHTML = `
+                    <div class="dropdown-content">
+                        <div class="dropdown-item" data-status="Assistir">Assistindo</div>
+                        <div class="dropdown-item" data-status="Terminei">Terminei</div>
+                        <div class="dropdown-item" data-status="Pausa">Em Pausa</div>
+                        <div class="dropdown-item" data-status="Desisti">Desisti</div>
+                        <div class="dropdown-item" data-status="Pensar_Assistir">Planejo Assistir</div>
+                    </div>
+                `;
+                // Adicionar event listeners para cada item do dropdown
+                dropdown.querySelectorAll('.dropdown-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const status = this.dataset.status;
+                        adicionarShowALista(showId, status);
+                        fecharDropdown(dropdown);
+                    });
+                });
+                return dropdown;
+            }
+
+            // Função para mostrar o dropdown
+            function mostrarDropdown(button, showId) {
+                // Fechar qualquer dropdown existente
+                document.querySelectorAll('.status-dropdown').forEach(d => d.remove());
+
+                const dropdown = criarDropdown(showId);
+                const optionsDiv = button.parentNode;
+                optionsDiv.appendChild(dropdown);
+
+                // Fechar dropdown ao clicar fora
+                setTimeout(() => {
+                    document.addEventListener('click', function closeDropdown(e) {
+                        if (!dropdown.contains(e.target) && e.target !== button) {
+                            fecharDropdown(dropdown);
+                            document.removeEventListener('click', closeDropdown);
+                        }
+                    });
+                }, 100);
+            }
+
+            // Função para fechar dropdown
+            function fecharDropdown(dropdown) {
+                if (dropdown && dropdown.parentNode) {
+                    dropdown.parentNode.removeChild(dropdown);
+                }
+            }
+
+            // Função para adicionar show à lista via AJAX
+            function adicionarShowALista(showId, status) {
+                // Get the anti-forgery token from the hidden input field
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                fetch('/ListaShows/AdicionarShowALista', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token // Pass the token in the header
+                    },
+                    body: `showId=${showId}&status=${status}` // Remove token from body, it's in headers
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarNotificacao(data.message, 'success');
+                        atualizarBotaoAdicionar(showId, status);
+                    } else {
+                        mostrarNotificacao(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    mostrarNotificacao('Erro ao adicionar show à lista', 'error');
+                });
+            }
+
+            // Função para remover show da lista
+            function removerShowDaLista(showId) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                fetch('/ListaShows/RemoverShowDaLista', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: `showId=${showId}` // Remove token from body
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarNotificacao(data.message, 'success');
+                        atualizarBotaoAdicionar(showId, null);
+                    } else {
+                        mostrarNotificacao(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    mostrarNotificacao('Erro ao remover show da lista', 'error');
+                });
+            }
+
+            // Função para atualizar o botão após adicionar/remover
+            function atualizarBotaoAdicionar(showId, status) {
+                const button = document.querySelector(`[data-show-id="${showId}"]`);
+                if (button) {
+                    // Remove todas as classes de status existentes para garantir apenas uma é aplicada
+                    button.classList.remove('status-assistir', 'status-terminei', 'status-pausa', 'status-desisti', 'status-pensar-assistir');
+
+                    if (status) {
+                        const statusDisplay = getStatusDisplayName(status);
+                        button.innerHTML = `${statusDisplay}`;
+                        button.classList.add('added'); // Mantém a classe 'added' se já existir
+
+                        // Adiciona uma classe específica baseada no status
+                        button.classList.add(`status-${status.toLowerCase().replace('_', '-')}`); // Ex: 'status-assistir', 'status-pensar-assistir'
+
+                        button.onclick = (e) => {
+                            e.preventDefault(); // Evita o comportamento padrão do link
+                            removerShowDaLista(showId);
+                        };
+                    } else {
+                        button.innerHTML = 'Adicionar +';
+                        button.classList.remove('added');
+                        button.className = 'add';
+                        button.onclick = (e) => {
+                            e.preventDefault(); // Evita o comportamento padrão do link
+                            mostrarDropdown(button, showId);
+                        };
+                    }
+                }
+            }
+
+            // Função para obter nome de exibição do status
+            function getStatusDisplayName(status) {
+                const statusMap = {
+                    'Assistir': 'Assistindo',
+                    'Terminei': 'Terminei',
+                    'Pausa': 'Em Pausa',
+                    'Desisti': 'Desisti',
+                    'Pensar_Assistir': 'Planejo Assistir'
+                };
+                return statusMap[status] || status;
+            }
+
+            // Função para mostrar notificações
+            function mostrarNotificacao(message, type) {
+                // Remover notificação existente
+                const existingNotification = document.querySelector('.notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+
+                const notification = document.createElement('div');
+                notification.className = `status-notification ${type}`;
+                notification.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()">×</button>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Remover automaticamente após 5 segundos
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 5000);
+            }
+
+            // Verificar status inicial dos shows na página
+            function verificarStatusInicial() {
+                document.querySelectorAll('[data-show-id]').forEach(button => {
+                    const showId = button.dataset.showId;
+
+                    fetch(`/ListaShows/VerificarShowNaLista?showId=${showId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.inList) {
+                                // `data.status` from controller is already the string representation of the enum
+                                atualizarBotaoAdicionar(showId, data.status);
+                            }
+                        })
+                        .catch(error => console.error('Erro ao verificar status:', error));
+                });
+            }
+
+            // Inicializar event listeners
+            function inicializarEventListeners() {
+                const addButton = document.querySelector('.add[data-show-id]');
+                if (addButton) {
+                    addButton.onclick = (e) => {
+                        e.preventDefault();
+                        mostrarDropdown(addButton, addButton.dataset.showId);
+                    };
+                }
+            }
+
+            // Call initialization functions
+            inicializarEventListeners();
+            verificarStatusInicial();
+        });
+
+
         const video = document.getElementById('videoTrailer');
         const playPauseBtn = document.getElementById('playPauseBtn');
         const progressBar = document.getElementById('progressBar');
@@ -161,97 +380,109 @@
             </svg>
         `;
 
-        volumeBar.value = video.volume;
-        volumeBar.style.setProperty('--volume-fill', (video.volume * 100) + '%');
-
-        playPauseBtn.addEventListener('click', () => {
-            if (video.paused) {
-                video.play();
-                playPauseBtn.innerHTML = pauseSVG; // Change to pause SVG
-            } else {
-                video.pause();
-                playPauseBtn.innerHTML = playSVG; // Change to play SVG
-            }
-        });
-
-        video.addEventListener('timeupdate', () => {
-            progressBar.value = video.currentTime;
-            progressBar.max = video.duration;
-
-            if (video.currentTime > maxPlayedTime) {
-                maxPlayedTime = video.currentTime;
-            }
-
-            const currentTimePercent = (video.currentTime / video.duration) * 100;
-            const watchedPercent = (maxPlayedTime / video.duration) * 100;
-
-            progressBar.style.setProperty('--current-time', currentTimePercent + '%');
-            progressBar.style.setProperty('--watched-progress', watchedPercent + '%');
-        });
-
-        progressBar.addEventListener('input', () => {
-            video.currentTime = progressBar.value;
-        });
-
-        volumeBar.addEventListener('input', () => {
-            video.volume = volumeBar.value;
-            volumeBar.style.setProperty('--volume-fill', (volumeBar.value * 100) + '%');
-        });
-
-        video.addEventListener('volumechange', () => {
+        // Ensure volume bar styling applies immediately
+        if (video) { // Check if video element exists before accessing its properties
             volumeBar.value = video.volume;
             volumeBar.style.setProperty('--volume-fill', (video.volume * 100) + '%');
-        });
 
-        video.addEventListener('ended', () => {
-            playPauseBtn.innerHTML = playSVG;
-        });
+            playPauseBtn.addEventListener('click', () => {
+                if (video.paused) {
+                    video.play();
+                    playPauseBtn.innerHTML = pauseSVG; // Change to pause SVG
+                } else {
+                    video.pause();
+                    playPauseBtn.innerHTML = playSVG; // Change to play SVG
+                }
+            });
 
-        video.addEventListener('loadedmetadata', () => {
-             maxPlayedTime = 0;
-             volumeBar.value = video.volume;
-             volumeBar.style.setProperty('--volume-fill', (video.volume * 100) + '%');
-             playPauseBtn.innerHTML = playSVG; 
-        });
+            video.addEventListener('timeupdate', () => {
+                progressBar.value = video.currentTime;
+                progressBar.max = video.duration;
 
-        if (video.paused) {
-            playPauseBtn.innerHTML = playSVG;
-        } else {
-            playPauseBtn.innerHTML = pauseSVG;
+                if (video.currentTime > maxPlayedTime) {
+                    maxPlayedTime = video.currentTime;
+                }
+
+                const currentTimePercent = (video.currentTime / video.duration) * 100;
+                const watchedPercent = (maxPlayedTime / video.duration) * 100;
+
+                progressBar.style.setProperty('--current-time', currentTimePercent + '%');
+                progressBar.style.setProperty('--watched-progress', watchedPercent + '%');
+            });
+
+            progressBar.addEventListener('input', () => {
+                video.currentTime = progressBar.value;
+            });
+
+            volumeBar.addEventListener('input', () => {
+                video.volume = volumeBar.value;
+                volumeBar.style.setProperty('--volume-fill', (volumeBar.value * 100) + '%');
+            });
+
+            video.addEventListener('volumechange', () => {
+                volumeBar.value = video.volume;
+                volumeBar.style.setProperty('--volume-fill', (video.volume * 100) + '%');
+            });
+
+            video.addEventListener('ended', () => {
+                playPauseBtn.innerHTML = playSVG;
+            });
+
+            video.addEventListener('loadedmetadata', () => {
+                maxPlayedTime = 0;
+                volumeBar.value = video.volume;
+                volumeBar.style.setProperty('--volume-fill', (video.volume * 100) + '%');
+                playPauseBtn.innerHTML = playSVG; 
+            });
+
+            // Initial state check for play/pause button
+            if (video.paused) {
+                playPauseBtn.innerHTML = playSVG;
+            } else {
+                playPauseBtn.innerHTML = pauseSVG;
+            }
         }
 
-            document.addEventListener('DOMContentLoaded', function() {
+
+        document.addEventListener('DOMContentLoaded', function() {
             const sinopseWrapper = document.getElementById('sinopseWrapper');
             const toggleSinopseBtn = document.getElementById('toggleSinopse');
 
-            sinopseWrapper.style.overflow = 'visible';
-            const fullHeight = sinopseWrapper.scrollHeight;
-            sinopseWrapper.style.overflow = 'hidden';
-            
-            const tempDiv = document.createElement('div');
-            tempDiv.classList.add('sinopse-collapsed');
-            tempDiv.style.visibility = 'hidden';
-            document.body.appendChild(tempDiv);
-            const collapsedMaxHeight = parseFloat(getComputedStyle(tempDiv).maxHeight);
-            document.body.removeChild(tempDiv);
+            // Only proceed if sinopse elements exist
+            if (sinopseWrapper && toggleSinopseBtn) {
+                // Temporarily make overflow visible to measure full height
+                sinopseWrapper.style.overflow = 'visible';
+                const fullHeight = sinopseWrapper.scrollHeight;
+                // Revert overflow to hidden
+                sinopseWrapper.style.overflow = 'hidden';
+                
+                // Create a temporary div to measure the collapsed height for comparison
+                const tempDiv = document.createElement('div');
+                tempDiv.classList.add('sinopse-collapsed');
+                tempDiv.style.visibility = 'hidden'; // Make it invisible
+                tempDiv.style.position = 'absolute'; // Prevent it from affecting layout
+                document.body.appendChild(tempDiv);
+                const collapsedMaxHeight = parseFloat(getComputedStyle(tempDiv).maxHeight);
+                document.body.removeChild(tempDiv); // Remove temporary div
 
-            if (fullHeight <= collapsedMaxHeight) {
-                toggleSinopseBtn.style.display = 'none';
-            } else {
-                toggleSinopseBtn.style.display = 'block';
-            }
-
-            toggleSinopseBtn.addEventListener('click', function() {
-                if (sinopseWrapper.classList.contains('sinopse-collapsed')) {
-                    sinopseWrapper.classList.remove('sinopse-collapsed');
-                    sinopseWrapper.classList.add('sinopse-expanded');
-                    toggleSinopseBtn.textContent = 'Ler menos';
+                if (fullHeight <= collapsedMaxHeight) {
+                    toggleSinopseBtn.style.display = 'none';
                 } else {
-                    sinopseWrapper.classList.remove('sinopse-expanded');
-                    sinopseWrapper.classList.add('sinopse-collapsed');
-                    toggleSinopseBtn.textContent = 'Ler mais';
+                    toggleSinopseBtn.style.display = 'block';
                 }
-            });
+
+                toggleSinopseBtn.addEventListener('click', function() {
+                    if (sinopseWrapper.classList.contains('sinopse-collapsed')) {
+                        sinopseWrapper.classList.remove('sinopse-collapsed');
+                        sinopseWrapper.classList.add('sinopse-expanded');
+                        toggleSinopseBtn.textContent = 'Ler menos';
+                    } else {
+                        sinopseWrapper.classList.remove('sinopse-expanded');
+                        sinopseWrapper.classList.add('sinopse-collapsed');
+                        toggleSinopseBtn.textContent = 'Ler mais';
+                    }
+                });
+            }
         });
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -259,7 +490,7 @@
 
             if (sinopseTextElement) {
                 let originalText = sinopseTextElement.innerHTML;
-                const regex = /\bBR\b/gi;
+                const regex = /\bBR\b/gi; // Matches "BR" case-insensitively as a whole word
 
                 let newText = originalText.replace(regex, '<br>');
 

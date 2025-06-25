@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@using animeAlley.Services
+@inject UtilizadorService UtilizadorService
+@{
+    var idUtilizador = await UtilizadorService.GetIDUtilizadorAsync();
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -28,6 +34,12 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Personagens" asp-action="Index">Personagens</a>
                             </li>
+                            @if (idUtilizador > 0)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Utilizadores" asp-action="Details" asp-route-id="@idUtilizador">Minha Lista</a>
+                                </li>
+                            }
                         </ul>
                     </div>
                     <div class="d-lg-none">
@@ -41,6 +53,13 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Personagens" asp-action="Index">Personagens</a>
                             </li>
+                            @if (idUtilizador > 0)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Utilizadores" asp-action="Details" asp-route-id="@idUtilizador">Minha Lista</a>
+                                </li>
+                            }
+
                         </ul>
                     </div>
    
