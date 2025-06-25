@@ -166,6 +166,7 @@ namespace animeAlley.Areas.Identity.Pages.Account
                     // var auxiliar
                     bool haErro = false;
                     string imagePath = "placeholder.png"; // Default placeholder
+                    string bannerPath = "bannerplaceholder.png"; // Default placeholder
 
                     // atribuir o UserName do utilizador AspNetUser criado 
                     // ao objeto Utilizador
@@ -198,6 +199,7 @@ namespace animeAlley.Areas.Identity.Pages.Account
 
                     // Atribuir o caminho da foto ao utilizador
                     Input.Utilizador.Foto = imagePath;
+                    Input.Utilizador.Banner = bannerPath;
 
                     try
                     {

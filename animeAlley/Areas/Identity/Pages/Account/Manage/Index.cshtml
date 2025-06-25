@@ -1,30 +1,242 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = "Perfil";
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3>@ViewData["Title"]</h3>
+<h3 class="mb-4">@ViewData["Title"]</h3>
 <partial name="_StatusMessage" for="StatusMessage" />
+
 <div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
+    <div class="col-md-8">
+        <form id="profile-form" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <!-- Username Field -->
             <div class="form-floating mb-3">
                 <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
                 <label asp-for="Username" class="form-label"></label>
             </div>
+
+            <!-- Phone Number Field -->
             <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
+                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
                 <label asp-for="Input.PhoneNumber" class="form-label"></label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+
+            <!-- Avatar Section -->
+            <div class="mb-4">
+                <h5>Avatar</h5>
+                <p class="text-muted small">Formatos permitidos: JPEG, PNG. Tamanho máximo: 3MB. Dimensões ideais: 230x230px</p>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="avatar-preview mb-3">
+                            @if (!string.IsNullOrEmpty(Model.Input.Foto))
+                            {
+                                @if (Model.Input.Foto == "placeholder.png")
+                                {
+                                    <img id="avatar-preview" src="~/img/@Model.Input.Foto" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <img id="avatar-preview" src="~/images/userFotos/@Model.Input.Foto" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                                }
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                    <div class="text-center">
+                                        <p class="small mb-0">Sem avatar</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Input.AvatarFile" class="form-label">Escolher nova foto de perfil</label>
+                            <input asp-for="Input.AvatarFile" type="file" class="form-control" accept="image/jpeg,image/png" onchange="previewAvatar(this)" />
+                            <span asp-validation-for="Input.AvatarFile" class="text-danger"></span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Input.Foto) && Model.Input.Foto != "placeholder.png")
+                        {
+                            <div class="">
+                                <input asp-for="Input.RemoveAvatar" class="form-check-input" type="checkbox" />
+                                <label asp-for="Input.RemoveAvatar" class="form-check-label" style="cursor: pointer;">
+                                    Remover avatar atual
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner Section -->
+            <div class="mb-4">
+                <h5>Banner</h5>
+                <p class="text-muted small">Formatos permitidos: JPEG, PNG. Tamanho máximo: 6MB. Dimensões ideais: 1700x330px</p>
+
+                <div class="header-preview mb-3">
+                    @if (!string.IsNullOrEmpty(Model.Input.Banner))
+                    {
+                        @if (Model.Input.Banner == "bannerplaceholder.png")
+                        {
+                            <img id="banner-preview" src="~/img/@Model.Input.Banner" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <img id="banner-preview" src="~/images/userBanners/@Model.Input.Banner" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                        }
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                            <div class="text-center">
+                                <p class="small mb-0">Sem banner</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.BannerFile" class="form-label">Escolher novo banner</label>
+                    <input asp-for="Input.BannerFile" type="file" class="form-control" accept="image/jpeg,image/png" onchange="previewBanner(this)" />
+                    <span asp-validation-for="Input.BannerFile" class="text-danger"></span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Input.Banner) && Model.Input.Banner != "bannerplaceholder.png")
+                {
+                    <div class="">
+                        <input asp-for="Input.RemoveBanner" class="form-check-input" type="checkbox" />
+                        <label asp-for="Input.RemoveBanner" class="form-check-label" style="cursor: pointer">
+                            Remover banner atual
+                        </label>
+                    </div>
+                }
+            </div>
+
+            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">
+                Salvar Alterações
+            </button>
         </form>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function previewAvatar(input) {
+            const preview = document.getElementById('avatar-preview');
+            const previewContainer = preview ? preview.parentElement : document.querySelector('.avatar-preview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validar tamanho do arquivo (3MB = 3 * 1024 * 1024 bytes)
+                if (file.size > 3 * 1024 * 1024) {
+                    alert('O arquivo é muito grande. O tamanho máximo é 3MB.');
+                    input.value = '';
+                    return;
+                }
+
+                // Validar tipo do arquivo
+                if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    alert('Formato não suportado. Use apenas JPEG ou PNG.');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    } else {
+                        previewContainer.innerHTML = `<img id="avatar-preview" src="${e.target.result}" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover;" />`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewBanner(input) {
+            const preview = document.getElementById('banner-preview');
+            const previewContainer = preview ? preview.parentElement : document.querySelector('.header-preview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validar tamanho do arquivo (6MB = 6 * 1024 * 1024 bytes)
+                if (file.size > 6 * 1024 * 1024) {
+                    alert('O arquivo é muito grande. O tamanho máximo é 6MB.');
+                    input.value = '';
+                    return;
+                }
+
+                // Validar tipo do arquivo
+                if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    alert('Formato não suportado. Use apenas JPEG ou PNG.');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    } else {
+                        previewContainer.innerHTML = `<img id="banner-preview" src="${e.target.result}" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;" />`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Resetar preview quando checkbox de remoção é marcado
+        document.addEventListener('DOMContentLoaded', function() {
+            const removeAvatarCheckbox = document.querySelector('input[name="Input.RemoveAvatar"]');
+            const removeBannerCheckbox = document.querySelector('input[name="Input.RemoveBanner"]');
+
+            if (removeAvatarCheckbox) {
+                removeAvatarCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        const avatarInput = document.querySelector('input[name="Input.AvatarFile"]');
+                        if (avatarInput) avatarInput.value = '';
+
+                        const previewContainer = document.querySelector('.avatar-preview');
+                        previewContainer.innerHTML = `
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <div class="text-center">
+                                    <p class="small mb-0" style="color: #C4AEAE">Avatar será removido</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+
+            if (removeBannerCheckbox) {
+                removeBannerCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        const bannerInput = document.querySelector('input[name="Input.BannerFile"]');
+                        if (bannerInput) bannerInput.value = '';
+
+                        const previewContainer = document.querySelector('.header-preview');
+                        previewContainer.innerHTML = `
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <div class="text-center">
+                                    <p class="small mb-0" style="color: #C4AEAE">Banner será removido</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+        });
+    </script>
 }

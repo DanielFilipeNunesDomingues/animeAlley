@@ -9,17 +9,15 @@
     }
 }
 
-<div class="min-vh-100 container m-auto">
-    <h1>Manage your account</h1>
-
+<div class="min-vh-100 container m-auto py-5">
     <div>
-        <h2>Change your account settings</h2>
+        <h1 class="mb-3">Configurações</h1>
         <hr />
-        <div class="row ">
-            <div class="col-md-3 m-auto">
+        <div class="row gap-4">
+            <div class="col-md-3">
                 <partial name="_ManageNav" />
             </div>
-            <div class="col-md-9 m-auto">
+            <div class="col-md-8 navbar-animeAlley-bg p-4" style="border-radius: 0.4rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
                 @RenderBody()
             </div>
         </div>

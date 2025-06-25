@@ -1,63 +1,63 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
-
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using animeAlley.Data;
+using animeAlley.Models;
 
 namespace animeAlley.Areas.Identity.Pages.Account.Manage
 {
-    public class IndexModel : PageModel
+    public partial class IndexModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ApplicationDbContext _context;
 
         public IndexModel(
             UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager,
+            IWebHostEnvironment webHostEnvironment,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _webHostEnvironment = webHostEnvironment;
+            _context = context;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string Username { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Phone]
             [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
+            public string? PhoneNumber { get; set; }
+
+            [Display(Name = "Foto atual")]
+            public string? Foto { get; set; }
+
+            [Display(Name = "Banner atual")]
+            public string? Banner { get; set; }
+
+            [Display(Name = "Arquivo de Avatar")]
+            public IFormFile? AvatarFile { get; set; }
+
+            [Display(Name = "Arquivo de Banner")]
+            public IFormFile? BannerFile { get; set; }
+
+            [Display(Name = "Remover Avatar")]
+            public bool RemoveAvatar { get; set; }
+
+            [Display(Name = "Remover Banner")]
+            public bool RemoveBanner { get; set; }
         }
 
         private async Task LoadAsync(IdentityUser user)
@@ -67,9 +67,15 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
 
             Username = userName;
 
+            // Buscar dados do utilizador na base de dados
+            var utilizador = await _context.Utilizadores
+                .FirstOrDefaultAsync(u => u.UserName == userName);
+
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                Foto = utilizador?.Foto,
+                Banner = utilizador?.Banner
             };
         }
 
@@ -99,20 +105,174 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
+            // Buscar utilizador na base de dados
+            var utilizador = await _context.Utilizadores
+                .FirstOrDefaultAsync(u => u.UserName == user.UserName);
+
+            if (utilizador == null)
+            {
+                StatusMessage = "Erro: Utilizador não encontrado na base de dados.";
+                return RedirectToPage();
+            }
+
+            // Atualizar número de telefone
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
+                    StatusMessage = "Erro inesperado ao definir o número de telefone.";
                     return RedirectToPage();
                 }
             }
 
-            await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
-            return RedirectToPage();
+            string novaFoto = utilizador.Foto;
+            string novoBanner = utilizador.Banner;
+
+            try
+            {
+                // Processar upload de avatar
+                if (Input.RemoveAvatar)
+                {
+                    // Remover foto atual (exceto placeholder)
+                    if (!string.IsNullOrEmpty(utilizador.Foto) && utilizador.Foto != "placeholder.png")
+                    {
+                        await RemoverImagemFisica(utilizador.Foto, "images/userFotos");
+                    }
+                    novaFoto = "placeholder.png";
+                }
+                else if (Input.AvatarFile != null)
+                {
+                    // Validar arquivo de avatar
+                    if (!IsValidImageFile(Input.AvatarFile, 3 * 1024 * 1024)) // 3MB
+                    {
+                        ModelState.AddModelError("Input.AvatarFile", "Arquivo inválido. Use JPEG ou PNG com no máximo 3MB.");
+                        await LoadAsync(user);
+                        return Page();
+                    }
+
+                    // Remover foto anterior (exceto placeholder)
+                    if (!string.IsNullOrEmpty(utilizador.Foto) && utilizador.Foto != "placeholder.png")
+                    {
+                        await RemoverImagemFisica(utilizador.Foto, "images/userFotos");
+                    }
+
+                    // Salvar nova foto
+                    novaFoto = await SalvarImagemAsync(Input.AvatarFile, "images/userFotos");
+                }
+
+                // Processar upload de banner
+                if (Input.RemoveBanner)
+                {
+                    // Remover banner atual
+                    if (!string.IsNullOrEmpty(utilizador.Banner))
+                    {
+                        await RemoverImagemFisica(utilizador.Banner, "images/userBanners");
+                    }
+                    novoBanner = null;
+                }
+                else if (Input.BannerFile != null)
+                {
+                    // Validar arquivo de banner
+                    if (!IsValidImageFile(Input.BannerFile, 6 * 1024 * 1024)) // 6MB
+                    {
+                        ModelState.AddModelError("Input.BannerFile", "Arquivo inválido. Use JPEG ou PNG com no máximo 6MB.");
+                        await LoadAsync(user);
+                        return Page();
+                    }
+
+                    // Remover banner anterior
+                    if (!string.IsNullOrEmpty(utilizador.Banner))
+                    {
+                        await RemoverImagemFisica(utilizador.Banner, "images/userBanners");
+                    }
+
+                    // Salvar novo banner
+                    novoBanner = await SalvarImagemAsync(Input.BannerFile, "images/userBanners");
+                }
+
+                // Atualizar dados na base de dados
+                utilizador.Foto = novaFoto;
+                utilizador.Banner = novoBanner;
+
+                _context.Update(utilizador);
+                await _context.SaveChangesAsync();
+
+                await _signInManager.RefreshSignInAsync(user);
+                StatusMessage = "O seu perfil foi atualizado com sucesso.";
+                return RedirectToPage();
+            }
+            catch (Exception ex)
+            {
+                // Log do erro (implementar logging conforme necessário)
+                StatusMessage = "Erro: Não foi possível atualizar o perfil. Tente novamente.";
+                
+                // Reverter alterações se necessário
+                // (as imagens já foram salvas, mas pode implementar lógica de rollback)
+                
+                return RedirectToPage();
+            }
+        }
+
+        private bool IsValidImageFile(IFormFile file, long maxSize)
+        {
+            if (file == null || file.Length == 0)
+                return false;
+
+            if (file.Length > maxSize)
+                return false;
+
+            var allowedTypes = new[] { "image/jpeg", "image/png" };
+            return allowedTypes.Contains(file.ContentType.ToLower());
+        }
+
+
+        private async Task<string> SalvarImagemAsync(IFormFile file, string pasta)
+        {
+            // Gerar nome único para o arquivo (similar ao código de registo)
+            Guid g = Guid.NewGuid();
+            string nomeImagem = g.ToString();
+            string extensaoImagem = Path.GetExtension(file.FileName).ToLowerInvariant();
+            nomeImagem += extensaoImagem;
+
+            // Definir localização da imagem
+            string localizacaoImagem = _webHostEnvironment.WebRootPath;
+            localizacaoImagem = Path.Combine(localizacaoImagem, pasta);
+
+            // Criar diretório se não existir
+            if (!Directory.Exists(localizacaoImagem))
+            {
+                Directory.CreateDirectory(localizacaoImagem);
+            }
+
+            // Salvar arquivo fisicamente
+            string caminhoCompleto = Path.Combine(localizacaoImagem, nomeImagem);
+            using (var streamImage = new FileStream(caminhoCompleto, FileMode.Create))
+            {
+                await file.CopyToAsync(streamImage);
+            }
+
+            return nomeImagem;
+        }
+        private async Task RemoverImagemFisica(string nomeImagem, string pasta)
+        {
+            if (string.IsNullOrEmpty(nomeImagem))
+                return;
+
+            try
+            {
+                string localizacaoImagem = _webHostEnvironment.WebRootPath;
+                string caminhoCompleto = Path.Combine(localizacaoImagem, pasta, nomeImagem);
+
+                if (System.IO.File.Exists(caminhoCompleto))
+                {
+                    System.IO.File.Delete(caminhoCompleto);
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
     }
 }

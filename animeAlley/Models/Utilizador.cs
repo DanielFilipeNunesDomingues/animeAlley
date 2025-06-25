@@ -25,6 +25,12 @@ public class Utilizador
     [MaxLength(200)]
     public string? Foto { get; set; } // Foto do Utilizador
 
+    /// <summary>
+    /// Banner do utilizador.
+    /// </summary>
+    [MaxLength(200)]
+    public string? Banner { get; set; } // Banner do Utilizador
+
     [Required]
     public bool isAdmin { get; set; } = false;
 

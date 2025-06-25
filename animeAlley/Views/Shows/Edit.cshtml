@@ -248,7 +248,7 @@
                     `${selectedCount} género(s) selecionado(s). ` :
                     'Nenhum género selecionado. ';
                 helpText += 'Mantenha pressionado Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos géneros.';
-                $('#genero-count').html(`<i class="fas fa-info-circle me-1"></i>${helpText}`);
+                $('#genero-count').html(`${helpText}`);
             };
 
             updateGeneroCount();
@@ -277,7 +277,7 @@
                         var previewHtml = `
                             <div class="${previewClass.substring(1)} mt-3">
                                 <div class="small mb-2" style="color: #D84043">
-                                    <i class="fas fa-eye me-1"></i>Nova imagem selecionada:
+                                Nova imagem selecionada:
                                 </div>
                                 <div class="image-container">
                                     <img src="${e.target.result}"

@@ -106,9 +106,9 @@ hr {
     margin-bottom: 0.1rem;
 }
 
-.form-control {
+.form-control, .form-control-plaintext {
     padding: 0.8rem 1rem;
-    background-color: #3D3030;
+    background-color: #3D3030 !important;
     border: none;
     outline: none;
     color: #eee;
@@ -117,12 +117,16 @@ hr {
     transition: all 0.2s ease;
 }
 
-.form-control:hover {
+.form-control:hover, .form-control-plaintext:hover {
     border: 2px solid #D84040;
     transition: all 0.2s ease;
 }
 
 .form-control::placeholder {
+    color: #C4AEAE;
+}
+
+label {
     color: #C4AEAE;
 }
 
@@ -137,7 +141,7 @@ hr {
 }
 
 
-.form-control:focus, .form-select:focus {
+.form-control:focus, .form-select:focus, .form-control-plaintext:focus {
     padding: 0.8rem 1rem;
     background-color: #3D3030;
     border: none;
@@ -366,6 +370,39 @@ div > a[asp-action="Index"]:hover {
     color: #e94560;
     display: block;
     margin-bottom: 5px;
+}
+
+.avatar-preview {
+    height: 150px;
+    width: 150px;
+    border: 2px solid #554646;
+    border-radius: 0.4rem;
+    position: relative;
+    overflow: hidden;
+    background-color: #3D3030;
+    transition: 0.2s ease all;
+    cursor: pointer;
+}
+
+.header-preview {
+    width: 100%;
+    height: 200px;
+    border: 2px solid #554646;
+    border-radius: 0.4rem;
+    position: relative;
+    overflow: hidden;
+    background-color: #3D3030;
+    transition: 0.2s ease all;
+    cursor: pointer;
+}
+
+.avatar-preview:hover, .header-preview:hover {
+    border: 2px solid #D84040;
+    transition: 0.2s ease all;
+}
+
+.avatar-preview img {
+    border-radius: 0.4rem;
 }
 
 .card {
@@ -1113,6 +1150,40 @@ div > a[asp-action="Index"]:hover {
 }
 /* End Personagem Detail Style*/
 
+/* Account Management Style */
+
+.nav-pills {
+    background-color: #3D3030;
+    border-radius: 0.4rem;
+    padding: 15px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-pills .nav-item {
+    margin-bottom: 5px;
+}
+
+.nav-pills .nav-link {
+    color: #C4AEAE;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.nav-pills .nav-link:hover,
+.nav-pills .nav-link:focus {
+    background-color: #2A1D1D;
+    color: #EEEEEE;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #2A1D1D;
+    color: #EEEEEE;
+    font-weight: bold;
+    border-left: 4px solid #D84040;
+}
+
+/* End Account Management Style */
 
 /* Reponsive Breakpoints */
 @media (max-width: 100rem) {

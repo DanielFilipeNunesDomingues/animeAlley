@@ -66,7 +66,7 @@ namespace animeAlley.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Foto,isAdmin,UserName")] Utilizador utilizador)
+        public async Task<IActionResult> Create([Bind("Id,Nome,Foto,Banner,isAdmin,UserName")] Utilizador utilizador)
         {
             if (ModelState.IsValid)
             {
@@ -98,7 +98,7 @@ namespace animeAlley.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Foto,isAdmin,UserName")] Utilizador utilizador)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Foto,Banner,isAdmin,UserName")] Utilizador utilizador)
         {
             if (id != utilizador.Id)
             {
