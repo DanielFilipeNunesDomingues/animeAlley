@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div class="container position-relative personagem-info py-3 min-vh-100">
+<div class="container position-relative pt-4 pb-5 personagem-info ">
     <div class="foto-wrap">
         <div class="cover">
             <img src="~/images/personagensFoto/@Html.DisplayFor(Model => Model.Foto)" alt="@Html.DisplayFor(Model => Model.Nome) | Foto" />
@@ -38,23 +38,40 @@
 
         @if (Model.DataNasc.HasValue)
         {
-            <p><b>Data de Nascimento:</b> @Html.DisplayFor(Model => Model.DataNasc)</p>
+            <p><b>Data de Nascimento:</b> @Model.DataNasc.Value.ToString("dd/MM/yyyy")</p>
         }
 
-        <div id="sinopseWrapper" class="sinopse-collapsed">
+        <div id="personagemSinopseWrapper" class="personagem-sinopse-collapsed">
             <p id="sinopseText">@Html.DisplayFor(Model => Model.Sinopse)</p>
         </div>
         <button id="toggleSinopse" class="toggle-btn">Ler mais</button>
+    </div>
+
+    <div class="container min-vh-100 grid-personagem">
+        <h1 class="mb-4">Shows em que participa:</h1>
+        <div class="show-grid-container">
+            @foreach (var item in Model.Shows)
+            {
+                <div class="show-grid-item">
+                    <a asp-controller="Shows" asp-action="Details" asp-route-id="@item.Id">
+                        <img src="~/images/showCover/@item.Imagem" alt="@item.Nome" title="@item.Nome" height="100px" />
+                        <span class="score">@item.Nota</span>
+                    </a>
+                </div>
+            }
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sinopseWrapper = document.getElementById('sinopseWrapper');
+            const personagemSinopseWrapper = document.getElementById('personagemSinopseWrapper');
             const toggleSinopseBtn = document.getElementById('toggleSinopse');
-            const sinopseTextElement = document.getElementById('sinopseText');
+            const infoDiv = document.querySelector('.info');
 
+            // --- Logic to replace "BR" with <br> tags ---
+            const sinopseTextElement = document.getElementById('sinopseText');
             if (sinopseTextElement) {
                 let originalText = sinopseTextElement.innerHTML;
                 const regex = /\bBR\b/gi;
@@ -62,47 +79,54 @@
                 sinopseTextElement.innerHTML = newText;
             }
 
-            sinopseWrapper.style.overflow = 'visible';
-            sinopseWrapper.style.height = 'auto'; 
-            const fullHeight = sinopseWrapper.scrollHeight;
+            // --- Logic for expanding/collapsing sinopse ---
+            if (personagemSinopseWrapper && toggleSinopseBtn && infoDiv) {
+                // Medir a altura real do conteúdo da sinopse
+                const tempDiv = personagemSinopseWrapper.cloneNode(true);
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.visibility = 'hidden';
+                tempDiv.style.height = 'auto';
+                tempDiv.style.maxHeight = 'none';
+                tempDiv.classList.remove('personagem-sinopse-collapsed');
+                document.body.appendChild(tempDiv);
 
-            sinopseWrapper.style.overflow = 'hidden';
-            sinopseWrapper.classList.add('sinopse-collapsed'); 
+                const fullHeight = tempDiv.scrollHeight;
+                const collapsedMaxHeight = 120; // Mesmo valor do CSS
 
-            const tempDiv = document.createElement('div');
-            tempDiv.classList.add('sinopse-collapsed'); 
-            tempDiv.style.position = 'absolute'; 
-            tempDiv.style.visibility = 'hidden';
-            tempDiv.innerHTML = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'; 
-            document.body.appendChild(tempDiv);
+                document.body.removeChild(tempDiv);
 
-            const collapsedMaxHeight = tempDiv.clientHeight; 
-            document.body.removeChild(tempDiv);
-
-    
-            if (fullHeight <= collapsedMaxHeight) {
-                toggleSinopseBtn.style.display = 'none';
-                sinopseWrapper.style.height = 'auto';
-                sinopseWrapper.style.overflow = 'visible';
-            } else {
-                toggleSinopseBtn.style.display = 'block';
-                sinopseWrapper.style.height = collapsedMaxHeight + 'px';
-                sinopseWrapper.classList.add('sinopse-collapsed'); 
-            }
-
-            toggleSinopseBtn.addEventListener('click', function() {
-                if (sinopseWrapper.classList.contains('sinopse-collapsed')) {
-                    sinopseWrapper.classList.remove('sinopse-collapsed');
-                    sinopseWrapper.classList.add('sinopse-expanded');
-                    sinopseWrapper.style.height = fullHeight + 'px'; 
-                    toggleSinopseBtn.textContent = 'Ler menos';
+                // Verificar se o conteúdo precisa do botão de expandir
+                if (fullHeight <= collapsedMaxHeight) {
+                    toggleSinopseBtn.style.display = 'none';
+                    personagemSinopseWrapper.classList.remove('personagem-sinopse-collapsed');
                 } else {
-                    sinopseWrapper.classList.remove('sinopse-expanded');
-                    sinopseWrapper.classList.add('sinopse-collapsed');
-                    sinopseWrapper.style.height = collapsedMaxHeight + 'px';
-                    toggleSinopseBtn.textContent = 'Ler mais';
+                    toggleSinopseBtn.style.display = 'block';
+                    personagemSinopseWrapper.classList.add('personagem-sinopse-collapsed');
                 }
-            });
+
+                // Event listener para o toggle
+                toggleSinopseBtn.addEventListener('click', function() {
+                    if (personagemSinopseWrapper.classList.contains('personagem-sinopse-collapsed')) {
+                        // Expandir
+                        personagemSinopseWrapper.classList.remove('personagem-sinopse-collapsed');
+                        personagemSinopseWrapper.classList.add('personagem-sinopse-expanded');
+                        infoDiv.classList.add('expanded');
+                        toggleSinopseBtn.textContent = 'Ler menos';
+                    } else {
+                        // Colapsar
+                        personagemSinopseWrapper.classList.remove('personagem-sinopse-expanded');
+                        personagemSinopseWrapper.classList.add('personagem-sinopse-collapsed');
+                        infoDiv.classList.remove('expanded');
+                        toggleSinopseBtn.textContent = 'Ler mais';
+
+                        // Scroll suave de volta para o topo da seção de informações
+                        infoDiv.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest'
+                        });
+                    }
+                });
+            }
         });
     </script>
 }

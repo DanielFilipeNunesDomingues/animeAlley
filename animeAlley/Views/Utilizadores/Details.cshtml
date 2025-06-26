@@ -41,78 +41,285 @@ else
 
 <div class="min-vh-100 container py-5">
     <div class="row">
-            @if (showsPorStatus != null && showsPorStatus.Any())
-            {
+        @if (showsPorStatus != null && showsPorStatus.Any())
+        {
             <div class="user-list">
+
                 <!-- Navegação por abas para diferentes status -->
                 <ul class="nav lista-status" id="statusTabs" role="tablist">
+
+                    <!-- Campo de busca -->
+                    <div class="search-container mb-4">
+                        <div class="input-group">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Buscar shows..." />
+                        </div>
+                        <div id="searchResults" class="mt-2 text-muted" style="display: none;"></div>
+                    </div>
+
                     <p class="m-0">Lista</p>
                     @{
                         bool isFirst = true;
                         var statusDisplayNames = new Dictionary<ListaStatus, string>
-                        {
-                            { ListaStatus.Assistir, "Assistindo" },
-                            { ListaStatus.Terminei, "Terminei" },
-                            { ListaStatus.Pausa, "Em Pausa" },
-                            { ListaStatus.Desisti, "Desisti" },
-                            { ListaStatus.Pensar_Assistir, "Planejo Assistir" }
-                        };
+                                {
+                                { ListaStatus.Assistir, "Assistindo" },
+                                { ListaStatus.Terminei, "Terminei" },
+                                { ListaStatus.Pausa, "Em Pausa" },
+                                { ListaStatus.Desisti, "Desisti" },
+                                { ListaStatus.Pensar_Assistir, "Planejo Assistir" }
+                                };
                     }
-                    
+
                     @foreach (var statusGroup in showsPorStatus.OrderBy(x => (int)x.Key))
                     {
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link @(isFirst ? "active" : "")" 
-                                    id="@(statusGroup.Key.ToString().ToLower())-tab" 
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#@(statusGroup.Key.ToString().ToLower())" 
-                                    type="button" 
+                            <button class="nav-link @(isFirst ? "active" : "")"
+                                    id="@(statusGroup.Key.ToString().ToLower())-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#@(statusGroup.Key.ToString().ToLower())"
+                                    type="button"
                                     role="tab">
-                                @statusDisplayNames[statusGroup.Key] 
-                                <span>@statusGroup.Value.Count</span>
+                                @statusDisplayNames[statusGroup.Key]
+                                <span class="status-count">@statusGroup.Value.Count</span>
                             </button>
                         </li>
                         isFirst = false;
                     }
                 </ul>
 
-                <!-- Conteúdo das abas -->
-                <div class="tab-content" id="statusTabsContent">
+                <!-- Conteúdo das abas com posição fixa -->
+                <div class="tab-content" id="statusTabsContent" style="position: relative; min-height: 400px;">
                     @{
                         isFirst = true;
                     }
 
                     @foreach (var statusGroup in showsPorStatus.OrderBy(x => (int)x.Key))
                     {
-                        <div class="tab-pane fade @(isFirst ? "show active" : "")" 
-                             id="@(statusGroup.Key.ToString().ToLower())" 
-                             role="tabpanel">
+                        <div class="tab-pane fade @(isFirst ? "show active" : "")"
+                             id="@(statusGroup.Key.ToString().ToLower())"
+                             role="tabpanel"
+                             data-status="@statusGroup.Key.ToString().ToLower()"
+                             style="position: absolute; top: 0; left: 0; right: 0; width: 100%;">
                             <div class="user-show-grid">
                                 @foreach (var listaShow in statusGroup.Value)
                                 {
-                                        <div class="user-show-grid-item">
-                                            <a asp-controller="Shows" asp-action="Details" asp-route-id="@listaShow.Show.Id">
-                                                <img src="~/images/showCover/@listaShow.Show.Imagem" alt="@listaShow.Show.Nome" title="@listaShow.Show.Nome" height="100px" />
-                                                <div class="info">
-                                                    <p class="title">@listaShow.Show.Nome</p>
-                                                    <p class="type">@listaShow.Show.Tipo<span class="nota">@listaShow.Show.Nota</span></p>
-                                                </div>
-                                            </a>
-                                        </div>
+                                    <div class="user-show-grid-item" data-show-name="@listaShow.Show.Nome.ToLower()">
+                                        <a asp-controller="Shows" asp-action="Details" asp-route-id="@listaShow.Show.Id">
+                                            <img src="~/images/showCover/@listaShow.Show.Imagem" alt="@listaShow.Show.Nome" title="@listaShow.Show.Nome" height="100px" />
+                                            <div class="info">
+                                                <p class="title">@listaShow.Show.Nome</p>
+                                                <p class="type">@statusDisplayNames[statusGroup.Key] <span class="nota">@listaShow.Show.Nota</span></p>
+                                            </div>
+                                        </a>
+                                    </div>
                                 }
                             </div>
-                        </div>
+						</div>
                         isFirst = false;
                     }
                 </div>
             </div>
-            }
-            else
-            {
-                <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
-                    <h1 class="text-center" style="color: #3D2D2D">Sua lista está vazia :(</h1>
+        }
+        else
+        {
+            <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
+                <h1 class="text-center" style="color: #3D2D2D">Sua lista está vazia :(</h1>
                 <p class="text-center" style="color: #3D2D2D">Vá para a aba de <a asp-controller="Shows" asp-action="Index" style="color: #3D2D2D">Shows</a> e adicione seus animes na lista!</p>
-                </div>
-            }
+            </div>
+        }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            const statusTabs = document.querySelectorAll('.nav-link');
+
+            // Corrigido: buscar os spans de contagem dentro de cada tab
+            const statusCounts = document.querySelectorAll('.status-count');
+
+            let originalCounts = {};
+
+            // Verificar se os elementos existem antes de continuar
+            if (!searchInput || !searchResults || statusTabs.length === 0 || statusCounts.length === 0) {
+                console.error('Elementos necessários não encontrados');
+                return;
+            }
+
+            // Armazenar contagens originais com verificação
+            statusTabs.forEach((tab, index) => {
+                const statusName = tab.id.replace('-tab', '');
+                const countElement = statusCounts[index];
+
+                if (countElement) {
+                    const count = parseInt(countElement.textContent) || 0;
+                    originalCounts[statusName] = count;
+                }
+            });
+
+            function performSearch(searchTerm) {
+                const normalizedTerm = searchTerm.toLowerCase().trim();
+                let totalResults = 0;
+                let statusResults = {};
+
+                // Buscar em todas as abas
+                let firstTabWithResults = null;
+
+                document.querySelectorAll('.tab-pane').forEach(tabPane => {
+                    const statusName = tabPane.dataset.status;
+                    const items = tabPane.querySelectorAll('.user-show-grid-item');
+                    const tabButton = document.getElementById(statusName + '-tab');
+                    let visibleCount = 0;
+
+                    if (!tabButton) return;
+
+                    items.forEach(item => {
+                        const showName = item.dataset.showName;
+                        const isMatch = normalizedTerm === '' || (showName && showName.includes(normalizedTerm));
+
+                        if (isMatch) {
+                            item.style.display = 'inline-flex';
+                            visibleCount++;
+                            totalResults++;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+
+                    statusResults[statusName] = visibleCount;
+
+                    // Esconder/mostrar aba inteira se não tiver resultados
+                    if (normalizedTerm !== '' && visibleCount === 0) {
+                        tabButton.style.display = 'none';
+                    } else {
+                        tabButton.style.display = 'inline-flex';
+                        // Armazenar a primeira aba com resultados
+                        if (!firstTabWithResults && visibleCount > 0) {
+                            firstTabWithResults = tabButton;
+                        }
+                    }
+                });
+
+                // Quando há termo de pesquisa
+                if (normalizedTerm !== '') {
+                    if (firstTabWithResults) {
+                        // Remover classe active de todas as abas
+                        document.querySelectorAll('.nav-link').forEach(tab => {
+                            tab.classList.remove('active');
+                        });
+                        document.querySelectorAll('.tab-pane').forEach(pane => {
+                            pane.classList.remove('show', 'active');
+                        });
+
+                        // Ativar a primeira aba com resultados
+                        firstTabWithResults.classList.add('active');
+                        const targetAttribute = firstTabWithResults.getAttribute('data-bs-target');
+                        if (targetAttribute) {
+                            const targetPaneId = targetAttribute.substring(1);
+                            const targetPane = document.getElementById(targetPaneId);
+                            if (targetPane) {
+                                targetPane.classList.add('show', 'active');
+                            }
+                        }
+                    }
+
+                    // Se não encontrou nenhum resultado
+                    if (totalResults === 0) {
+                        // Esconder apenas as abas de status
+                        statusTabs.forEach(tab => {
+                            if (tab) tab.style.display = 'none';
+                        });
+
+                        // Criar e mostrar mensagem de "nenhum resultado"
+                        let noResultsMessage = document.getElementById('no-search-results');
+                        if (!noResultsMessage) {
+                            noResultsMessage = document.createElement('div');
+                            noResultsMessage.id = 'no-search-results';
+                            noResultsMessage.style.gridColumn = '2';
+                            noResultsMessage.innerHTML = `
+                                <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
+                                    <h1 class="text-center" style="color: #3D2D2D">Nenhum show foi encontrado :(</h1>
+                                    <p class="text-center" style="color: #3D2D2D">Tente buscar por outro nome ou <a href="#" onclick="document.getElementById('searchInput').value=''; document.getElementById('searchInput').dispatchEvent(new Event('input'));" style="color: #3D2D2D">limpe a busca</a> para ver toda sua lista!</p>
+                                </div>
+                            `;
+                            const tabContent = document.getElementById('statusTabsContent');
+                            if (tabContent) {
+                                tabContent.parentNode.insertBefore(noResultsMessage, tabContent);
+                            }
+                        }
+                        noResultsMessage.style.display = 'block';
+                        searchResults.textContent = 'Nenhum show encontrado.';
+                        searchResults.className = 'mt-2 text-danger';
+                    } else {
+                        // Esconder mensagem se existir
+                        const noResultsMessage = document.getElementById('no-search-results');
+                        if (noResultsMessage) noResultsMessage.style.display = 'none';
+
+                        searchResults.textContent = totalResults === 1 ?
+                            '1 show encontrado.' :
+                            `${totalResults} shows encontrados.`;
+                        searchResults.className = 'mt-2 text-muted';
+                        searchResults.style.display = 'block';
+                    }
+                }
+                // Quando a pesquisa é limpa
+                else {
+                    // Restaurar visibilidade de todos os itens
+                    document.querySelectorAll('.user-show-grid-item').forEach(item => {
+                        if (item) item.style.display = 'inline-flex';
+                    });
+
+                    // Mostrar todas as abas novamente
+                    statusTabs.forEach(tab => {
+                        if (tab) tab.style.display = 'inline-flex';
+                    });
+
+                    // Encontrar a primeira aba válida
+                    const firstVisibleTab = Array.from(statusTabs).find(tab =>
+                        tab && tab.style.display !== 'none'
+                    );
+
+                    if (firstVisibleTab) {
+                        // Remover active de todas as abas
+                        document.querySelectorAll('.nav-link').forEach(tab => {
+                            if (tab) tab.classList.remove('active');
+                        });
+                        document.querySelectorAll('.tab-pane').forEach(pane => {
+                            if (pane) pane.classList.remove('show', 'active');
+                        });
+
+                        // Ativar a primeira aba visível
+                        firstVisibleTab.classList.add('active');
+                        const targetAttribute = firstVisibleTab.getAttribute('data-bs-target');
+                        if (targetAttribute) {
+                            const targetPaneId = targetAttribute.substring(1);
+                            const targetPane = document.getElementById(targetPaneId);
+                            if (targetPane) {
+                                targetPane.classList.add('show', 'active');
+                            }
+                        }
+                    }
+
+                    // Esconder mensagem de nenhum resultado
+                    const noResultsMessage = document.getElementById('no-search-results');
+                    if (noResultsMessage) noResultsMessage.style.display = 'none';
+
+                    searchResults.style.display = 'none';
+                }
+            }
+
+            // Event listeners
+            searchInput.addEventListener('input', function() {
+                performSearch(this.value);
+            });
+
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                    performSearch('');
+                }
+            });
+        });
+    </script>
+}

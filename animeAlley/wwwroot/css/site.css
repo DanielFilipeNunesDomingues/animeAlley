@@ -966,14 +966,13 @@ div > a[asp-action="Index"]:hover {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    align-items: start;
+    align-items: stretch;
 }
 
 .show-last-section .autor {
     display: grid;
     grid-template-columns: 0.5fr 1fr;
     border-radius: 0.4rem;
-    overflow: hidden;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -1009,7 +1008,7 @@ div > a[asp-action="Index"]:hover {
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    min-height: 100%;
+    height: auto;
 }
 
 .show-last-section .autor .nome:hover {
@@ -1025,6 +1024,7 @@ div > a[asp-action="Index"]:hover {
     line-height: 1.4rem;
     white-space: wrap;
     flex-grow: 1;
+    height: auto;
 }
 
 .show-last-section .trailer-wrapper {
@@ -1277,7 +1277,48 @@ div > a[asp-action="Index"]:hover {
 }
 
 .personagem-info .info {
+    height: 250px;
+    line-height: 1.4rem;
+    position: relative;
+    padding-right: 1rem;
     grid-column: 2;
+}
+
+.personagem-info .info.expanded {
+    height: auto;
+    overflow: visible;
+}
+
+#personagemSinopseWrapper {
+    position: relative;
+}
+
+.personagem-sinopse-collapsed {
+    max-height: 120px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    position: relative;
+}
+
+.personagem-sinopse-expanded {
+    max-height: none;
+    overflow: visible;
+    transition: max-height 0.5s ease-in;
+}
+
+.personagem-sinopse-collapsed::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(transparent, #1D1616);
+    pointer-events: none;
+}
+
+.personagem-sinopse-expanded::after {
+    display: none;
 }
 
 .personagem-info .info p {
@@ -1296,7 +1337,6 @@ div > a[asp-action="Index"]:hover {
 .personagem-info .info p b {
     color: #eee;
 }
-
 
 .personagem-info .foto-wrap {
     position: absolute;
@@ -1324,10 +1364,14 @@ div > a[asp-action="Index"]:hover {
     top: 0;
     width: 100%;
 }
+
+.grid-personagem {
+    grid-column: 1/3;
+
+}
 /* End Personagem Detail Style*/
 
 /* Account Management Style */
-
 .nav-pills {
     background-color: #3D3030;
     border-radius: 0.4rem;
@@ -1849,6 +1893,10 @@ div > a[asp-action="Index"]:hover {
 
     .user-list .nav li button.active {
         margin-left: 0rem;
+    }
+
+    .grid-personagem {
+        margin-top: 20px;
     }
 }
 
