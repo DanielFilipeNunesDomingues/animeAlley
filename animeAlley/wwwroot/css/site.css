@@ -966,12 +966,12 @@ div > a[asp-action="Index"]:hover {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
+    align-items: start;
 }
 
 .show-last-section .autor {
     display: grid;
-    grid-template-columns: 0.3fr 1fr;
-    width: auto;
+    grid-template-columns: 0.5fr 1fr;
     border-radius: 0.4rem;
     overflow: hidden;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
@@ -1007,6 +1007,9 @@ div > a[asp-action="Index"]:hover {
 
 .show-last-section .autor .about {
     padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
 }
 
 .show-last-section .autor .nome:hover {
@@ -1017,12 +1020,11 @@ div > a[asp-action="Index"]:hover {
 .show-last-section .autor .info {
     color: #C4AEAE;
     font-size: 0.8rem;
-    justify-self: end;
-    align-self: end;
     margin: 0;
     padding: .5rem;
     line-height: 1.4rem;
     white-space: wrap;
+    flex-grow: 1;
 }
 
 .show-last-section .trailer-wrapper {
@@ -1374,11 +1376,12 @@ div > a[asp-action="Index"]:hover {
     left: 0;
     bottom: 0;
     margin-bottom: 15px;
-    width: 200px;
-    height: 200px;
+    width: 240px;
+    height: 240px;
     border: 4px solid #554646;
     border-radius: 0.4rem;
     transition: 0.2s ease all;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
 }
 
 .user-cover:hover {
@@ -1391,7 +1394,6 @@ div > a[asp-action="Index"]:hover {
     position: relative;
     overflow: hidden;
     width: 100%;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
     margin-bottom: 15px;
 }
 
@@ -1405,14 +1407,169 @@ div > a[asp-action="Index"]:hover {
 }
 
 .user-name {
-    width: 950px;
+    width: 910px;
+}
+
+.user-list {
+    display: grid;
+    grid-template-columns: 0.25fr 1fr;
+    gap: 2rem;
+}
+
+.user-list .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.user-list .nav li button {
+    width: 100%;
+    text-align: start;
+    background-color: transparent;
+    border: none;
+    transition: 0.2s ease all;
+    border-radius: 0.4rem;
+    color: #C4AEAE;
+    padding: 0.5rem 1rem;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-list .nav li button:hover {
+    background-color: #3D3030;
+    transition: 0.2s ease all;
+    color: #E4D6D6;
+    margin-left: 0.2rem;
+
+}
+
+.user-list .nav li button span {
+    padding: 0.2rem 0.6rem;
+    background-color: #3D3030;
+    border-radius: 0.4rem;
+    text-align: center;
+}
+
+.user-list .nav li button.active > span {
+    background-color: #1D1616;
+    border-radius: 0.4rem;
+    text-align: center;
+    color: #C4AEAE;
+}
+
+.user-list .nav li button.active {
+    background-color: #3D3030;
+    transition: 0.2s ease all;
+    color: #E4D6D6;
+    margin-left: 0.2rem;
+}
+
+.user-show-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-items: center;
+}
+
+.user-show-grid .user-show-grid-item {
+    display: inline-block;
+    cursor: pointer;
+    height: 265px;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: 0px 0px 0px #D84043;
+    border: 3px solid transparent;
+    transition: 0.2s ease all;
+    border-radius: 0.4rem;
+}
+
+.user-show-grid .user-show-grid-item:hover {
+    box-shadow: 0px 0px 15px #D84043;
+    border: 3px solid #D84043;
+}
+
+.user-show-grid .user-show-grid-item:hover img {
+    opacity: 0.8;
+}
+
+.user-show-grid .user-show-grid-item img {
+    height: 100%;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    transition: 0.2s ease all;
+}
+
+.user-show-grid .user-show-grid-item .info {
+    background: rgba(0, 0, 0, 0.8);
+    color: #f1f4f2;
+    text-align: center;
+    padding: 1rem;
+    opacity: 0;
+    transition: 0.2s ease all;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    gap: 0.1rem;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+}
+
+
+.user-show-grid .user-show-grid-item .info .title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+    color: #eee;
+}
+
+.user-show-grid .user-show-grid-item .info .type {
+    font-size: 0.8rem;
+    margin: 0;
+    color: #D84043;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    
+}
+
+.user-show-grid .user-show-grid-item .info .nota {
+    position: relative;
+    color: #eee;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-show-grid .user-show-grid-item .info .nota::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    margin-right: 0.15rem;
+    background: url("../img/star.svg") no-repeat;
+}
+
+
+.user-show-grid .user-show-grid-item:hover .info  {
+    opacity: 1;
 }
 
 /* End User List Style */
 
 /* Reponsive Breakpoints */
 @media (max-width: 100rem) {
-    .show-grid-container {
+        .show-grid-container {
         grid-template-columns: repeat(5, 1fr);
     }
 
@@ -1437,6 +1594,24 @@ div > a[asp-action="Index"]:hover {
     .personagem-info {
         grid-template-columns: 0.26fr 1fr;
     }
+
+    .user-show-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+        justify-items: center;
+    }
+
+    .user-name {
+        width: 910px;
+    }
+
+    .user-cover {
+        width: 240px;
+        height: 240px;
+    }
+
 
 }
 
@@ -1471,6 +1646,23 @@ div > a[asp-action="Index"]:hover {
     .personagem-info {
         grid-template-columns: 0.34fr 1fr;
     }
+
+    .user-show-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+        justify-items: center;
+    }
+
+    .user-name {
+        width: 750px;
+    }
+
+    .user-cover {
+        width: 200px;
+        height: 200px;
+    }
 }
 
 @media (max-width: 70rem) {
@@ -1492,6 +1684,23 @@ div > a[asp-action="Index"]:hover {
 
     .personagem-info {
         grid-template-columns: 0.46fr 1fr;
+    }
+
+    .user-show-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+        justify-items: center;
+    }
+
+    .user-name {
+        width:  590px;
+    }
+
+    .user-cover {
+        width: 160px;
+        height: 160px;
     }
 }
 
@@ -1598,6 +1807,49 @@ div > a[asp-action="Index"]:hover {
         flex-direction: column;
         gap: 1rem;
     }
+
+    .user-show-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+        justify-items: center;
+    }
+
+    .user-header {
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        flex-direction: column;
+        position: relative;
+        padding: 1.2rem;
+    }
+
+    .user-cover {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 240px;
+        margin: 0 auto;
+        margin-bottom: 1rem;
+    }
+
+    .user-name {
+        width: 100%;
+        text-align: center;
+    }
+
+    .user-name h2 {
+        text-align: center;
+    }
+
+    .user-list .nav li button:hover {
+        margin-left: 0rem;
+    }
+
+    .user-list .nav li button.active {
+        margin-left: 0rem;
+    }
 }
 
 @media (max-width: 50rem) {
@@ -1609,6 +1861,20 @@ div > a[asp-action="Index"]:hover {
     .container {
         max-width: 600px;
     }
+
+    .user-show-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+        justify-items: center;
+    }
+
+    .user-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
 }
 
 @media (max-width: 40rem) {
@@ -1619,43 +1885,12 @@ div > a[asp-action="Index"]:hover {
     .container {
         max-width: 350px;
     }
-}
 
-.rememberme {
-    color: #C4AEAE;
-}
-
-.button {
-    background-color: #ebd1d1;
-}
-
-.card_area {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.pbody {
-    background-color: #1d1616;
-    color: white;
-    font-family: Arial, sans-serif;
-}
-
-.pcontent {
-    display: flex;
-    padding: 20px;
-    flex-direction: column;
-}
-
-.puser_img {
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-}
-
-.pheader {
-    background-color: #292929;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    .user-show-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+        justify-items: center;
+    }
 }
