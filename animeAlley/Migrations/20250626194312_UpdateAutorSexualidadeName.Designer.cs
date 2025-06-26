@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250626194312_UpdateAutorSexualidadeName")]
+    partial class UpdateAutorSexualidadeName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,15 +169,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "cb6a8a12-ac5f-4c64-a223-ca2d1d2b0f41",
+                            ConcurrencyStamp = "7b3d63c4-1be5-4c9f-84d6-fad4bb26492e",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIC7wnWsQrEM60sh6+8Wy45n9mcWHe56rxHv8AQ/4fpMPmX83HhWyP/GKMoIbMHmSA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEItrR6KIW29PnahH4dONhZxN1IhpNEKtXj5LAS/fwHzUS3IKQ5KDRff8pAKi/G3lxQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "12d39c6a-cc39-4b6a-ba78-ded829a2a880",
+                            SecurityStamp = "108125f0-72a0-499c-af6b-ccc8b9e5d8c9",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -805,7 +808,7 @@ namespace animeAlley.Migrations
             modelBuilder.Entity("animeAlley.Models.Show", b =>
                 {
                     b.HasOne("animeAlley.Models.Autor", "Autor")
-                        .WithMany("ShowsCriados")
+                        .WithMany("Shows")
                         .HasForeignKey("AutorFK")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -838,7 +841,7 @@ namespace animeAlley.Migrations
 
             modelBuilder.Entity("animeAlley.Models.Autor", b =>
                 {
-                    b.Navigation("ShowsCriados");
+                    b.Navigation("Shows");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Forum", b =>

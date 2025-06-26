@@ -4,11 +4,18 @@
     ViewData["Title"] = "Autores";
 }
 
-<div class="py-5 container">
+<div class="py-5 container min-vh-100">
 
-    <p>
-        <a asp-action="Create">Create New</a>
-    </p>
+    @if (User.IsInRole("Admin"))
+    {
+        <p>
+            <a class="text-muted pointer-event" asp-action="Create">Create New</a>
+        </p>
+    }
+
+    <form asp-action="Index" method="get" class="mb-4">
+        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Buscar autores..." class="form-control" />
+    </form>
 
     <div class="show-grid-container">
         @foreach (var item in Model)

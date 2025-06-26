@@ -7,16 +7,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using animeAlley.Data;
 using animeAlley.Models;
+using Microsoft.AspNetCore.Hosting; // Needed for IWebHostEnvironment
+using System.IO; // Needed for Path
+using Microsoft.AspNetCore.Authorization; // Needed for Authorize attribute
 
 namespace animeAlley.Controllers
 {
     public class AutoresController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        /// <summary>
-        /// objeto que contém todas as características do Servidor
-        /// </summary>
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         public AutoresController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
@@ -26,12 +25,30 @@ namespace animeAlley.Controllers
         }
 
         // GET: Autores
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            return View(await _context.Autores.ToListAsync());
+            ViewData["CurrentFilter"] = searchString;
+
+            var autores = from a in _context.Autores
+                          select a;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var lowerSearch = searchString.ToLower();
+                autores = autores.Where(a =>
+                    a.Nome.ToLower().Contains(lowerSearch) ||
+                    a.Sobre.ToLower().Contains(lowerSearch)
+                );
+            }
+
+            return View(await autores.ToListAsync());
         }
 
-        // GET: Autores/Details/5
+        /// <summary>
+        /// GET: Autores/Details/5
+        /// </summary>
+        /// <param name="id">Author ID</param>
+        /// <returns>Details view for the Author</returns>
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -40,7 +57,9 @@ namespace animeAlley.Controllers
             }
 
             var autor = await _context.Autores
+                .Include(a => a.ShowsCriados) // Eager load the collection of shows created by this author
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (autor == null)
             {
                 return NotFound();
@@ -50,17 +69,18 @@ namespace animeAlley.Controllers
         }
 
         // GET: Autores/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
+            // No MultiSelectList needed for Authors, as they don't have an associated list like Shows
             return View();
         }
 
         // POST: Autores/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,DateNasc,Sobre,Foto")] Autor autor, IFormFile autorFoto)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create([Bind("Id,Nome,DateNasc,Sobre,Foto,Idade,AutorSexualidade")] Autor autor, IFormFile autorFoto)
         {
             bool hasError = false;
             string imagePath = string.Empty;
@@ -68,62 +88,69 @@ namespace animeAlley.Controllers
             if (autorFoto == null)
             {
                 hasError = true;
-                ModelState.AddModelError("", "Tem de submeter uma Fotografia da Personagem");
+                ModelState.AddModelError("autorFoto", "Precisa de submeter uma fotografia do Autor.");
             }
             else
             {
+                // Check content type and file size
                 if (autorFoto.ContentType != "image/jpeg" && autorFoto.ContentType != "image/png")
                 {
-                    // não há imagem
                     hasError = true;
-                    // construo a msg de erro
-                    ModelState.AddModelError("", "Tem de submeter uma Fotografia");
+                    ModelState.AddModelError("autorFoto", "A fotografia deve ser em formato JPEG ou PNG.");
+                }
+                else if (autorFoto.Length > 2 * 1024 * 1024) // 2 MB limit
+                {
+                    hasError = true;
+                    ModelState.AddModelError("autorFoto", "O tamanho do arquivo é muito grande. Tamanho máximo: 2MB.");
                 }
                 else
                 {
-                    // há imagem,
-                    // vamos processá-la
-                    // *******************************
-                    // Novo nome para o ficheiro
+                    // Process the image
                     Guid g = Guid.NewGuid();
                     imagePath = g.ToString();
-
                     string extensaoImagem = Path.GetExtension(autorFoto.FileName).ToLowerInvariant();
                     imagePath += extensaoImagem;
-
-                    // guardar este nome na BD
                     autor.Foto = imagePath;
                 }
             }
 
+            // Remove "Foto" from ModelState to prevent validation issues with null Foto property
+            // when IFormFile is handled separately.
             ModelState.Remove("Foto");
+            // Also remove the IFormFile itself, as it's not directly part of the model validation
+            ModelState.Remove("autorFoto");
 
             if (ModelState.IsValid && !hasError)
             {
-                // Adicionar a personagem à base de dados (o ShowFK já vai ser salvo automaticamente)
-                _context.Add(autor);
-                await _context.SaveChangesAsync();
-
-                // Salvar a imagem fisicamente
-                string localizacaoImagem = _webHostEnvironment.WebRootPath;
-                localizacaoImagem = Path.Combine(localizacaoImagem, "images/autoresFoto");
-                if (!Directory.Exists(localizacaoImagem))
+                try
                 {
-                    Directory.CreateDirectory(localizacaoImagem);
+                    _context.Add(autor);
+                    await _context.SaveChangesAsync();
+
+                    // Save the image physically
+                    string localizacaoImagem = Path.Combine(_webHostEnvironment.WebRootPath, "images", "autoresFoto");
+                    if (!Directory.Exists(localizacaoImagem))
+                    {
+                        Directory.CreateDirectory(localizacaoImagem);
+                    }
+
+                    string caminhoCompletoImagem = Path.Combine(localizacaoImagem, imagePath);
+                    using var streamImage = new FileStream(caminhoCompletoImagem, FileMode.Create);
+                    await autorFoto.CopyToAsync(streamImage);
+
+                    return RedirectToAction(nameof(Index));
                 }
-                // gerar o caminho completo para a imagem
-                imagePath = Path.Combine(localizacaoImagem, imagePath);
-
-                // agora, temos condições para guardar a imagem
-                using var streamImage = new FileStream(imagePath, FileMode.Create);
-                await autorFoto.CopyToAsync(streamImage);
-
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Erro ao salvar o autor: " + ex.Message);
+                }
             }
+            // If we got this far, something failed, re-display form
             return View(autor);
         }
 
         // GET: Autores/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -140,60 +167,91 @@ namespace animeAlley.Controllers
         }
 
         // POST: Autores/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,DateNasc,Sobre,Foto")] Autor autor, IFormFile autorFoto)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,DateNasc,Sobre,Foto,Idade,AutorSexualidade")] Autor autor, IFormFile autorFoto)
         {
             if (id != autor.Id)
             {
                 return NotFound();
             }
 
-            // Se foi enviada uma nova foto, processar
+            bool fileError = false;
+            string newImagePath = string.Empty;
+            string oldImagePath = string.Empty;
+
+            var existingAutor = await _context.Autores
+                .AsNoTracking() // Use AsNoTracking to avoid tracking conflicts when attaching 'autor' later
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (existingAutor == null)
+            {
+                return NotFound();
+            }
+
+            oldImagePath = existingAutor.Foto;
+            autor.Foto = oldImagePath; // Keep the old photo if no new one is uploaded
+
             if (autorFoto != null)
             {
-                if (autorFoto.ContentType == "image/jpeg" || autorFoto.ContentType == "image/png")
+                if (autorFoto.ContentType != "image/jpeg" && autorFoto.ContentType != "image/png")
                 {
-                    // Remover a foto antiga se existir
-                    var personagemExistente = await _context.Personagens.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
-                    if (personagemExistente != null && !string.IsNullOrWhiteSpace(personagemExistente.Foto))
-                    {
-                        var pastaImagens = Path.Combine(_webHostEnvironment.WebRootPath, "images", "autoresFoto");
-                        var caminhoImagemAntiga = Path.Combine(pastaImagens, personagemExistente.Foto);
-                        if (System.IO.File.Exists(caminhoImagemAntiga))
-                            System.IO.File.Delete(caminhoImagemAntiga);
-                    }
-
-                    // Salvar nova foto
+                    fileError = true;
+                    ModelState.AddModelError("autorFoto", "A fotografia deve ser em formato JPEG ou PNG.");
+                }
+                else if (autorFoto.Length > 2 * 1024 * 1024) // 2 MB limit
+                {
+                    fileError = true;
+                    ModelState.AddModelError("autorFoto", "O arquivo é muito grande. Tamanho máximo: 2MB.");
+                }
+                else
+                {
                     Guid g = Guid.NewGuid();
-                    string imagePath = g.ToString();
+                    newImagePath = g.ToString();
                     string extensaoImagem = Path.GetExtension(autorFoto.FileName).ToLowerInvariant();
-                    imagePath += extensaoImagem;
-                    autor.Foto = imagePath;
-
-                    string localizacaoImagem = _webHostEnvironment.WebRootPath;
-                    localizacaoImagem = Path.Combine(localizacaoImagem, "images/personagensFoto");
-                    if (!Directory.Exists(localizacaoImagem))
-                    {
-                        Directory.CreateDirectory(localizacaoImagem);
-                    }
-
-                    string caminhoCompleto = Path.Combine(localizacaoImagem, imagePath);
-                    using var streamImage = new FileStream(caminhoCompleto, FileMode.Create);
-                    await autorFoto.CopyToAsync(streamImage);
+                    newImagePath += extensaoImagem;
+                    autor.Foto = newImagePath; // Assign new image name to model
                 }
             }
 
             ModelState.Remove("Foto");
+            ModelState.Remove("autorFoto");
 
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && !fileError)
             {
                 try
                 {
+                    // Attach the 'autor' entity to the context and mark it as modified
                     _context.Update(autor);
                     await _context.SaveChangesAsync();
+
+                    // Process image if a new one was uploaded
+                    string localizacaoImagens = Path.Combine(_webHostEnvironment.WebRootPath, "images", "autoresFoto");
+
+                    if (!Directory.Exists(localizacaoImagens))
+                    {
+                        Directory.CreateDirectory(localizacaoImagens);
+                    }
+
+                    if (autorFoto != null && !string.IsNullOrEmpty(newImagePath))
+                    {
+                        string fullNewImagePath = Path.Combine(localizacaoImagens, newImagePath);
+                        using (var streamImage = new FileStream(fullNewImagePath, FileMode.Create))
+                        {
+                            await autorFoto.CopyToAsync(streamImage);
+                        }
+
+                        // Delete old image if a new one was successfully saved and it's different from the old one
+                        if (!string.IsNullOrEmpty(oldImagePath) && oldImagePath != newImagePath)
+                        {
+                            string fullOldImagePath = Path.Combine(localizacaoImagens, oldImagePath);
+                            if (System.IO.File.Exists(fullOldImagePath))
+                            {
+                                System.IO.File.Delete(fullOldImagePath);
+                            }
+                        }
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -212,6 +270,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Autores/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -220,7 +279,9 @@ namespace animeAlley.Controllers
             }
 
             var autor = await _context.Autores
+                .Include(a => a.ShowsCriados)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (autor == null)
             {
                 return NotFound();
@@ -232,36 +293,33 @@ namespace animeAlley.Controllers
         // POST: Autores/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // 1) Obter o registo
-            var autor = await _context.Personagens.FindAsync(id);
+            var autor = await _context.Autores.FindAsync(id);
             if (autor == null)
                 return NotFound();
 
-            // 2) Remover o ficheiro físico, se existir
+            // Remove the physical file if it exists
             if (!string.IsNullOrWhiteSpace(autor.Foto))
             {
-                // 2.1) Construir o caminho completo até à imagem
                 var pastaImagens = Path.Combine(
-                    _webHostEnvironment.WebRootPath,       // wwwroot
-                    "images", "personagensFoto"            // sub‑pastas
+                    _webHostEnvironment.WebRootPath,
+                    "images", "autoresFoto"
                 );
                 var caminhoImagem = Path.Combine(pastaImagens, autor.Foto);
 
-                // 2.2) Apagar o ficheiro
                 if (System.IO.File.Exists(caminhoImagem))
                     System.IO.File.Delete(caminhoImagem);
             }
 
-            // 3) Remover o registo da BD
-            _context.Personagens.Remove(autor);
+            _context.Autores.Remove(autor);
             await _context.SaveChangesAsync();
 
-            // 4) Voltar à lista
             return RedirectToAction(nameof(Index));
         }
 
+        // Helper Method
         private bool AutorExists(int id)
         {
             return _context.Autores.Any(e => e.Id == id);
