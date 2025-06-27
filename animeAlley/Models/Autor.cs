@@ -40,7 +40,7 @@ public class Autor
     /// <summary>
     /// Descrição do autor
     /// </summary>
-    [MaxLength(1000)]
+    [MaxLength(10000)]
     [Display(Name = "Sobre")]
     public string Sobre { get; set; } = string.Empty; // Descrição do autor
 
@@ -52,6 +52,9 @@ public class Autor
     [Display(Name = "Foto")]
     public string Foto { get; set; } = string.Empty; // URL da foto do autor
 
+    /// <summary>
+    /// Shows criados pelo autor (relação 1-N com Show)
+    /// </summary>
     [ValidateNever]
     public ICollection<Show> ShowsCriados { get; set; } = new List<Show>();
 }

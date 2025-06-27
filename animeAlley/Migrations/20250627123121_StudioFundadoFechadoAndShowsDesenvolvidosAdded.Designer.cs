@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627123121_StudioFundadoFechadoAndShowsDesenvolvidosAdded")]
+    partial class StudioFundadoFechadoAndShowsDesenvolvidosAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,15 +169,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "5467dec3-7cbb-4783-ae99-e2d2d2b038a2",
+                            ConcurrencyStamp = "dfe968f4-7132-42cf-bd65-e845a364694f",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGQMOQvcvxpq89d3DOHBbocs/pTQsPWr1g0L5lC4ibklKfk7a3lUkJSIUptJQTIZ3g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEB1AZvTTkSs5PK1ACPb1Tz4u6wG/kuC0I1UcC/ijBBPfGD6d2JqZF36UK/6nlP7sIg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "50fb603e-d32c-4802-a49c-3a0d7daeef5b",
+                            SecurityStamp = "d898baf9-8270-4f89-9a9c-8a85cbf3b1c4",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -316,8 +319,8 @@ namespace animeAlley.Migrations
 
                     b.Property<string>("Sobre")
                         .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("Id");
 
@@ -488,8 +491,8 @@ namespace animeAlley.Migrations
 
                     b.Property<string>("Sinopse")
                         .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("TipoPersonagem")
                         .HasColumnType("int");
@@ -574,14 +577,11 @@ namespace animeAlley.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("Fechado")
+                        .HasMaxLength(500)
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Foto")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<DateTime?>("Fundado")
+                        .HasMaxLength(500)
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Nome")
@@ -590,8 +590,8 @@ namespace animeAlley.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Sobre")
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int?>("Status")
                         .HasColumnType("int");

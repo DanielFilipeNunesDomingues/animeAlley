@@ -18,13 +18,26 @@
     </form>
 
     <div class="show-grid-container">
+
         @foreach (var item in Model)
         {
-            <div class="show-grid-item">
-                <a asp-action="Details" asp-route-id="@item.Id">
-                    <img src="~/images/personagensFoto/@item.Foto" alt="@item.Nome" title="@item.Nome" height="100px" />
-                </a>
-            </div>
+            @if (!string.IsNullOrEmpty(item.Foto))
+            {
+                <div class="show-grid-item">
+                    <a asp-action="Details" asp-route-id="@item.Id">
+                        <img src="~/images/personagensFoto/@item.Foto" alt="@item.Nome" title="@item.Nome" height="100px" />
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="show-grid-item">
+                    <a asp-action="Details" asp-route-id="@item.Id">
+                        <img src="~/img/noimageplaceholder.png" alt="@item.Nome" title="@item.Nome" height="100px" />
+                    </a>
+                </div>
+            }
         }
+
     </div>
 </div>

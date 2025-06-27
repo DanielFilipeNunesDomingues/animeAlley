@@ -1,36 +1,147 @@
 ﻿@model animeAlley.Models.Studio
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Nome;
 }
 
-<h1>Details</h1>
+<div class="bg-secondary">
+    <div class="container py-lg-5 py-3 personagem-header">
+        <div class="d-flex justify-content-between">
+            <h1 class="m-0">@Html.DisplayFor(model => model.Nome)</h1>
+            @if (User.IsInRole("Admin"))
+            {
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="me-2"><svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#C4AEAE"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" /></svg></a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id"><svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#C4AEAE"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" /></svg></a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
 
-<div>
-    <h4>Studio</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Sobre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Sobre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-    </dl>
+<div class="container position-relative pt-4 pb-5 personagem-info">
+    <div class="foto-wrap">
+        <div class="cover">
+            @if (!string.IsNullOrEmpty(Model.Foto))
+            {
+                <img src="~/images/studiosFoto/@Html.DisplayFor(model => model.Foto)" alt="@Html.DisplayFor(model => model.Nome) | Logo" />
+            }
+            else
+            {
+                <img src="~/img/noimageplaceholder.png" alt="Sem Foto" />
+            }
+        </div>
+    </div>
+
+    <div class="info">
+        @if (Model.Fundado.HasValue)
+        {
+            <p><b>Fundado:</b> @Model.Fundado.Value.ToString("dd/MM/yyyy")</p>
+        }
+
+        @if (Model.Fechado.HasValue)
+        {
+            <p><b>Fechado:</b> @Model.Fechado.Value.ToString("dd/MM/yyyy")</p>
+        }
+        else
+        {
+            <p><b>Status:</b> @Html.DisplayFor(model => model.Status)</p>
+        }
+
+        <div id="studioSobreWrapper" class="autor-sobre-collapsed">
+            <p id="sobreText">@Html.DisplayFor(model => model.Sobre)</p>
+        </div>
+        <button id="toggleSobre" class="toggle-btn">Ler mais</button>
+    </div>
+
+    <div class="container min-vh-100 grid-personagem">
+        @if (Model.ShowsDesenvolvidos != null && Model.ShowsDesenvolvidos.Any())
+        {
+            <h4 class="mb-2">Shows desenvolvidos:</h4>
+            <div class="show-grid-container">
+                @foreach (var item in Model.ShowsDesenvolvidos)
+                {
+                    <div class="show-grid-item">
+                        <a asp-controller="Shows" asp-action="Details" asp-route-id="@item.Id">
+                            <img src="~/images/showCover/@item.Imagem" alt="@item.Nome" title="@item.Nome" height="100px" />
+                            <span class="score">@item.Nota</span>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="py-4" role="alert" style="width: 100%; margin: 0 auto;">
+                <h1 class="text-center" style="color: #3D2D2D">Este estúdio ainda não tem shows associados :(</h1>
+            </div>
+        }
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const studioSobreWrapper = document.getElementById('studioSobreWrapper');
+            const toggleSobreBtn = document.getElementById('toggleSobre');
+            const infoDiv = document.querySelector('.info');
+
+            // --- Logic to replace "BR" with <br> tags ---
+            const sobreTextElement = document.getElementById('sobreText');
+            if (sobreTextElement) {
+                let originalText = sobreTextElement.innerHTML;
+                const regex = /\bBR\b/gi;
+                let newText = originalText.replace(regex, '<br>');
+                sobreTextElement.innerHTML = newText;
+            }
+
+            // --- Logic for expanding/collapsing "Sobre" section ---
+            if (studioSobreWrapper && toggleSobreBtn && infoDiv) {
+                const tempDiv = studioSobreWrapper.cloneNode(true);
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.visibility = 'hidden';
+                tempDiv.style.height = 'auto';
+                tempDiv.style.maxHeight = 'none';
+                tempDiv.classList.remove('autor-sobre-collapsed'); // Use autor-sobre-collapsed as per original CSS
+                document.body.appendChild(tempDiv);
+
+                const fullHeight = tempDiv.scrollHeight;
+                const collapsedMaxHeight = 120; // Same value as your CSS, adjust as needed
+
+                document.body.removeChild(tempDiv);
+
+                // Check if content needs the expand button
+                if (fullHeight <= collapsedMaxHeight) {
+                    toggleSobreBtn.style.display = 'none';
+                    studioSobreWrapper.classList.remove('autor-sobre-collapsed'); // Use autor-sobre-collapsed
+                } else {
+                    toggleSobreBtn.style.display = 'block';
+                    studioSobreWrapper.classList.add('autor-sobre-collapsed'); // Use autor-sobre-collapsed
+                }
+
+                // Event listener for the toggle
+                toggleSobreBtn.addEventListener('click', function() {
+                    if (studioSobreWrapper.classList.contains('autor-sobre-collapsed')) {
+                        // Expand
+                        studioSobreWrapper.classList.remove('autor-sobre-collapsed');
+                        studioSobreWrapper.classList.add('autor-sobre-expanded'); // Add expanded class
+                        infoDiv.classList.add('expanded'); // Apply expanded styles to parent
+                        toggleSobreBtn.textContent = 'Ler menos';
+                    } else {
+                        // Collapse
+                        studioSobreWrapper.classList.remove('autor-sobre-expanded');
+                        studioSobreWrapper.classList.add('autor-sobre-collapsed');
+                        infoDiv.classList.remove('expanded');
+                        toggleSobreBtn.textContent = 'Ler mais';
+
+                        // Smooth scroll back to the top of the info section
+                        infoDiv.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest'
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+}

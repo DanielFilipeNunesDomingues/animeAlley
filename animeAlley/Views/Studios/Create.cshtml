@@ -1,46 +1,157 @@
 ﻿@model animeAlley.Models.Studio
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Criar Estúdio";
 }
 
-<h1>Create</h1>
+<div class="py-5 container">
+    <h1 class="text-center mb-4">Criar Estúdio</h1>
 
-<h4>Studio</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Sobre" class="control-label"></label>
-                <input asp-for="Sobre" class="form-control" />
-                <span asp-validation-for="Sobre" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control"
-                        asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">
-                    <option value="">-- Selecione --</option>
-                </select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-pencil-alt me-2"></i>Informações do Estúdio</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Nome" class="form-label fw-semibold">Nome <span class="text-danger d-inline-block">*</span></label>
+                                    <input asp-for="Nome" class="form-control" placeholder="Nome do estúdio" />
+                                    <span asp-validation-for="Nome" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Fundado" class="form-label fw-semibold">Fundado Em</label>
+                                    <input asp-for="Fundado" class="form-control" type="date" />
+                                    <span asp-validation-for="Fundado" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Fechado" class="form-label fw-semibold">Fechado Em</label>
+                                    <input asp-for="Fechado" class="form-control" type="date" />
+                                    <span asp-validation-for="Fechado" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Status" class="form-label fw-semibold"></label>
+                                    <select asp-for="Status" class="form-select"
+                                            asp-items="Html.GetEnumSelectList<animeAlley.Models.Estado>()">
+                                        {{ /* Changed to Estado as per Studio model */}}
+                                        <option value="">-- Selecione --</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label asp-for="Sobre" class="form-label fw-semibold">Sobre <span class="text-danger d-inline-block">*</span></label>
+                                    <textarea asp-for="Sobre" class="form-control" rows="4" placeholder="Breve descrição ou informações sobre o estúdio..."></textarea>
+                                    <span asp-validation-for="Sobre" class="text-danger"></span>
+                                    <div class="form-text text-muted">
+                                        <span id="about-info">Use BR/br para quebrar linhas.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label fw-semibold">Foto do Estúdio <span class="text-danger d-inline-block">*</span></label>
+                                    <input type="file"
+                                           accept=".png,.jpeg,.jpg"
+                                           name="studioFoto" {{ /* Changed name to studioFoto * /}}
+                                           id="studioFoto" {{ /* Changed id to studioFoto * /}}
+                                           class="form-control form-control-sm" />
+                                    <span asp-validation-for="Foto" class="text-danger"></span>
+                                    <div class="form-text">JPG ou PNG (máx. 2MB)</div>
+
+                                    <div id="previewContainer" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Criar Estúdio
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                        Voltar à Lista
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Preview da imagem
+            function showImagePreview(input) {
+                const file = input.files[0];
+                const $preview = $('#previewContainer');
+                $preview.empty();
+
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) { // 2MB
+                        alert("O arquivo é muito grande. Tamanho máximo: 2MB.");
+                        $(input).val(''); // Clear the input
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const html = `
+                            <div class="preview-image">
+                                <div class="small mb-2" style="color:#D84043">
+                                    <i class="fas fa-eye me-1"></i>Nova imagem selecionada:
+                                </div>
+                                <img src="${e.target.result}"
+                                     class="img-thumbnail"
+                                     style="object-fit:cover; width: 200px;" />
+                            </div>`;
+                        $preview.html(html);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Event listener para mudança na seleção de arquivo
+            $('#studioFoto').on('change', function () { {{ /* Changed to studioFoto */}}
+                showImagePreview(this);
+            });
+
+            // Validação antes do submit (apenas para a foto, já que não há "shows associados")
+            $('form').on('submit', function(e) {
+                const photoFile = $('#studioFoto')[0].files[0]; {{ /* Changed to studioFoto */}}
+
+                if (!photoFile) {
+                    e.preventDefault();
+                    alert('Por favor, selecione uma foto para o estúdio.');
+                    $('#studioFoto').focus(); {{ /* Changed to studioFoto */}}
+                    return false;
+                }
+            });
+
+            // Tooltip para campos obrigatórios (se necessário, ative aqui)
+            // $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
 }

@@ -46,7 +46,7 @@ public class Personagem
     /// <summary>
     /// Descrição da personagem
     /// </summary>
-    [MaxLength(1000)] // para o campo sinopse
+    [MaxLength(10000)] // para o campo sinopse
     public string Sinopse { get; set; } = string.Empty; // Sinopse da personagem
 
     /// <summary>

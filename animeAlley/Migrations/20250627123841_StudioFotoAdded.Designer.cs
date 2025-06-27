@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627123841_StudioFotoAdded")]
+    partial class StudioFotoAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,15 +169,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "5467dec3-7cbb-4783-ae99-e2d2d2b038a2",
+                            ConcurrencyStamp = "90db9133-573e-45ea-bed0-3323faeb5e1c",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGQMOQvcvxpq89d3DOHBbocs/pTQsPWr1g0L5lC4ibklKfk7a3lUkJSIUptJQTIZ3g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPMcL/P5O82aBCmBDz7V1W1ldaTnKgGKu6CQ0b7HQP5/yhicyjgbhlTVzUuRToYwIg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "50fb603e-d32c-4802-a49c-3a0d7daeef5b",
+                            SecurityStamp = "08f09a40-c282-4e4d-8541-cc70ae445d7c",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -316,8 +319,8 @@ namespace animeAlley.Migrations
 
                     b.Property<string>("Sobre")
                         .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("Id");
 
@@ -488,8 +491,8 @@ namespace animeAlley.Migrations
 
                     b.Property<string>("Sinopse")
                         .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("TipoPersonagem")
                         .HasColumnType("int");
@@ -574,6 +577,7 @@ namespace animeAlley.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("Fechado")
+                        .HasMaxLength(500)
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Foto")
@@ -582,6 +586,7 @@ namespace animeAlley.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime?>("Fundado")
+                        .HasMaxLength(500)
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Nome")
@@ -590,8 +595,8 @@ namespace animeAlley.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Sobre")
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int?>("Status")
                         .HasColumnType("int");
