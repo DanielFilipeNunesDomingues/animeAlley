@@ -70,6 +70,9 @@ builder.Services.AddScoped<TokenService>();
 // Pegar o Nome do Utilizador
 builder.Services.AddScoped<UtilizadorService>();
 
+// API para gerir os shows
+builder.Services.AddScoped<MappingService>();
+
 // Novo serviço para gerenciar roles
 builder.Services.AddScoped<RoleService>(); 
 

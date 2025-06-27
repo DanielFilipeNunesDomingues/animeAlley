@@ -306,7 +306,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Autores");
+                    b.ToTable("Autores", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Comentario", b =>
@@ -337,7 +337,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("UtilizadorId");
 
-                    b.ToTable("Comentarios");
+                    b.ToTable("Comentarios", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Forum", b =>
@@ -355,7 +355,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Foruns");
+                    b.ToTable("Foruns", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Genero", b =>
@@ -373,7 +373,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Generos");
+                    b.ToTable("Generos", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Lista", b =>
@@ -392,7 +392,7 @@ namespace animeAlley.Migrations
                     b.HasIndex("UtilizadorId")
                         .IsUnique();
 
-                    b.ToTable("Listas");
+                    b.ToTable("Listas", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.ListaShows", b =>
@@ -418,7 +418,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("ShowId");
 
-                    b.ToTable("ListaShows");
+                    b.ToTable("ListaShows", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Obra", b =>
@@ -436,7 +436,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("ShowID");
 
-                    b.ToTable("Obras");
+                    b.ToTable("Obras", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Personagem", b =>
@@ -476,7 +476,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Personagens");
+                    b.ToTable("Personagens", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.PersonagemShow", b =>
@@ -509,7 +509,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("ShowId1");
 
-                    b.ToTable("PersonagemShow");
+                    b.ToTable("PersonagemShow", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Show", b =>
@@ -575,7 +575,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("StudioFK");
 
-                    b.ToTable("Shows");
+                    b.ToTable("Shows", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Studio", b =>
@@ -611,7 +611,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Studios");
+                    b.ToTable("Studios", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Topico", b =>
@@ -647,7 +647,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("UtilizadorId");
 
-                    b.ToTable("Topicos");
+                    b.ToTable("Topicos", (string)null);
                 });
 
             modelBuilder.Entity("animeAlley.Models.Utilizador", b =>
@@ -681,7 +681,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Utilizadores");
+                    b.ToTable("Utilizadores", (string)null);
                 });
 
             modelBuilder.Entity("GeneroShow", b =>
