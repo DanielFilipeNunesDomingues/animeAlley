@@ -86,20 +86,30 @@
     <div class="show-section">
         <div class="mb-4">
             <h3>Personagens</h3>
-            <div class="show-personagens">
-                @foreach (var p in Model.Personagens)
+
+                @if(Model.Personagens.Count > 0)
                 {
-                    <div class="personagem bg-secondary">
-                        <a asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">
-                            <div class="cover">
-                                <img src="~/images/personagensFoto/@p.Foto" alt="@p.Nome | Foto">
+                    <div class="show-personagens">
+                        @foreach (var p in Model.Personagens)
+                        {
+                            <div class="personagem bg-secondary">
+                                <a asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">
+                                    <div class="cover">
+                                        <img src="~/images/personagensFoto/@p.Foto" alt="@p.Nome | Foto">
+                                    </div>
+                                </a>
+                                <a class="nome" asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">@p.Nome</a>
+                                <p class="info">@p.TipoPersonagem</p>
                             </div>
-                        </a>
-                        <a class="nome" asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">@p.Nome</a>
-                        <p class="info">@p.TipoPersonagem</p>
+                        }
+                    </div>
+                } 
+                else
+                {
+                    <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
+                        <h1 class="text-center" style="color: #3D2D2D">Este show não possui personagens :(</h1>
                     </div>
                 }
-            </div>
         </div>
 
         <div class="show-last-section">

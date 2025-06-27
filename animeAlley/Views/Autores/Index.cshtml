@@ -17,27 +17,35 @@
         <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Buscar autores..." class="form-control" />
     </form>
 
-    <div class="show-grid-container">
-
-        @foreach (var item in Model)
-        {
-            @if (!string.IsNullOrEmpty(item.Foto))
+    @if(Model.Any())
+    {
+        <div class="show-grid-container">
+            @foreach (var item in Model)
             {
-                <div class="show-grid-item">
-                    <a asp-action="Details" asp-route-id="@item.Id">
-                        <img src="~/images/autoresFoto/@item.Foto" alt="@item.Nome" title="@item.Nome" height="100px" />
-                    </a>
-                </div>
+                @if (!string.IsNullOrEmpty(item.Foto))
+                {
+                    <div class="show-grid-item">
+                        <a asp-action="Details" asp-route-id="@item.Id">
+                            <img src="~/images/autoresFoto/@item.Foto" alt="@item.Nome" title="@item.Nome" height="100px" />
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="show-grid-item">
+                        <a asp-action="Details" asp-route-id="@item.Id">
+                            <img src="~/img/noimageplaceholder.png" alt="@item.Nome" title="@item.Nome" height="100px" />
+                        </a>
+                    </div>
+                }
             }
-            else
-            {
-                <div class="show-grid-item">
-                    <a asp-action="Details" asp-route-id="@item.Id">
-                        <img src="~/img/noimageplaceholder.png" alt="@item.Nome" title="@item.Nome" height="100px" />
-                    </a>
-                </div>
-            }
-        }
+        </div>
+    }
+    else
+    {
+        <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
+            <h1 class="text-center" style="color: #3D2D2D">Num autor foi encontrado :(</h1>
+        </div>
+    }
 
-    </div>
 </div>

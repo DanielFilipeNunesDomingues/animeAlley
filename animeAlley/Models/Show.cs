@@ -121,18 +121,17 @@ public class Show
     /// <summary>
     /// Lista de personagens que aparecem neste show (relação N-M)
     /// </summary>
-    [ValidateNever]
     public ICollection<Personagem> Personagens { get; set; } = new List<Personagem>();
 
     /// <summary>
     /// Lista de generos que tem no show
     /// </summary>
-    public ICollection<Genero> GenerosShows { get; set; } = []; // FK para os géneros do show
+    public ICollection<Genero> GenerosShows { get; set; } = new List<Genero>();
 
     /// <summary>
     /// Lista de shows nas listas dos utilizadores
     /// </summary>
-    public ICollection<ListaShows> ListaShows { get; set; } = [];
+    public ICollection<ListaShows> ListaShows { get; set; } = new List<ListaShows>();
 }
 
 /// <summary>

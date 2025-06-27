@@ -498,24 +498,102 @@ namespace animeAlley.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var show = await _context.Shows
-                .Include(s => s.GenerosShows)
-                .FirstOrDefaultAsync(s => s.Id == id);
-            
-            if (show != null)
+            try
             {
-                // Remover as relações com géneros antes de deletar o show
-                show.GenerosShows.Clear();
-                _context.Shows.Remove(show);
+                // 1. Remover todas as referências em ListaShows
+                var listaShowsToRemove = await _context.ListaShows
+                    .Where(ls => ls.ShowId == id)
+                    .ToListAsync();
+
+                if (listaShowsToRemove.Any())
+                {
+                    _context.ListaShows.RemoveRange(listaShowsToRemove);
+                }
+
+                // 2. Remover relações personagem-show na tabela intermediária
+                var personagemShowsToRemove = await _context.Set<PersonagemShow>()
+                    .Where(ps => ps.ShowId == id)
+                    .ToListAsync();
+
+                if (personagemShowsToRemove.Any())
+                {
+                    _context.Set<PersonagemShow>().RemoveRange(personagemShowsToRemove);
+                }
+
+                // 3. Carregar o show com os géneros
+                var show = await _context.Shows
+                    .Include(s => s.GenerosShows)
+                    .FirstOrDefaultAsync(s => s.Id == id);
+
+                if (show != null)
+                {
+                    // 4. Limpar relações com géneros
+                    show.GenerosShows.Clear();
+
+                    // 5. Remover imagens do filesystem
+                    await RemoverImagensShow(show);
+
+                    // 6. Remover o show
+                    _context.Shows.Remove(show);
+
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Show deletado com sucesso!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Show não encontrado.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao deletar o show: {ex.Message}";
+                return RedirectToAction(nameof(Delete), new { id = id });
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ShowExists(int id)
         {
             return _context.Shows.Any(e => e.Id == id);
+        }
+
+        /// <summary>
+        /// Remove as imagens do show do filesystem
+        /// </summary>
+        private async Task RemoverImagensShow(Show show)
+        {
+            try
+            {
+                string localizacaoImagem = Path.Combine(_webHostEnvironment.WebRootPath, "images/showCover");
+                string localizacaoBanner = Path.Combine(_webHostEnvironment.WebRootPath, "images/showBanner");
+
+                // Remover imagem de capa
+                if (!string.IsNullOrEmpty(show.Imagem))
+                {
+                    string caminhoImagem = Path.Combine(localizacaoImagem, show.Imagem);
+                    if (System.IO.File.Exists(caminhoImagem))
+                    {
+                        System.IO.File.Delete(caminhoImagem);
+                    }
+                }
+
+                // Remover banner
+                if (!string.IsNullOrEmpty(show.Banner))
+                {
+                    string caminhoBanner = Path.Combine(localizacaoBanner, show.Banner);
+                    if (System.IO.File.Exists(caminhoBanner))
+                    {
+                        System.IO.File.Delete(caminhoBanner);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log do erro, mas não impedir a exclusão do show
+                System.Diagnostics.Debug.WriteLine($"Erro ao remover imagens: {ex.Message}");
+            }
         }
     }
 }

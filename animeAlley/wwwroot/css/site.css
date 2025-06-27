@@ -1301,7 +1301,7 @@ div > a[asp-action="Index"]:hover {
 }
 
 .personagem-sinopse-expanded {
-    max-height: none;
+    max-height: 1000px;
     overflow: visible;
     transition: max-height 0.5s ease-in;
 }

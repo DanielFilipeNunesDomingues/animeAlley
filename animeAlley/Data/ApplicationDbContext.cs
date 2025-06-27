@@ -20,7 +20,7 @@ namespace animeAlley.Data
 
         /// <summary>
         /// este método é executado imediatamente antes 
-        /// da criação da base de dados. <br />
+        /// da criação da base de dados.
         /// É utilizado para adicionar as últimas instruções
         /// à criação do modelo
         /// </summary>
@@ -63,18 +63,53 @@ namespace animeAlley.Data
                 .HasForeignKey<Lista>(l => l.UtilizadorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Configurar a relação many-to-many entre Lista e Show através de ListaShows
+            // Configuração da relação Show -> ListaShows
+            modelBuilder.Entity<ListaShows>()
+                .HasOne(ls => ls.Show)
+                .WithMany(s => s.ListaShows)
+                .HasForeignKey(ls => ls.ShowId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configuração da relação Lista -> ListaShows
             modelBuilder.Entity<ListaShows>()
                 .HasOne(ls => ls.Lista)
                 .WithMany(l => l.ListaShows)
                 .HasForeignKey(ls => ls.ListaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ListaShows>()
-                .HasOne(ls => ls.Show)
-                .WithMany() // Assumindo que Show não tem navegação de volta
-                .HasForeignKey(ls => ls.ShowId)
-                .OnDelete(DeleteBehavior.Restrict); // Evita deleção em cascata de Shows
+            // Configuração da relação Utilizador -> Lista (duplicada, removida)
+            // Esta configuração já foi feita acima, não precisa repetir
+
+            // Configuração da relação many-to-many entre Personagem e Show
+            modelBuilder.Entity<PersonagemShow>()
+                .HasKey(ps => new { ps.PersonagemId, ps.ShowId });
+
+            // ALTERAÇÃO PRINCIPAL: Mudar para NoAction para evitar ciclos de cascade
+            modelBuilder.Entity<PersonagemShow>()
+                .HasOne(ps => ps.Personagem)
+                .WithMany()
+                .HasForeignKey(ps => ps.PersonagemId)
+                .OnDelete(DeleteBehavior.NoAction); // Alterado de Cascade para NoAction
+
+            modelBuilder.Entity<PersonagemShow>()
+                .HasOne(ps => ps.Show)
+                .WithMany()
+                .HasForeignKey(ps => ps.ShowId)
+                .OnDelete(DeleteBehavior.NoAction); // Alterado de Cascade para NoAction
+
+            // Configuração da relação many-to-many usando a tabela intermediária
+            modelBuilder.Entity<Personagem>()
+                .HasMany(p => p.Shows)
+                .WithMany(s => s.Personagens)
+                .UsingEntity<PersonagemShow>(
+                    l => l.HasOne<Show>().WithMany().HasForeignKey(ps => ps.ShowId).OnDelete(DeleteBehavior.NoAction),
+                    r => r.HasOne<Personagem>().WithMany().HasForeignKey(ps => ps.PersonagemId).OnDelete(DeleteBehavior.NoAction));
+
+            // Configuração many-to-many para Shows e Generos
+            modelBuilder.Entity<Show>()
+                .HasMany(s => s.GenerosShows)
+                .WithMany(g => g.Shows)
+                .UsingEntity(j => j.ToTable("ShowGeneros"));
         }
 
         public DbSet<Autor> Autores { get; set; }
