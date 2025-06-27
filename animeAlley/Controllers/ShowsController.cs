@@ -500,54 +500,47 @@ namespace animeAlley.Controllers
         {
             try
             {
-                // 1. Remover todas as referências em ListaShows
-                var listaShowsToRemove = await _context.ListaShows
-                    .Where(ls => ls.ShowId == id)
-                    .ToListAsync();
-
-                if (listaShowsToRemove.Any())
-                {
-                    _context.ListaShows.RemoveRange(listaShowsToRemove);
-                }
-
-                // 2. Remover relações personagem-show na tabela intermediária
-                var personagemShowsToRemove = await _context.Set<PersonagemShow>()
-                    .Where(ps => ps.ShowId == id)
-                    .ToListAsync();
-
-                if (personagemShowsToRemove.Any())
-                {
-                    _context.Set<PersonagemShow>().RemoveRange(personagemShowsToRemove);
-                }
-
-                // 3. Carregar o show com os géneros
+                // Carregar o show com todas as suas relações
                 var show = await _context.Shows
                     .Include(s => s.GenerosShows)
+                    .Include(s => s.Personagens)
+                    .Include(s => s.ListaShows)
                     .FirstOrDefaultAsync(s => s.Id == id);
 
-                if (show != null)
-                {
-                    // 4. Limpar relações com géneros
-                    show.GenerosShows.Clear();
-
-                    // 5. Remover imagens do filesystem
-                    await RemoverImagensShow(show);
-
-                    // 6. Remover o show
-                    _context.Shows.Remove(show);
-
-                    await _context.SaveChangesAsync();
-
-                    TempData["SuccessMessage"] = "Show deletado com sucesso!";
-                }
-                else
+                if (show == null)
                 {
                     TempData["ErrorMessage"] = "Show não encontrado.";
+                    return RedirectToAction(nameof(Index));
                 }
+
+                // Remover as imagens do filesystem antes de deletar da BD
+                await RemoverImagensShow(show);
+
+                // Limpar todas as relações many-to-many
+                show.GenerosShows.Clear();
+                show.Personagens.Clear();
+
+                // O Entity Framework automaticamente cuidará das relações em cascade
+                // Não é necessário remover manualmente as entradas das tabelas intermediárias
+
+                // Remover o show (as relações serão removidas automaticamente devido ao cascade)
+                _context.Shows.Remove(show);
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Show deletado com sucesso!";
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Erro ao deletar o show: {ex.Message}";
+
+                // Log do erro para debugging
+                System.Diagnostics.Debug.WriteLine($"Erro ao deletar show {id}: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+
                 return RedirectToAction(nameof(Delete), new { id = id });
             }
 

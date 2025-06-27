@@ -48,18 +48,27 @@
     </div>
 
     <div class="container min-vh-100 grid-personagem">
-        <h4 class="mb-2">Shows em que participa:</h4>
-        <div class="show-grid-container">
-            @foreach (var item in Model.Shows)
-            {
-                <div class="show-grid-item">
-                    <a asp-controller="Shows" asp-action="Details" asp-route-id="@item.Id">
-                        <img src="~/images/showCover/@item.Imagem" alt="@item.Nome" title="@item.Nome" height="100px" />
-                        <span class="score">@item.Nota</span>
-                    </a>
-                </div>
-            }
-        </div>
+        @if(Model.Shows != null && Model.Shows.Any())
+        {
+            <h4 class="mb-2">Shows em que participa:</h4>
+            <div class="show-grid-container">
+                @foreach (var item in Model.Shows)
+                {
+                    <div class="show-grid-item">
+                        <a asp-controller="Shows" asp-action="Details" asp-route-id="@item.Id">
+                            <img src="~/images/showCover/@item.Imagem" alt="@item.Nome" title="@item.Nome" height="100px" />
+                            <span class="score">@item.Nota</span>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="py-4" role="alert" style="width: 100%; margin: 0 auto;">
+                <h1 class="text-center" style="color: #3D2D2D">Este personagem ainda não tem shows associados :(</h1>
+            </div>
+        }
     </div>
 </div>
 

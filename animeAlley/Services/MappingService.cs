@@ -20,14 +20,14 @@ namespace animeAlley.Services
             {
                 Id = show.Id,
                 Nome = show.Nome,
-                Descricao = show.Sinopse,
-                ImagemUrl = show.Imagem,
+                Sinopse = show.Sinopse,
+                Imagem = show.Imagem,
                 Tipo = show.Tipo.ToString(),
-                Rating = show.Nota,
-                DataLancamento = show.Ano,
+                Nota = show.Nota,
+                Ano = show.Ano,
                 Status = show.Status.ToString(),
                 Generos = show.GenerosShows?.Select(g => g.GeneroNome).ToList() ?? new List<string>(),
-                Studios = show.Studio.ToString()
+                Studio = show.Studio.ToString(),
             };
         }
 
@@ -37,11 +37,11 @@ namespace animeAlley.Services
             {
                 Id = show.Id,
                 Nome = show.Nome,
-                Descricao = show.Sinopse,
-                ImagemUrl = show.Imagem,
+                Sinopse = show.Sinopse,
+                Imagem = show.Imagem,
                 Tipo = show.Tipo.ToString(),
-                Rating = show.Nota,
-                DataLancamento = show.Ano,
+                Nota = show.Nota,
+                Ano = show.Ano,
                 //DataFim = show.DataFim,
                 Status = show.Status.ToString(),
                 //NumeroEpisodios = show.NumeroEpisodios,
@@ -51,16 +51,15 @@ namespace animeAlley.Services
                     Id = g.Id,
                     Nome = g.GeneroNome,
                 }).ToList() ?? new List<GeneroDto>(),
-                Studios = show.Studio.ToString(),
-                Personagens = show.Personagens?.Select(p => new PersonagemDto
+                // Studio = show.Studio.ToString(),
+                Personagens = show.Personagens?.Select(p => new PersonagemResumoDto
                 {
                     Id = p.Id,
                     Nome = p.Nome,
-                    Descricao = p.Sinopse,
-                    ImagemUrl = p.Foto,
-                    Papel = p.TipoPersonagem.ToString(),
+                    Foto = p.Foto,
+                    TipoPersonagem = p.TipoPersonagem.ToString(),
                     //VoiceActor = p.VoiceActor
-                }).ToList() ?? new List<PersonagemDto>()
+                }).ToList() ?? new List<PersonagemResumoDto>()
             };
         }
 

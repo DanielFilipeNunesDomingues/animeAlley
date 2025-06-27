@@ -39,115 +39,127 @@
     </div>
 </div>
 
-<div class="container py-5 px-0 show-content min-vh-100">
-    <div class="show-info bg-secondary">
-        <div class="data">
-            <h3>Status</h3>
-            <p>@Html.DisplayFor(Model => Model.Status)</p>
-        </div>
-
-        <div class="data">
-            <h3>Ano de Lançamento</h3>
-            <p>@Html.DisplayFor(Model => Model.Ano)</p>
-        </div>
-
-        <div class="data">
-            <h3>Avaliação</h3>
-            <p>@Html.DisplayFor(Model => Model.Nota)</p>
-        </div>
-
-        <div class="data">
-            <h3>Popularidade</h3>
-            <p>@Html.DisplayFor(Model => Model.Views)</p>
-        </div>
-
-        <div class="data">
-            <h3>Estúdio</h3>
-            <a asp-controller="Studios" asp-action="Details" asp-route-id="@Model.Studio.Id">@Html.DisplayFor(Model => Model.Studio.Nome)</a>
-        </div>
-
-        <div class="data">
-            <h3>Origem</h3>
-            <p>@Html.DisplayFor(Model => Model.Fonte)</p>
-        </div>
-
-        <div class="data">
-            <h3>Gêneros</h3>
-            @foreach (var g in Model.GenerosShows)
-            {
-                <p class="mt-1">@g.GeneroNome</p>
-            }
-        </div>
-    </div>
-
-    <div class="show-section">
-        <div class="mb-4">
-            <h3>Personagens</h3>
-
-                @if(Model.Personagens.Count > 0)
-                {
-                    <div class="show-personagens">
-                        @foreach (var p in Model.Personagens)
-                        {
-                            <div class="personagem bg-secondary">
-                                <a asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">
-                                    <div class="cover">
-                                        <img src="~/images/personagensFoto/@p.Foto" alt="@p.Nome | Foto">
-                                    </div>
-                                </a>
-                                <a class="nome" asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">@p.Nome</a>
-                                <p class="info">@p.TipoPersonagem</p>
-                            </div>
-                        }
-                    </div>
-                } 
-                else
-                {
-                    <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
-                        <h1 class="text-center" style="color: #3D2D2D">Este show não possui personagens :(</h1>
-                    </div>
-                }
-        </div>
-
-        <div class="show-last-section">
-            <div>
-                <h3>Autor</h3>
-                <div class="autor bg-secondary">
-                    <a asp-controller="Autores" asp-action="Details" asp-route-id="@Model.Autor.Id">
-                        <div class="cover">
-                            <img src="~/images/autoresFoto/@Html.DisplayFor(Model => Model.Autor.Foto)" alt="@Html.DisplayFor(Model => Model.Autor.Nome) | Foto">
-                        </div>
-                    </a>
-                    
-                    <div class="about">
-                        <a class="nome" asp-controller="Autores" asp-action="Details" asp-route-id="@Model.Autor.Id">@Html.DisplayFor(Model => Model.Autor.Nome)</a>
-                        <p class="info">
-                            @Html.Raw(Model.Autor.Sobre.Replace("\n", "<br>"))
-                        </p>
-                    </div>
-                </div>
+<div class="min-vh-100">
+    <div class="container py-5 px-0 show-content">
+        <div class="show-info bg-secondary">
+            <div class="data">
+                <h3>Status</h3>
+                <p>@Html.DisplayFor(Model => Model.Status)</p>
             </div>
 
-            <div>
-                <h3>Abertura</h3>
-                <div class="trailer-wrapper">
-                    <video class="trailer" id="videoTrailer">
-                        <source src="@Html.DisplayFor(Model => Model.Trailer)" type="video/webm">
-                        Seu navegador não suporta a tag de vídeo.
-                    </video>
+            <div class="data">
+                <h3>Ano de Lançamento</h3>
+                <p>@Html.DisplayFor(Model => Model.Ano)</p>
+            </div>
 
-                    <div class="video-controls">
-                        <button id="playPauseBtn" title="Play/Pause">
-                            <svg id="playIcon" class="control-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
+            <div class="data">
+                <h3>Avaliação</h3>
+                <p>@Html.DisplayFor(Model => Model.Nota)</p>
+            </div>
 
-                            <svg id="pauseIcon" class="control-icon hidden" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M6 4h4v16H6zm8 0h4v16h-4z" />
-                            </svg>
-                        </button>
-                        <input type="range" id="progressBar" value="0" min="0" step="0.01">
-                        <input type="range" id="volumeBar" value="1" min="0" max="1" step="0.01">
+            <div class="data">
+                <h3>Popularidade</h3>
+                <p>@Html.DisplayFor(Model => Model.Views)</p>
+            </div>
+
+            <div class="data">
+                <h3>Estúdio</h3>
+                <a asp-controller="Studios" asp-action="Details" asp-route-id="@Model.Studio.Id">@Html.DisplayFor(Model => Model.Studio.Nome)</a>
+            </div>
+
+            <div class="data">
+                <h3>Origem</h3>
+                <p>@Html.DisplayFor(Model => Model.Fonte)</p>
+            </div>
+
+            <div class="data">
+                <h3>Gêneros</h3>
+                @foreach (var g in Model.GenerosShows)
+                {
+                    <p class="mt-1">@g.GeneroNome</p>
+                }
+            </div>
+        </div>
+
+        <div class="show-section">
+            <div class="mb-4">
+                <h3>Personagens</h3>
+
+                    @if(Model.Personagens.Count > 0)
+                    {
+                        <div class="show-personagens">
+                            @foreach (var p in Model.Personagens)
+                            {
+                                <div class="personagem bg-secondary">
+                                    <a asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">
+                                        <div class="cover">
+                                            <img src="~/images/personagensFoto/@p.Foto" alt="@p.Nome | Foto">
+                                        </div>
+                                    </a>
+                                    <a class="nome" asp-controller="Personagens" asp-action="Details" asp-route-id="@p.Id">@p.Nome</a>
+                                    <p class="info">@p.TipoPersonagem</p>
+                                </div>
+                            }
+                        </div>
+                    } 
+                    else
+                    {
+                        <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
+                            <h1 class="text-center" style="color: #3D2D2D">Este show não possui personagens :(</h1>
+                        </div>
+                    }
+            </div>
+
+            <div class="show-last-section">
+                <div>
+                    <h3>Autor</h3>
+                    <div class="autor bg-secondary">
+                        <a asp-controller="Autores" asp-action="Details" asp-route-id="@Model.Autor.Id">
+                            <div class="cover">
+                                <img src="~/images/autoresFoto/@Html.DisplayFor(Model => Model.Autor.Foto)" alt="@Html.DisplayFor(Model => Model.Autor.Nome) | Foto">
+                            </div>
+                        </a>
+                    
+                        <div class="about">
+                            <a class="nome" asp-controller="Autores" asp-action="Details" asp-route-id="@Model.Autor.Id">@Html.DisplayFor(Model => Model.Autor.Nome)</a>
+                            <div class="info-container">
+                                <p class="info">
+                                    @{
+                                        string sobre = Model.Autor.Sobre ?? "";
+                                        sobre = sobre.Replace("\n", "<br>");
+                                        if (sobre.Length > 300)
+                                        {
+                                            sobre = sobre.Substring(0, 300) + "...";
+                                        }
+                                    }
+                                    @Html.Raw(sobre)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Abertura</h3>
+                    <div class="trailer-wrapper">
+                        <video class="trailer" id="videoTrailer">
+                            <source src="@Html.DisplayFor(Model => Model.Trailer)" type="video/webm">
+                            Seu navegador não suporta a tag de vídeo.
+                        </video>
+
+                        <div class="video-controls">
+                            <button id="playPauseBtn" title="Play/Pause">
+                                <svg id="playIcon" class="control-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+
+                                <svg id="pauseIcon" class="control-icon hidden" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 4h4v16H6zm8 0h4v16h-4z" />
+                                </svg>
+                            </button>
+                            <input type="range" id="progressBar" value="0" min="0" step="0.01">
+                            <input type="range" id="volumeBar" value="1" min="0" max="1" step="0.01">
+                        </div>
                     </div>
                 </div>
             </div>

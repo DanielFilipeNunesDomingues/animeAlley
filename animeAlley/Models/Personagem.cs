@@ -68,31 +68,6 @@ public class Personagem
     public List<int> SelectedShowIds { get; set; } = new List<int>();
 }
 
-public class PersonagemShow
-{
-    [Key, Column(Order = 0)]
-    public int PersonagemId { get; set; }
-
-    [Key, Column(Order = 1)]
-    public int ShowId { get; set; }
-
-    [ForeignKey("PersonagemId")]
-    public Personagem Personagem { get; set; } = null!;
-
-    [ForeignKey("ShowId")]
-    public Show Show { get; set; } = null!;
-
-    /// <summary>
-    /// Papel específico do personagem neste show
-    /// </summary>
-    public string? PapelNoShow { get; set; }
-
-    /// <summary>
-    /// Data de primeira aparição neste show
-    /// </summary>
-    public DateTime? PrimeiraAparicao { get; set; }
-}
-
 public enum TiposPersonagem
 {
     [Display(Name = "Protagonista")]

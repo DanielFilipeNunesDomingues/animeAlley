@@ -891,6 +891,7 @@ div > a[asp-action="Index"]:hover {
 
 .show-section {
     grid-column: 2;
+    height: 100%;
 }
 
 .show-section h3 {
@@ -966,7 +967,7 @@ div > a[asp-action="Index"]:hover {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    align-items: stretch;
+    align-items: start;
 }
 
 .show-last-section .autor {
@@ -974,6 +975,9 @@ div > a[asp-action="Index"]:hover {
     grid-template-columns: 0.5fr 1fr;
     border-radius: 0.4rem;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    max-width: 100%; 
+    height: fit-content;
+    overflow: hidden; 
 }
 
 .show-last-section .autor .cover {
@@ -984,6 +988,7 @@ div > a[asp-action="Index"]:hover {
     height: 100%;
     margin-bottom: 15px;
     cursor: pointer;
+    min-height: 200px;
 }
 
 .show-last-section .autor .cover img {
@@ -995,6 +1000,15 @@ div > a[asp-action="Index"]:hover {
     width: 100%;
 }
 
+.show-last-section .autor .about {
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-width: 100%;
+    min-width: 0;
+}
+
 .show-last-section .autor .nome {
     padding: .5rem;
     margin: 0;
@@ -1002,18 +1016,22 @@ div > a[asp-action="Index"]:hover {
     align-self: start;
     transition: 0.2s ease all;
     text-decoration: none;
-}
-
-.show-last-section .autor .about {
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    height: 200px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .show-last-section .autor .nome:hover {
     color: #C4AEAE;
     transition: 0.2s ease all;
+}
+
+.info-container {
+    overflow: hidden;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .show-last-section .autor .info {
@@ -1022,9 +1040,28 @@ div > a[asp-action="Index"]:hover {
     margin: 0;
     padding: .5rem;
     line-height: 1.4rem;
+
     white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     word-break: break-word;
+    hyphens: auto;
+    
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    
+    display: block;
+    text-overflow: ellipsis;
 }
+
+.show-last-section .autor .info * {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
 .show-last-section .trailer-wrapper {
     position: relative;
     width: 100%;
@@ -1294,14 +1331,12 @@ div > a[asp-action="Index"]:hover {
 .personagem-sinopse-collapsed {
     max-height: 120px;
     overflow: hidden;
-    transition: max-height 0.3s ease-out;
     position: relative;
 }
 
 .personagem-sinopse-expanded {
     max-height: 1000px;
     overflow: visible;
-    transition: max-height 0.5s ease-in;
 }
 
 .personagem-sinopse-collapsed::after {

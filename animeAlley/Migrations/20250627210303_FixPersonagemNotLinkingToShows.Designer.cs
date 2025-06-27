@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627210303_FixPersonagemNotLinkingToShows")]
+    partial class FixPersonagemNotLinkingToShows
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -325,7 +328,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Autores", (string)null);
+                    b.ToTable("Autores");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Genero", b =>
@@ -343,7 +346,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Generos", (string)null);
+                    b.ToTable("Generos");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Lista", b =>
@@ -362,7 +365,7 @@ namespace animeAlley.Migrations
                     b.HasIndex("UtilizadorId")
                         .IsUnique();
 
-                    b.ToTable("Listas", (string)null);
+                    b.ToTable("Listas");
                 });
 
             modelBuilder.Entity("animeAlley.Models.ListaShows", b =>
@@ -388,7 +391,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("ShowId");
 
-                    b.ToTable("ListaShows", (string)null);
+                    b.ToTable("ListaShows");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Personagem", b =>
@@ -428,7 +431,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Personagens", (string)null);
+                    b.ToTable("Personagens");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Show", b =>
@@ -494,7 +497,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("StudioFK");
 
-                    b.ToTable("Shows", (string)null);
+                    b.ToTable("Shows");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Studio", b =>
@@ -530,7 +533,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Studios", (string)null);
+                    b.ToTable("Studios");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Utilizador", b =>
@@ -564,7 +567,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Utilizadores", (string)null);
+                    b.ToTable("Utilizadores");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

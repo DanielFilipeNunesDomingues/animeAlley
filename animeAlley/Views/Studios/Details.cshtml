@@ -48,10 +48,10 @@
             <p><b>Status:</b> @Html.DisplayFor(model => model.Status)</p>
         }
 
-        <div id="studioSobreWrapper" class="autor-sobre-collapsed">
-            <p id="sobreText">@Html.Raw(Model.Sobre.Replace("\n", "<br>"))</p>
+        <div id="personagemSinopseWrapper" class="personagem-sinopse-collapsed">
+            <p id="sinopseText">@Html.Raw(Model.Sobre.Replace("\n", "<br>"))</p>
         </div>
-        <button id="toggleSobre" class="toggle-btn">Ler mais</button>
+        <button id="toggleSinopse" class="toggle-btn">Ler mais</button>
     </div>
 
     <div class="container min-vh-100 grid-personagem">
@@ -82,50 +82,51 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const studioSobreWrapper = document.getElementById('studioSobreWrapper');
-            const toggleSobreBtn = document.getElementById('toggleSobre');
+            const personagemSinopseWrapper = document.getElementById('personagemSinopseWrapper');
+            const toggleSinopseBtn = document.getElementById('toggleSinopse');
             const infoDiv = document.querySelector('.info');
 
-            // --- Logic for expanding/collapsing "Sobre" section ---
-            if (studioSobreWrapper && toggleSobreBtn && infoDiv) {
-                const tempDiv = studioSobreWrapper.cloneNode(true);
+            // --- Logic for expanding/collapsing sinopse ---
+            if (personagemSinopseWrapper && toggleSinopseBtn && infoDiv) {
+                // Medir a altura real do conteúdo da sinopse
+                const tempDiv = personagemSinopseWrapper.cloneNode(true);
                 tempDiv.style.position = 'absolute';
                 tempDiv.style.visibility = 'hidden';
                 tempDiv.style.height = 'auto';
                 tempDiv.style.maxHeight = 'none';
-                tempDiv.classList.remove('autor-sobre-collapsed'); // Use autor-sobre-collapsed as per original CSS
+                tempDiv.classList.remove('personagem-sinopse-collapsed');
                 document.body.appendChild(tempDiv);
 
                 const fullHeight = tempDiv.scrollHeight;
-                const collapsedMaxHeight = 120; // Same value as your CSS, adjust as needed
+                const collapsedMaxHeight = 120; // Mesmo valor do CSS
 
                 document.body.removeChild(tempDiv);
 
-                // Check if content needs the expand button
+                // Verificar se o conteúdo precisa do botão de expandir
                 if (fullHeight <= collapsedMaxHeight) {
-                    toggleSobreBtn.style.display = 'none';
-                    studioSobreWrapper.classList.remove('autor-sobre-collapsed'); // Use autor-sobre-collapsed
+                    toggleSinopseBtn.style.display = 'none';
+                    personagemSinopseWrapper.classList.remove('personagem-sinopse-collapsed');
                 } else {
-                    toggleSobreBtn.style.display = 'block';
-                    studioSobreWrapper.classList.add('autor-sobre-collapsed'); // Use autor-sobre-collapsed
+                    toggleSinopseBtn.style.display = 'block';
+                    personagemSinopseWrapper.classList.add('personagem-sinopse-collapsed');
                 }
 
-                // Event listener for the toggle
-                toggleSobreBtn.addEventListener('click', function() {
-                    if (studioSobreWrapper.classList.contains('autor-sobre-collapsed')) {
-                        // Expand
-                        studioSobreWrapper.classList.remove('autor-sobre-collapsed');
-                        studioSobreWrapper.classList.add('autor-sobre-expanded'); // Add expanded class
-                        infoDiv.classList.add('expanded'); // Apply expanded styles to parent
-                        toggleSobreBtn.textContent = 'Ler menos';
+                // Event listener para o toggle
+                toggleSinopseBtn.addEventListener('click', function() {
+                    if (personagemSinopseWrapper.classList.contains('personagem-sinopse-collapsed')) {
+                        // Expandir
+                        personagemSinopseWrapper.classList.remove('personagem-sinopse-collapsed');
+                        personagemSinopseWrapper.classList.add('personagem-sinopse-expanded');
+                        infoDiv.classList.add('expanded');
+                        toggleSinopseBtn.textContent = 'Ler menos';
                     } else {
-                        // Collapse
-                        studioSobreWrapper.classList.remove('autor-sobre-expanded');
-                        studioSobreWrapper.classList.add('autor-sobre-collapsed');
+                        // Colapsar
+                        personagemSinopseWrapper.classList.remove('personagem-sinopse-expanded');
+                        personagemSinopseWrapper.classList.add('personagem-sinopse-collapsed');
                         infoDiv.classList.remove('expanded');
-                        toggleSobreBtn.textContent = 'Ler mais';
+                        toggleSinopseBtn.textContent = 'Ler mais';
 
-                        // Smooth scroll back to the top of the info section
+                        // Scroll suave de volta para o topo da seção de informações
                         infoDiv.scrollIntoView({
                             behavior: 'smooth',
                             block: 'nearest'

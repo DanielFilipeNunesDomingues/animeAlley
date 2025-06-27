@@ -1,5 +1,4 @@
 ﻿using animeAlley.Models;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +11,6 @@ namespace animeAlley.Data
         {
 
         }
-
-        // este código deve ser colocado dentro da classe 'ApplicationDbContext'
-        // serve para adicionar às Migrações um conjunto de registos que devem estar sempre presentes na 
-        // base de dados do projeto, desde o seu início.
-        // Esta técnica NÃO É ADEQUADA para a criação de dados de teste!!!
 
         /// <summary>
         /// este método é executado imediatamente antes 
@@ -77,63 +71,62 @@ namespace animeAlley.Data
                 .HasForeignKey(ls => ls.ListaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Configuração da relação Utilizador -> Lista (duplicada, removida)
-            // Esta configuração já foi feita acima, não precisa repetir
-
-            // Configuração da relação many-to-many entre Personagem e Show
-            modelBuilder.Entity<PersonagemShow>()
-                .HasKey(ps => new { ps.PersonagemId, ps.ShowId });
-
-            // ALTERAÇÃO PRINCIPAL: Mudar para NoAction para evitar ciclos de cascade
-            modelBuilder.Entity<PersonagemShow>()
-                .HasOne(ps => ps.Personagem)
-                .WithMany()
-                .HasForeignKey(ps => ps.PersonagemId)
-                .OnDelete(DeleteBehavior.NoAction); // Alterado de Cascade para NoAction
-
-            modelBuilder.Entity<PersonagemShow>()
-                .HasOne(ps => ps.Show)
-                .WithMany()
-                .HasForeignKey(ps => ps.ShowId)
-                .OnDelete(DeleteBehavior.NoAction); // Alterado de Cascade para NoAction
-
-            // Configuração da relação many-to-many usando a tabela intermediária
+            // Configuração many-to-many entre Personagem e Show
             modelBuilder.Entity<Personagem>()
                 .HasMany(p => p.Shows)
                 .WithMany(s => s.Personagens)
-                .UsingEntity<PersonagemShow>(
-                    l => l.HasOne<Show>().WithMany().HasForeignKey(ps => ps.ShowId).OnDelete(DeleteBehavior.NoAction),
-                    r => r.HasOne<Personagem>().WithMany().HasForeignKey(ps => ps.PersonagemId).OnDelete(DeleteBehavior.NoAction));
+                .UsingEntity<Dictionary<string, object>>(
+                    "PersonagemShow",
+                    j => j
+                        .HasOne<Show>()
+                        .WithMany()
+                        .HasForeignKey("ShowId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j => j
+                        .HasOne<Personagem>()
+                        .WithMany()
+                        .HasForeignKey("PersonagemId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("PersonagemId", "ShowId");
+                        j.ToTable("PersonagemShow");
+                        j.Property<int>("PersonagemId").HasColumnName("PersonagemId");
+                        j.Property<int>("ShowId").HasColumnName("ShowId");
+                    });
 
             // Configuração many-to-many para Shows e Generos
             modelBuilder.Entity<Show>()
                 .HasMany(s => s.GenerosShows)
                 .WithMany(g => g.Shows)
-                .UsingEntity(j => j.ToTable("ShowGeneros"));
+                .UsingEntity<Dictionary<string, object>>(
+                    "ShowGeneros",
+                    j => j
+                        .HasOne<Genero>()
+                        .WithMany()
+                        .HasForeignKey("GenerosId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j => j
+                        .HasOne<Show>()
+                        .WithMany()
+                        .HasForeignKey("ShowsId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("ShowsId", "GenerosId");
+                        j.ToTable("ShowGeneros");
+                        j.Property<int>("ShowsId").HasColumnName("ShowsId");
+                        j.Property<int>("GenerosId").HasColumnName("GenerosId");
+                    });
         }
 
         public DbSet<Autor> Autores { get; set; }
-
-        public DbSet<Comentario> Comentarios { get; set; }
-
-        public DbSet<Forum> Foruns { get; set; }
-
         public DbSet<Genero> Generos { get; set; }
-
         public DbSet<Lista> Listas { get; set; }
-
-        public DbSet<Obra> Obras { get; set; }
-
         public DbSet<Personagem> Personagens { get; set; }
-
         public DbSet<Show> Shows { get; set; }
-
         public DbSet<Studio> Studios { get; set; }
-
-        public DbSet<Topico> Topicos { get; set; }
-
         public DbSet<ListaShows> ListaShows { get; set; }
-
         public DbSet<Utilizador> Utilizadores { get; set; }
     }
 }

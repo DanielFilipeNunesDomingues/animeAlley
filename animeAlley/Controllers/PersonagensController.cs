@@ -53,7 +53,6 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            // Incluir os shows associados nos detalhes
             var personagem = await _context.Personagens
                 .Include(p => p.Shows)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -70,14 +69,12 @@ namespace animeAlley.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
-            // Buscar todos os shows para popular o dropdown múltiplo
             var shows = await _context.Shows
                 .Select(s => new { s.Id, s.Nome })
                 .OrderBy(s => s.Nome)
                 .ToListAsync();
 
             ViewBag.Shows = new MultiSelectList(shows, "Id", "Nome");
-
             return View();
         }
 
@@ -85,89 +82,120 @@ namespace animeAlley.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,PersonagemSexualidade,Idade,DataNasc")] Personagem personagem,
+        public async Task<IActionResult> Create([Bind("Id,Nome,TipoPersonagem,Sinopse,PersonagemSexualidade,Idade,DataNasc")] Personagem personagem,
             IFormFile personagemFoto, List<int> selectedShows)
         {
             bool hasError = false;
             string imagePath = string.Empty;
 
+            // Validar foto
             if (personagemFoto == null)
             {
                 hasError = true;
-                ModelState.AddModelError("", "Tem de submeter uma Fotografia da Personagem");
+                ModelState.AddModelError("personagemFoto", "Tem de submeter uma Fotografia da Personagem");
             }
             else
             {
-                if (personagemFoto.ContentType != "image/jpeg" && personagemFoto.ContentType != "image/png")
+                if (personagemFoto.ContentType != "image/jpeg" &&
+                    personagemFoto.ContentType != "image/png" &&
+                    personagemFoto.ContentType != "image/jpg")
                 {
                     hasError = true;
-                    ModelState.AddModelError("", "Tem de submeter uma Fotografia");
+                    ModelState.AddModelError("personagemFoto", "Tem de submeter uma Fotografia em formato JPEG ou PNG");
+                }
+                else if (personagemFoto.Length > 2 * 1024 * 1024) // 2MB
+                {
+                    hasError = true;
+                    ModelState.AddModelError("personagemFoto", "O arquivo é muito grande. Tamanho máximo: 2MB");
                 }
                 else
                 {
-                    // Processar a imagem
+                    // Gerar nome único para a imagem
                     Guid g = Guid.NewGuid();
-                    imagePath = g.ToString();
                     string extensaoImagem = Path.GetExtension(personagemFoto.FileName).ToLowerInvariant();
-                    imagePath += extensaoImagem;
-                    personagem.Foto = imagePath;
+                    imagePath = g.ToString() + extensaoImagem;
                 }
             }
 
-            // Validar se pelo menos um show foi selecionado
+            // Validar shows selecionados
             if (selectedShows == null || !selectedShows.Any())
             {
                 hasError = true;
-                ModelState.AddModelError("", "Selecione pelo menos um show para o personagem");
+                ModelState.AddModelError("selectedShows", "Selecione pelo menos um show para o personagem");
             }
 
+            // Remover validações que não queremos verificar
             ModelState.Remove("Foto");
             ModelState.Remove("Shows");
+            ModelState.Remove("personagemFoto");
 
             if (ModelState.IsValid && !hasError)
             {
                 try
                 {
-                    // Buscar os shows selecionados
+                    // Definir o caminho da foto no modelo
+                    personagem.Foto = imagePath;
+
+                    // Primeiro, adicionar o personagem sem os shows
+                    _context.Personagens.Add(personagem);
+                    await _context.SaveChangesAsync(); // Salva para obter o ID
+
+                    // Agora buscar os shows selecionados e estabelecer a relação
                     var showsSelecionados = await _context.Shows
                         .Where(s => selectedShows.Contains(s.Id))
                         .ToListAsync();
 
-                    // Associar os shows ao personagem
-                    personagem.Shows = showsSelecionados;
+                    // Estabelecer a relação many-to-many
+                    foreach (var show in showsSelecionados)
+                    {
+                        personagem.Shows.Add(show);
+                    }
 
-                    // Adicionar a personagem à base de dados
-                    _context.Add(personagem);
+                    // Salvar as relações
                     await _context.SaveChangesAsync();
 
-                    // Salvar a imagem fisicamente
-                    string localizacaoImagem = _webHostEnvironment.WebRootPath;
-                    localizacaoImagem = Path.Combine(localizacaoImagem, "images/personagensFoto");
+                    // Salvar a imagem fisicamente após sucesso da BD
+                    string localizacaoImagem = Path.Combine(_webHostEnvironment.WebRootPath, "images", "personagensFoto");
                     if (!Directory.Exists(localizacaoImagem))
                     {
                         Directory.CreateDirectory(localizacaoImagem);
                     }
 
-                    imagePath = Path.Combine(localizacaoImagem, imagePath);
-                    using var streamImage = new FileStream(imagePath, FileMode.Create);
-                    await personagemFoto.CopyToAsync(streamImage);
+                    string fullImagePath = Path.Combine(localizacaoImagem, imagePath);
+                    using (var streamImage = new FileStream(fullImagePath, FileMode.Create))
+                    {
+                        await personagemFoto.CopyToAsync(streamImage);
+                    }
 
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
+                    // Se houve erro, apagar a imagem se foi criada
+                    if (!string.IsNullOrEmpty(imagePath))
+                    {
+                        string fullImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "personagensFoto", imagePath);
+                        if (System.IO.File.Exists(fullImagePath))
+                        {
+                            System.IO.File.Delete(fullImagePath);
+                        }
+                    }
+
                     ModelState.AddModelError("", "Erro ao salvar: " + ex.Message);
+                    if (ex.InnerException != null)
+                    {
+                        ModelState.AddModelError("", "Detalhes: " + ex.InnerException.Message);
+                    }
                 }
             }
 
-            // Se chegou aqui, algo correu mal, recarregar a lista de shows
+            // Recarregar a lista de shows em caso de erro
             var shows = await _context.Shows
                 .Select(s => new { s.Id, s.Nome })
                 .OrderBy(s => s.Nome)
                 .ToListAsync();
 
             ViewBag.Shows = new MultiSelectList(shows, "Id", "Nome", selectedShows);
-
             return View(personagem);
         }
 
@@ -189,15 +217,12 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            // Buscar todos os shows para o dropdown
             var shows = await _context.Shows
                 .Select(s => new { s.Id, s.Nome })
                 .OrderBy(s => s.Nome)
                 .ToListAsync();
 
-            // IDs dos shows já associados ao personagem
             var showsAssociados = personagem.Shows.Select(s => s.Id).ToList();
-
             ViewBag.Shows = new MultiSelectList(shows, "Id", "Nome", showsAssociados);
 
             return View(personagem);
@@ -207,7 +232,7 @@ namespace animeAlley.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TipoPersonagem,Sinopse,Foto,PersonagemSexualidade,Idade,DataNasc")] Personagem personagem,
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TipoPersonagem,Sinopse,PersonagemSexualidade,Idade,DataNasc")] Personagem personagem,
             IFormFile personagemFoto, List<int> selectedShows)
         {
             if (id != personagem.Id)
@@ -215,12 +240,12 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            bool fileError = false;
+            bool hasError = false;
             string newImagePath = string.Empty;
-            string oldImagePath = string.Empty;
 
+            // Buscar personagem existente
             var existingPersonagem = await _context.Personagens
-                .AsNoTracking()
+                .Include(p => p.Shows)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (existingPersonagem == null)
@@ -228,92 +253,86 @@ namespace animeAlley.Controllers
                 return NotFound();
             }
 
-            oldImagePath = existingPersonagem.Foto;
-            personagem.Foto = oldImagePath;
+            string oldImagePath = existingPersonagem.Foto;
 
+            // Validar nova foto se fornecida
             if (personagemFoto != null)
             {
-                if (personagemFoto.ContentType != "image/jpeg" && personagemFoto.ContentType != "image/png")
+                if (personagemFoto.ContentType != "image/jpeg" &&
+                    personagemFoto.ContentType != "image/png" &&
+                    personagemFoto.ContentType != "image/jpg")
                 {
-                    fileError = true;
+                    hasError = true;
                     ModelState.AddModelError("personagemFoto", "A foto deve ser em formato JPEG ou PNG.");
                 }
                 else if (personagemFoto.Length > 2 * 1024 * 1024)
                 {
-                    fileError = true;
+                    hasError = true;
                     ModelState.AddModelError("personagemFoto", "O arquivo é muito grande. Tamanho máximo: 2MB.");
                 }
                 else
                 {
                     Guid g = Guid.NewGuid();
-                    newImagePath = g.ToString();
                     string extensaoImagem = Path.GetExtension(personagemFoto.FileName).ToLowerInvariant();
-                    newImagePath += extensaoImagem;
-                    personagem.Foto = newImagePath;
+                    newImagePath = g.ToString() + extensaoImagem;
                 }
             }
 
-            // Validar se pelo menos um show foi selecionado
+            // Validar shows selecionados
             if (selectedShows == null || !selectedShows.Any())
             {
-                fileError = true;
-                ModelState.AddModelError("", "Selecione pelo menos um show para o personagem");
+                hasError = true;
+                ModelState.AddModelError("selectedShows", "Selecione pelo menos um show para o personagem");
             }
 
+            // Remover validações desnecessárias
             ModelState.Remove("Foto");
             ModelState.Remove("personagemFoto");
             ModelState.Remove("Shows");
 
-            if (ModelState.IsValid && !fileError)
+            if (ModelState.IsValid && !hasError)
             {
                 try
                 {
-                    // Buscar o personagem com os shows atuais
-                    var personagemComShows = await _context.Personagens
-                        .Include(p => p.Shows)
-                        .FirstOrDefaultAsync(p => p.Id == id);
-
-                    if (personagemComShows == null)
-                    {
-                        return NotFound();
-                    }
-
                     // Atualizar propriedades básicas
-                    personagemComShows.Nome = personagem.Nome;
-                    personagemComShows.TipoPersonagem = personagem.TipoPersonagem;
-                    personagemComShows.Sinopse = personagem.Sinopse;
-                    personagemComShows.PersonagemSexualidade = personagem.PersonagemSexualidade;
-                    personagemComShows.Idade = personagem.Idade;
-                    personagemComShows.DataNasc = personagem.DataNasc;
-                    personagemComShows.Foto = personagem.Foto;
+                    existingPersonagem.Nome = personagem.Nome;
+                    existingPersonagem.TipoPersonagem = personagem.TipoPersonagem;
+                    existingPersonagem.Sinopse = personagem.Sinopse;
+                    existingPersonagem.PersonagemSexualidade = personagem.PersonagemSexualidade;
+                    existingPersonagem.Idade = personagem.Idade;
+                    existingPersonagem.DataNasc = personagem.DataNasc;
 
-                    // Atualizar associações com shows
-                    personagemComShows.Shows.Clear();
+                    // Atualizar shows
+                    existingPersonagem.Shows.Clear();
                     var showsSelecionados = await _context.Shows
                         .Where(s => selectedShows.Contains(s.Id))
                         .ToListAsync();
 
                     foreach (var show in showsSelecionados)
                     {
-                        personagemComShows.Shows.Add(show);
+                        existingPersonagem.Shows.Add(show);
                     }
 
-                    await _context.SaveChangesAsync();
-
-                    // Processar imagem se necessário
-                    string localizacaoImagem = Path.Combine(_webHostEnvironment.WebRootPath, "images", "personagensFoto");
-
-                    if (!Directory.Exists(localizacaoImagem))
-                    {
-                        Directory.CreateDirectory(localizacaoImagem);
-                    }
-
+                    // Processar nova imagem se fornecida
                     if (personagemFoto != null && !string.IsNullOrEmpty(newImagePath))
                     {
-                        string fullNewImagePath = Path.Combine(localizacaoImagem, newImagePath);
-                        using var streamImage = new FileStream(fullNewImagePath, FileMode.Create);
-                        await personagemFoto.CopyToAsync(streamImage);
+                        string localizacaoImagem = Path.Combine(_webHostEnvironment.WebRootPath, "images", "personagensFoto");
+                        if (!Directory.Exists(localizacaoImagem))
+                        {
+                            Directory.CreateDirectory(localizacaoImagem);
+                        }
 
+                        // Salvar nova imagem
+                        string fullNewImagePath = Path.Combine(localizacaoImagem, newImagePath);
+                        using (var streamImage = new FileStream(fullNewImagePath, FileMode.Create))
+                        {
+                            await personagemFoto.CopyToAsync(streamImage);
+                        }
+
+                        // Atualizar caminho da foto
+                        existingPersonagem.Foto = newImagePath;
+
+                        // Remover imagem antiga
                         if (!string.IsNullOrEmpty(oldImagePath) && oldImagePath != newImagePath)
                         {
                             string fullOldImagePath = Path.Combine(localizacaoImagem, oldImagePath);
@@ -323,6 +342,10 @@ namespace animeAlley.Controllers
                             }
                         }
                     }
+
+                    // Salvar alterações
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -335,17 +358,33 @@ namespace animeAlley.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    // Limpar nova imagem se houve erro
+                    if (!string.IsNullOrEmpty(newImagePath))
+                    {
+                        string fullNewImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "personagensFoto", newImagePath);
+                        if (System.IO.File.Exists(fullNewImagePath))
+                        {
+                            System.IO.File.Delete(fullNewImagePath);
+                        }
+                    }
+
+                    ModelState.AddModelError("", "Erro ao salvar: " + ex.Message);
+                    if (ex.InnerException != null)
+                    {
+                        ModelState.AddModelError("", "Detalhes: " + ex.InnerException.Message);
+                    }
+                }
             }
 
-            // Se chegou aqui, houve erro. Recarregar dropdown
+            // Recarregar dropdown em caso de erro
             var shows = await _context.Shows
                 .Select(s => new { s.Id, s.Nome })
                 .OrderBy(s => s.Nome)
                 .ToListAsync();
 
             ViewBag.Shows = new MultiSelectList(shows, "Id", "Nome", selectedShows);
-
             return View(personagem);
         }
 
@@ -396,7 +435,6 @@ namespace animeAlley.Controllers
                     System.IO.File.Delete(caminhoImagem);
             }
 
-            // As associações N-M serão removidas automaticamente pelo EF Core
             _context.Personagens.Remove(personagem);
             await _context.SaveChangesAsync();
 

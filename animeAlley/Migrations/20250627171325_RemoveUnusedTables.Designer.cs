@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627171325_RemoveUnusedTables")]
+    partial class RemoveUnusedTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace animeAlley.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("GeneroShow", b =>
+                {
+                    b.Property<int>("GenerosShowsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShowsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GenerosShowsId", "ShowsId");
+
+                    b.HasIndex("ShowsId");
+
+                    b.ToTable("ShowGeneros", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -151,15 +169,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "74b44e77-03e4-4c2e-855d-4bd927bbf422",
+                            ConcurrencyStamp = "b1d08448-54ef-4cfd-8baa-fb4c5c268222",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAeStEUI1boIE8T/4bpmqOaPRIYCbSFOmivzccieoGnShvX3UveaVNM92r+TCK6gZg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIZch0/Eg/1Heiha/mZTbQXbJb3cjctsMVeRBOhngOGztUAflXaP0cwIQeTCmK4SEg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "12e14d8d-f070-40f5-b4b5-007500b98eba",
+                            SecurityStamp = "d351569f-c318-4b7d-b976-876c9eb5b3da",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -257,40 +275,6 @@ namespace animeAlley.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PersonagemShow", b =>
-                {
-                    b.Property<int>("PersonagemId")
-                        .HasColumnType("int")
-                        .HasColumnName("PersonagemId");
-
-                    b.Property<int>("ShowId")
-                        .HasColumnType("int")
-                        .HasColumnName("ShowId");
-
-                    b.HasKey("PersonagemId", "ShowId");
-
-                    b.HasIndex("ShowId");
-
-                    b.ToTable("PersonagemShow", (string)null);
-                });
-
-            modelBuilder.Entity("ShowGeneros", b =>
-                {
-                    b.Property<int>("ShowsId")
-                        .HasColumnType("int")
-                        .HasColumnName("ShowsId");
-
-                    b.Property<int>("GenerosId")
-                        .HasColumnType("int")
-                        .HasColumnName("GenerosId");
-
-                    b.HasKey("ShowsId", "GenerosId");
-
-                    b.HasIndex("GenerosId");
-
-                    b.ToTable("ShowGeneros", (string)null);
-                });
-
             modelBuilder.Entity("animeAlley.Models.Autor", b =>
                 {
                     b.Property<int>("Id")
@@ -325,7 +309,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Autores", (string)null);
+                    b.ToTable("Autores");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Genero", b =>
@@ -343,7 +327,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Generos", (string)null);
+                    b.ToTable("Generos");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Lista", b =>
@@ -362,7 +346,7 @@ namespace animeAlley.Migrations
                     b.HasIndex("UtilizadorId")
                         .IsUnique();
 
-                    b.ToTable("Listas", (string)null);
+                    b.ToTable("Listas");
                 });
 
             modelBuilder.Entity("animeAlley.Models.ListaShows", b =>
@@ -388,7 +372,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("ShowId");
 
-                    b.ToTable("ListaShows", (string)null);
+                    b.ToTable("ListaShows");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Personagem", b =>
@@ -428,7 +412,40 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Personagens", (string)null);
+                    b.ToTable("Personagens");
+                });
+
+            modelBuilder.Entity("animeAlley.Models.PersonagemShow", b =>
+                {
+                    b.Property<int>("PersonagemId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("ShowId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.Property<string>("PapelNoShow")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PersonagemId1")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PrimeiraAparicao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ShowId1")
+                        .HasColumnType("int");
+
+                    b.HasKey("PersonagemId", "ShowId");
+
+                    b.HasIndex("PersonagemId1");
+
+                    b.HasIndex("ShowId");
+
+                    b.HasIndex("ShowId1");
+
+                    b.ToTable("PersonagemShow");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Show", b =>
@@ -494,7 +511,7 @@ namespace animeAlley.Migrations
 
                     b.HasIndex("StudioFK");
 
-                    b.ToTable("Shows", (string)null);
+                    b.ToTable("Shows");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Studio", b =>
@@ -530,7 +547,7 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Studios", (string)null);
+                    b.ToTable("Studios");
                 });
 
             modelBuilder.Entity("animeAlley.Models.Utilizador", b =>
@@ -564,7 +581,22 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Utilizadores", (string)null);
+                    b.ToTable("Utilizadores");
+                });
+
+            modelBuilder.Entity("GeneroShow", b =>
+                {
+                    b.HasOne("animeAlley.Models.Genero", null)
+                        .WithMany()
+                        .HasForeignKey("GenerosShowsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("animeAlley.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("ShowsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -618,36 +650,6 @@ namespace animeAlley.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PersonagemShow", b =>
-                {
-                    b.HasOne("animeAlley.Models.Personagem", null)
-                        .WithMany()
-                        .HasForeignKey("PersonagemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("animeAlley.Models.Show", null)
-                        .WithMany()
-                        .HasForeignKey("ShowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ShowGeneros", b =>
-                {
-                    b.HasOne("animeAlley.Models.Genero", null)
-                        .WithMany()
-                        .HasForeignKey("GenerosId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("animeAlley.Models.Show", null)
-                        .WithMany()
-                        .HasForeignKey("ShowsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("animeAlley.Models.Lista", b =>
                 {
                     b.HasOne("animeAlley.Models.Utilizador", "Utilizador")
@@ -674,6 +676,37 @@ namespace animeAlley.Migrations
                         .IsRequired();
 
                     b.Navigation("Lista");
+
+                    b.Navigation("Show");
+                });
+
+            modelBuilder.Entity("animeAlley.Models.PersonagemShow", b =>
+                {
+                    b.HasOne("animeAlley.Models.Personagem", null)
+                        .WithMany()
+                        .HasForeignKey("PersonagemId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("animeAlley.Models.Personagem", "Personagem")
+                        .WithMany()
+                        .HasForeignKey("PersonagemId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("animeAlley.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("ShowId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("animeAlley.Models.Show", "Show")
+                        .WithMany()
+                        .HasForeignKey("ShowId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Personagem");
 
                     b.Navigation("Show");
                 });
