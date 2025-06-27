@@ -1008,7 +1008,7 @@ div > a[asp-action="Index"]:hover {
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    height: auto;
+    height: 200px;
 }
 
 .show-last-section .autor .nome:hover {
@@ -1022,11 +1022,9 @@ div > a[asp-action="Index"]:hover {
     margin: 0;
     padding: .5rem;
     line-height: 1.4rem;
-    white-space: wrap;
-    flex-grow: 1;
-    height: auto;
+    white-space: normal;
+    word-break: break-word;
 }
-
 .show-last-section .trailer-wrapper {
     position: relative;
     width: 100%;

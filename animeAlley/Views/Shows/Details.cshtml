@@ -16,9 +16,6 @@
             </div>
             <div class="options">
                 <a class="add" href="#" data-show-id="@Model.Id">Adicionar +</a> 
-                
-
-                
             </div>
             
         </div>
@@ -35,7 +32,7 @@
                 }
             </div>
             <div id="sinopseWrapper" class="sinopse-collapsed">
-                <p id="sinopseText">@Html.DisplayFor(Model => Model.Sinopse)</p>
+                <p id="sinopseText">@Html.Raw(Model.Sinopse.Replace("\n", "<br>"))</p>
             </div>
             <button id="toggleSinopse" class="toggle-btn">Ler mais</button>
         </div>
@@ -125,7 +122,7 @@
                     <div class="about">
                         <a class="nome" asp-controller="Autores" asp-action="Details" asp-route-id="@Model.Autor.Id">@Html.DisplayFor(Model => Model.Autor.Nome)</a>
                         <p class="info">
-                            @Html.DisplayFor(Model => Model.Autor.Sobre)
+                            @Html.Raw(Model.Autor.Sobre.Replace("\n", "<br>"))
                         </p>
                     </div>
                 </div>
@@ -494,19 +491,5 @@
                 });
             }
         });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const sinopseTextElement = document.getElementById('sinopseText');
-
-            if (sinopseTextElement) {
-                let originalText = sinopseTextElement.innerHTML;
-                const regex = /\bBR\b/gi; // Matches "BR" case-insensitively as a whole word
-
-                let newText = originalText.replace(regex, '<br>');
-
-                sinopseTextElement.innerHTML = newText;
-            }
-        });
-
     </script>
 }

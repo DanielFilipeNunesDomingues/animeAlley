@@ -43,7 +43,7 @@
         }
 
         <div id="autorSobreWrapper" class="autor-sobre-collapsed">
-            <p id="sobreText">@Html.DisplayFor(model => model.Sobre)</p> 
+            <p id="sobreText">@Html.Raw(Model.Sobre.Replace("\n", "<br>"))</p>
         </div>
         <button id="toggleSobre" class="toggle-btn">Ler mais</button> 
     </div>
@@ -80,15 +80,6 @@
             const autorSobreWrapper = document.getElementById('autorSobreWrapper');
             const toggleSobreBtn = document.getElementById('toggleSobre');
             const infoDiv = document.querySelector('.info');
-
-            // --- Logic to replace "BR" with <br> tags ---
-            const sobreTextElement = document.getElementById('sobreText');
-            if (sobreTextElement) {
-                let originalText = sobreTextElement.innerHTML;
-                const regex = /\bBR\b/gi;
-                let newText = originalText.replace(regex, '<br>');
-                sobreTextElement.innerHTML = newText;
-            }
 
             // --- Logic for expanding/collapsing "Sobre" section ---
             if (autorSobreWrapper && toggleSobreBtn && infoDiv) {

@@ -42,7 +42,7 @@
         }
 
         <div id="personagemSinopseWrapper" class="personagem-sinopse-collapsed">
-            <p id="sinopseText">@Html.DisplayFor(Model => Model.Sinopse)</p>
+            <p id="sinopseText">@Html.Raw(Model.Sinopse.Replace("\n", "<br>"))</p>
         </div>
         <button id="toggleSinopse" class="toggle-btn">Ler mais</button>
     </div>
@@ -69,15 +69,6 @@
             const personagemSinopseWrapper = document.getElementById('personagemSinopseWrapper');
             const toggleSinopseBtn = document.getElementById('toggleSinopse');
             const infoDiv = document.querySelector('.info');
-
-            // --- Logic to replace "BR" with <br> tags ---
-            const sinopseTextElement = document.getElementById('sinopseText');
-            if (sinopseTextElement) {
-                let originalText = sinopseTextElement.innerHTML;
-                const regex = /\bBR\b/gi;
-                let newText = originalText.replace(regex, '<br>');
-                sinopseTextElement.innerHTML = newText;
-            }
 
             // --- Logic for expanding/collapsing sinopse ---
             if (personagemSinopseWrapper && toggleSinopseBtn && infoDiv) {
