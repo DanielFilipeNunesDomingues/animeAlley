@@ -1,0 +1,249 @@
+﻿@model animeAlley.ViewModels.SearchResultsViewModel
+@{
+    ViewData["Title"] = string.IsNullOrEmpty(Model.SearchTerm) ? "Pesquisar" : $"Resultados para '{Model.SearchTerm}'";
+}
+<div class="home-container">
+    <!-- Seção de Pesquisa com Banner -->
+    <div class="search-section py-5 mb-4 position-relative" style="background-image: url('@(Model.RandomBannerShow?.Banner != null ? $"/images/showBanner/{Model.RandomBannerShow.Banner}" : "/img/default-banner.jpg")'); ">
+        <div class="show-banner-shadow position-absolute bottom-0 w-100 h-100"></div>
+        <div class="container position-absolute top-50 start-50 translate-middle" style="z-index: 2;">
+            <div class="row justify-content-center h-100 align-items-center">
+                <div class="col-lg-8">
+                    <form asp-controller="Home" asp-action="Search" method="get" class="search-form">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input type="text" name="searchString" class="form-control form-control-lg"
+                                       value="@Model.SearchTerm"
+                                       placeholder="O que pretende pesquisar?">
+                            </div>
+                            <div class="col-md-4">
+                                <select name="FilterType" class="form-select form-select-lg border-0 shadow-sm" id="filterSelect" asp-for="FilterType">
+                                    <option value="all">Pesquisar tudo</option>
+                                    <option value="shows">Apenas Shows</option>
+                                    <option value="personagens">Apenas Personagens</option>
+                                    <option value="autores">Apenas Autores</option>
+                                    <option value="studios">Apenas Studios</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="bi bi-search"></i> Pesquisar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container min-vh-100">
+        @if (!string.IsNullOrEmpty(Model.SearchTerm))
+        {
+            <!-- Header dos Resultados -->
+            <div class="search-results-header mb-4">
+                <h2 class="fs-5" style="color: #C4AEAE">Resultados para: <span style="color: #EEEEEE">"@Model.SearchTerm"</span></h2>
+                <p class="text-muted">
+                    @if (Model.HasResults)
+                    {
+                        <span class="fs-6" style="color: #3D3030">@Model.TotalResults resultado(s) encontrado(s)</span>
+                    }
+                    @if (Model.FilterType != "all")
+                    {
+                        <span class="fs-6" style="color: #3D3030"> - Filtrado por: @GetFilterDisplayName(Model.FilterType)</span>
+                    }
+                </p>
+            
+                @if (Model.HasResults && Model.FilterType != "all")
+                {
+                    <a asp-action="Search" asp-route-searchString="@Model.SearchTerm" asp-route-filterType="all" 
+                       class="btn btn-primary btn-sm">Tirar Filtro</a>
+                }
+            </div>
+
+            @if (Model.HasResults)
+            {
+                <!-- Resultados de Shows -->
+                @if (Model.Shows.Any())
+                {
+                    <section class="results-section mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3>Shows (@Model.Shows.Count)</h3>
+                            @if (Model.FilterType == "all" && Model.Shows.Count >= 6)
+                            {
+                                <a asp-action="Search" asp-route-searchString="@Model.SearchTerm" asp-route-filterType="shows"
+                                   class="text-muted text-decoration-none fs-6 text-end">Ver todos os shows</a>
+                            }
+                        </div>
+                        <div class="row">
+                            @foreach (var show in Model.Shows.Take(Model.FilterType == "all" ? 6 : 24))
+                            {
+                                <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                                    <div class="card show-card h-100">
+                                        <div class="position-relative">
+                                            <a asp-controller="Shows" asp-action="Details" asp-route-id="@show.Id">
+                                                <img src="@(string.IsNullOrEmpty(show.Imagem) ? "/img/noimageplaceholder.png" : $"/images/showCover/{show.Imagem}")" alt="@show.Nome" title="@show.Nome" class="card-img-top" />
+                                            </a>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title mb-1" title="@show.Nome">
+                                                <a asp-controller="Shows" asp-action="Details" asp-route-id="@show.Id"
+                                                   class="text-decoration-none">@show.Nome</a>
+                                            </h6>
+                                            <a asp-controller="Studios" asp-action="Details" asp-route-id="@show.Studio.Id" class="text-decoration-none">
+                                                <small class="text-muted">@show.Studio.Nome</small>
+                                            </a>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+                }
+
+                <!-- Resultados de Personagens -->
+                @if (Model.Personagens.Any())
+                {
+                    <section class="results-section mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3>Personagens (@Model.Personagens.Count)</h3>
+                            @if (Model.FilterType == "all" && Model.Personagens.Count >= 6)
+                            {
+                                <a asp-action="Search" asp-route-searchString="@Model.SearchTerm" asp-route-filterType="personagens"
+                                   class="text-muted text-decoration-none fs-6 text-end">Ver todos os personagens</a>
+                            }
+                        </div>
+                        <div class="row">
+                            @foreach (var personagem in Model.Personagens.Take(Model.FilterType == "all" ? 6 : 24))
+                            {
+                                <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                                    <div class="card show-card h-100">
+                                        <a asp-controller="Personagens" asp-action="Details" asp-route-id="@personagem.Id" class="text-decoration-none">
+                                            <img src="@(string.IsNullOrEmpty(personagem.Foto) ? "/img/noimageplaceholder.png" : $"/images/personagensFoto/{personagem.Foto}")" class="card-img-top" alt="@personagem.Nome">
+                                        </a>
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title   mb-1" title="@personagem.Nome">
+                                                    <a asp-controller="Personagens" asp-action="Details" asp-route-id="@personagem.Id"
+                                                       class="text-decoration-none">
+                                                       @personagem.Nome
+                                                    </a>
+                                                </h6>
+                                                <small class="text-muted">@personagem.TipoPersonagem.ToString()</small>
+                                            </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+                }
+
+                <!-- Resultados de Autores -->
+                @if (Model.Autores.Any())
+                {
+                    <section class="results-section mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3>Autores (@Model.Autores.Count)</h3>
+                            @if (Model.FilterType == "all" && Model.Autores.Count >= 6)
+                            {
+                                <a asp-action="Search" asp-route-searchString="@Model.SearchTerm" asp-route-filterType="autores"
+                                   class="text-muted text-decoration-none fs-6 text-end">Ver todos os autores</a>
+                            }
+                        </div>
+                        <div class="row">
+                            @foreach (var autor in Model.Autores.Take(Model.FilterType == "all" ? 6 : 24))
+                            {
+                                <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                                    <div class="card show-card h-100">
+                                        <a asp-controller="Autores" asp-action="Details" asp-route-id="@autor.Id" class="text-decoration-none">
+                                            <img src="@(string.IsNullOrEmpty(autor.Foto) ? "/img/noimageplaceholder.png" : $"/images/autoresFoto/{autor.Foto}")" class="card-img-top" alt="@autor.Nome">
+                                        </a>
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title   mb-1" title="@autor.Nome">
+                                                <a asp-controller="Personagens" asp-action="Details" asp-route-id="@autor.Id"
+                                                   class="text-decoration-none">
+                                                    @autor.Nome
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">
+                                                @autor.ShowsCriados.Count() show@(autor.ShowsCriados.Count() != 1 ? "s" : "")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+                }
+
+                <!-- Resultados de Studios -->
+                @if (Model.Studios.Any())
+                {
+                    <section class="results-section mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3><i class="bi bi-building"></i> Studios (@Model.Studios.Count)</h3>
+                            @if (Model.FilterType == "all" && Model.Studios.Count >= 6)
+                            {
+                                <a asp-action="Search" asp-route-searchString="@Model.SearchTerm" asp-route-filterType="studios"
+                                   class="text-muted text-decoration-none fs-6 text-end">Ver todos os studios</a>
+                            }
+                        </div>
+                        <div class="row">
+                            @foreach (var studio in Model.Studios.Take(Model.FilterType == "all" ? 6 : 24))
+                            {
+                                <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                                    <div class="card show-card h-100">
+                                        <a asp-controller="Autores" asp-action="Details" asp-route-id="@studio.Id" class="text-decoration-none">
+                                            <img src="@(string.IsNullOrEmpty(studio.Foto) ? "/img/noimageplaceholder.png" : $"/images/studiosFoto/{studio.Foto}")" class="card-img-top" alt="@studio.Nome">
+                                        </a>
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title   mb-1" title="@studio.Nome">
+                                                <a asp-controller="Personagens" asp-action="Details" asp-route-id="@studio.Id"
+                                                   class="text-decoration-none">
+                                                    @studio.Nome
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">
+                                                @studio.ShowsDesenvolvidos.Count() show@(studio.ShowsDesenvolvidos.Count() != 1 ? "s" : "")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+                }
+            }
+            else
+            {
+                <!-- Nenhum resultado encontrado -->
+                <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
+                    <h1 class="text-center" style="color: #3D2D2D">Procuramos... mas nada foi encontrado :(</h1>
+                    <p class="text-center" style="color: #3D2D2D">Tente pesquisar com outros termos ou verifique a ortografia.</p>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Página inicial de pesquisa (sem termo de busca) -->
+            <div class="text-center py-5">
+                <i class="bi bi-search display-1 text-primary"></i>
+                <h2 class="mt-3">Pesquisa Universal</h2>
+                <p class="text-muted">Use o campo de pesquisa acima para encontrar shows, personagens, autores e studios.</p>
+            </div>
+        }
+    </div>
+</div>
+@functions {
+    string GetFilterDisplayName(string filterType)
+    {
+        return filterType switch
+        {
+            "shows" => "Shows",
+            "personagens" => "Personagens",
+            "autores" => "Autores",
+            "studios" => "Studios",
+            _ => "Todos"
+        };
+    }
+}

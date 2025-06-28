@@ -34,7 +34,10 @@
             <div id="sinopseWrapper" class="sinopse-collapsed">
                 <p id="sinopseText">@Html.Raw(Model.Sinopse.Replace("\n", "<br>"))</p>
             </div>
-            <button id="toggleSinopse" class="toggle-btn">Ler mais</button>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <button id="toggleSinopse" class="toggle-btn">Ler mais</button>
+            }
         </div>
     </div>
 </div>

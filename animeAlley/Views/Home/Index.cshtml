@@ -1,8 +1,230 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model animeAlley.ViewModels.BrowseViewModel
+@{
+    ViewData["Title"] = "Página Inicial";
 }
 
-<div class="text-center min-vh-100">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="home-container">
+    <!-- Seção de Pesquisa -->
+    <div class="search-section py-5 mb-4 position-relative" style="background-image: url('@(Model.RandomBannerShow?.Banner != null ? $"/images/showBanner/{Model.RandomBannerShow.Banner}" : "/img/default-banner.jpg")');">
+        <div class="show-banner-shadow position-absolute bottom-0"></div>
+        <div class="container position-absolute top-50 start-50 translate-middle">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <form asp-controller="Home" asp-action="Search" method="get" class="search-form">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input type="text" name="searchString" class="form-control form-control-lg"
+                                       placeholder="O que pretende pesquisar?" required>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="filterType" class="form-select form-select-lg">
+                                    <option value="all">Todos</option>
+                                    <option value="shows">Shows</option>
+                                    <option value="personagens">Personagens</option>
+                                    <option value="autores">Autores</option>
+                                    <option value="studios">Studios</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="bi bi-search"></i> Pesquisar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção Melhores Shows -->
+    @if (Model.TopShows.Any())
+    {
+        <div class="section mb-5">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="section-title">Melhores Shows</h3>
+                    <a asp-controller="Shows" asp-route-section="Index"
+                       class="text-muted text-decoration-none fs-6">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="row">
+                    @foreach (var show in Model.TopShows)
+                    {
+                        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                            <div class="card show-card h-100">
+                                <div class="position-relative">
+                                    <a asp-controller="Shows" asp-action="Details" asp-route-id="@show.Id">
+                                        <img src="~/images/showCover/@show.Imagem" class="card-img-top" alt="@show.Nome">
+                                    </a>
+                                    <div class="rating-badge" data-rating="@(show.Nota < 3 ? "low" : show.Nota < 6 ? "medium" : show.Nota < 8 ? "good" : "excellent")">
+                                        <span class="badge">@show.Nota.ToString("F1")</span>
+                                    </div>
+                                </div>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title mb-1" title="@show.Nome">
+                                        <a asp-controller="Shows" asp-action="Details" asp-route-id="@show.Id"
+                                           class="text-decoration-none">@show.Nome</a>
+                                    </h6>
+                                    <a asp-controller="Studios" asp-action="Details" asp-route-id="@show.Studio.Id" class="text-decoration-none">
+                                        <small class="text-muted">@show.Studio.Nome</small>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Seção Shows Recentes -->
+    @if (Model.RecentShows.Any())
+    {
+        <div class="section mb-5">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="section-title">Shows Recentes</h3>
+                    <a asp-controller="Shows" asp-route-section="Index"
+                       class="text-muted text-decoration-none fs-6">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="row">
+                    @foreach (var show in Model.RecentShows)
+                    {
+                        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                            <div class="card show-card h-100">
+                                <a asp-controller="Shows" asp-action="Details" asp-route-id="@show.Id">
+                                    <img src="~/images/showCover/@show.Imagem" class="card-img-top" alt="@show.Nome">
+
+                                </a>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title   mb-1" title="@show.Nome">
+                                        <a asp-controller="Shows" asp-action="Details" asp-route-id="@show.Id"
+                                           class="text-decoration-none">@show.Nome</a>
+                                    </h6>
+                                    <a asp-controller="Studios" asp-action="Details" asp-route-id="@show.Studio.Id" class="text-decoration-none">
+                                        <small class="text-muted">@show.Studio.Nome</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Seção Personagens -->
+    @if (Model.RecentPersonagens.Any())
+    {
+        <div class="section mb-5">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="section-title">Personagens</h3>
+                    <a asp-controller="Personagens" asp-route-section="Index"
+                       class="text-muted text-decoration-none fs-6">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="row">
+                    @foreach (var personagem in Model.RecentPersonagens)
+                    {
+                        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                            <div class="card character-card h-100">
+                                <a asp-controller="Personagens" asp-action="Details" asp-route-id="@personagem.Id">
+                                    <img src="~/images/personagensFoto/@personagem.Foto" class="card-img-top" alt="@personagem.Nome">
+                                </a>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title   mb-1" title="@personagem.Nome">
+                                        <a asp-controller="Personagens" asp-action="Details" asp-route-id="@personagem.Id"
+                                           class="text-decoration-none">@personagem.Nome</a>
+                                    </h6>
+                                    <small class="text-muted">@personagem.TipoPersonagem.ToString()</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Seção Autores -->
+    @if (Model.RecentAutores.Any())
+    {
+        <div class="section mb-5">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="section-title">Autores</h3>
+                    <a asp-controller="Autores" asp-route-section="Index"
+                       class="text-muted text-decoration-none fs-6">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="row">
+                    @foreach (var autor in Model.RecentAutores)
+                    {
+                        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                            <div class="card author-card h-100">
+                                <a asp-controller="Autores" asp-action="Details" asp-route-id="@autor.Id">
+                                    <img src="~/images/autoresFoto/@autor.Foto" class="card-img-top" alt="@autor.Nome">
+                                </a>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title   mb-1" title="@autor.Nome">
+                                        <a asp-controller="Autores" asp-action="Details" asp-route-id="@autor.Id"
+                                           class="text-decoration-none">@autor.Nome</a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        @autor.ShowsCriados.Count() show@(autor.ShowsCriados.Count() != 1 ? "s" : "")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Seção Studios -->
+    @if (Model.RecentStudios.Any())
+    {
+        <div class="section pb-5">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="section-title">Estúdios</h3>
+                    <a asp-controller="Studios" asp-route-section="Index"
+                       class="text-muted text-decoration-none fs-6">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="row">
+                    @foreach (var studio in Model.RecentStudios)
+                    {
+                        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                            <div class="card studio-card h-100">
+                                <a asp-controller="Studios" asp-action="Details" asp-route-id="@studio.Id">
+                                    <img src="~/images/studiosFoto/@studio.Foto" class="card-img-top" alt="@studio.Nome">
+
+                                </a>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title   mb-1" title="@studio.Nome">
+                                        <a asp-controller="Studios" asp-action="Details" asp-route-id="@studio.Id"
+                                           class="text-decoration-none">@studio.Nome</a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        @studio.ShowsDesenvolvidos.Count() show@(studio.ShowsDesenvolvidos.Count() != 1 ? "s" : "")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>

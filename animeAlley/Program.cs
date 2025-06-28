@@ -1,7 +1,6 @@
 using animeAlley.Data;
 using animeAlley.Models;
 using animeAlley.Services;
-using AppFotos.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -67,12 +66,9 @@ builder.Services.AddAuthentication(options => { })
            IssuerSigningKey = new SymmetricSecurityKey(key)
        };
    });
+
 // configuração do JWT
 builder.Services.AddScoped<TokenService>();
-
-// Adiciona o Swagger
-// builder.Services.AddEndpointsApiExplorer();   // necessária apenas para APIs mínimas. 
-// builder.Services.AddSwaggerGen();
 
 // Pegar o Nome do Utilizador
 builder.Services.AddScoped<UtilizadorService>();
@@ -97,35 +93,19 @@ builder.Services.AddScoped<IEstatisticasService, EstatisticasService>();
 builder.Services.AddControllers()
                 .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new() { Title = "animeAlley API", Version = "v1" });
-
-    // Habilita o JWT Bearer no Swagger
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+builder.Services.AddSwaggerGen(c => {
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Digite 'Bearer {seu token}'"
+        Title = "animeAlley API",
+        Version = "v1",
+        Description = "API para gestão de shows, autores, personagens, generos e estúdios"
     });
 
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+    // Caminho para o XML gerado
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+
 });
 
 
@@ -152,7 +132,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();

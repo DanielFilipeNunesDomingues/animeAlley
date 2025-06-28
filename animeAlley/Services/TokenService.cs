@@ -4,10 +4,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AppFotos.Services
+namespace animeAlley.Services
 {
+
     /// <summary>
-    /// Geração de tokens JWT (Java Web Token)
+    /// Geração de 'tokens' JWT (Java Web Token)
     /// </summary>
     public class TokenService
     {
@@ -27,10 +28,11 @@ namespace AppFotos.Services
 
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),   // User ID
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),  // User Email - não será nulo pq é usado como UserName
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+           new Claim(JwtRegisteredClaimNames.Sub, user.Id),   // User ID
+           new Claim(JwtRegisteredClaimNames.Email, user.Email),  // User Email - não será nulo pq é usado como UserName
+           new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+       };
+
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
@@ -42,5 +44,6 @@ namespace AppFotos.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }

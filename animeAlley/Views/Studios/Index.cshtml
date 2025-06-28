@@ -1,53 +1,88 @@
 ﻿@model IEnumerable<animeAlley.Models.Studio>
-
 @{
-    ViewData["Title"] = "Estúdios";
+    ViewData["Title"] = "Estúdios"; 
 }
 
-<div class="py-5 container min-vh-100">
+@{
+    ViewBag.SearchTerm = ViewData["CurrentFilter"] as string ?? "";
+    ViewBag.FilterType = "studios"; // Filtro específico para shows
+}
 
+<div class="container min-vh-100 py-5">
+            <h2 class="fw-bold">Estúdios</h2>
     @if (User.IsInRole("Admin"))
     {
-        <p>
-            <a class="text-muted pointer-event" asp-action="Create">Create New</a>
-        </p>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a class="btn btn-primary" asp-action="Create">
+                Criar Novo Estúdio
+            </a>
+        </div>
     }
+    <!-- Filtros e Ordenação -->
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Index" method="get" class="d-flex">
+                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" 
+                       placeholder="Buscar estúdios..." class="form-control" />
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex justify-content-end gap-2 mt-md-0 mt-4">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Ordenar por
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name" })">Nome A-Z</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc" })">Nome Z-A</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date" })">Mais Recente</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc" })">Mais Antigo</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <form asp-action="Index" method="get" class="mb-4">
-        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Buscar estúdios..." class="form-control" />
-    </form>
-
+    <!-- Resultados -->
     @if(Model.Any())
     {
-        <div class="show-grid-container">
-
+        <!-- Grid View (padrão) -->
+        <div id="gridViewContainer" class="row mt-4">
             @foreach (var item in Model)
             {
-                @if (!string.IsNullOrEmpty(item.Foto))
-                {
-                    <div class="show-grid-item">
-                        <a asp-action="Details" asp-route-id="@item.Id">
-                            <img src="~/images/studiosFoto/@item.Foto" alt="@item.Nome" title="@item.Nome" height="100px" />
-                        </a>
-                    </div>
-                }
-                else
-                {
-                    <div class="show-grid-item">
-                        <a asp-action="Details" asp-route-id="@item.Id">
-                            <img src="~/img/noimageplaceholder.png" alt="@item.Nome" title="@item.Nome" height="100px" />
-                        </a>
-                    </div>
-                }
+                        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                            <div class="card show-card h-100">
+                                <div class="position-relative">
+                                    <a asp-controller="Studios" asp-action="Details" asp-route-id="@item.Id">
+                                        <img src="~/images/studiosFoto/@item.Foto" class="card-img-top" alt="@item.Nome">
+                                    </a>
+                                </div>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title mb-1" title="@item.Nome">
+                                        <a asp-controller="Studios" asp-action="Details" asp-route-id="@item.Id"
+                                           class="text-decoration-none">@item.Nome</a>
+                                    </h6>
+                                    <small class="text-muted">@item.ShowsDesenvolvidos.Count() show@(item.ShowsDesenvolvidos.Count() != 1 ? "s" : "")</small>
+                                </div>
+                            </div>
+                        </div>
             }
-
         </div>
+
+        <!-- Paginação (se implementada) -->
+        <nav aria-label="Navegação de páginas" class="mt-5">
+            <ul class="pagination justify-content-center">
+                <!-- Aqui você pode implementar a paginação -->
+            </ul>
+        </nav>
     }
     else
     {
+        <!-- Nenhum resultado encontrado -->
         <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
-            <h1 class="text-center" style="color: #3D2D2D">Nenhum estúdio foi encontrado :(</h1>
+            <h1 class="text-center mt-4" style="color: #3D2D2D">Procuramos... mas nada foi encontrado :(</h1>
+            <p class="text-center" style="color: #3D2D2D">Tente pesquisar com outros termos ou verifique a ortografia.</p>
         </div>
     }
-
 </div>

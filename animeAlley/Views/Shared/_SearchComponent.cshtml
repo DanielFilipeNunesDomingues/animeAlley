@@ -1,0 +1,114 @@
+﻿@model animeAlley.ViewModels.SearchResultsViewModel
+@{
+    var bannerImage = Model?.RandomBannerShow.Banner != null ? $"/images/showBanner/{Model.RandomBannerShow.Banner}" : "/img/default-banner.jpg";
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var filterType = ViewBag.FilterType as string ?? "all";
+}
+
+<!-- Componente de Pesquisa Universal -->
+<div class="search-section py-5 mb-4 position-relative" 
+     style="background-image: url('@bannerImage'); 
+            background-size: cover; 
+            background-position: center; 
+            min-height: 300px;">
+    <!-- Overlay -->
+    <div class="search-overlay position-absolute top-0 start-0 w-100 h-100" 
+         style="background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.7));"></div>
+    
+    <!-- Conteúdo -->
+    <div class="container position-relative h-100 d-flex align-items-center" style="z-index: 2;">
+        <div class="row justify-content-center w-100">
+            <div class="col-lg-8">
+                <div class="text-center mb-4">
+                    <h1 class="text-white display-6 fw-bold mb-3">
+                        @if (string.IsNullOrEmpty(searchTerm))
+                        {
+                            <span>Descubra seu próximo anime favorito</span>
+                        }
+                        else
+                        {
+                            <span>Pesquisar em AnimeAlley</span>
+                        }
+                    </h1>
+                    <p class="text-white-50 lead">Explore milhares de shows, personagens, autores e studios</p>
+                </div>
+                
+                <form asp-controller="Home" asp-action="Search" method="get" class="search-form">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" name="searchString" 
+                                               class="form-control form-control-lg border-0 shadow-sm"
+                                               value="@searchTerm"
+                                               placeholder="O que pretende pesquisar?"
+                                               id="searchInput" required>
+                                        <label for="searchInput">
+                                            <i class="bi bi-search me-2"></i>O que pretende pesquisar?
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <select name="FilterType" class="form-select form-select-lg border-0 shadow-sm" id="filterSelect" asp-for="FilterType">
+                                            <option value="all">🔍 Pesquisar tudo</option>
+                                            <option value="shows">📺 Apenas Shows</option>
+                                            <option value="personagens">👤 Apenas Personagens</option>
+                                            <option value="autores">✍️ Apenas Autores</option>
+                                            <option value="studios">🏢 Apenas Studios</option>
+                                        </select>
+                                        <label for="filterSelect">Categoria</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 h-100 shadow-sm">
+                                        <i class="bi bi-search"></i>
+                                        <span class="d-none d-md-inline ms-2">Pesquisar</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Pesquisas Populares (opcional) -->
+                @if (string.IsNullOrEmpty(searchTerm))
+                {
+                    <div class="text-center mt-4">
+                        <p class="text-white-50 mb-2">Pesquisas populares:</p>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <a href="@Url.Action("Search", "Home", new { searchString = "Naruto" })" 
+                               class="badge bg-light text-dark text-decoration-none px-3 py-2">Naruto</a>
+                            <a href="@Url.Action("Search", "Home", new { searchString = "One Piece" })" 
+                               class="badge bg-light text-dark text-decoration-none px-3 py-2">One Piece</a>
+                            <a href="@Url.Action("Search", "Home", new { searchString = "Attack on Titan" })" 
+                               class="badge bg-light text-dark text-decoration-none px-3 py-2">Attack on Titan</a>
+                            <a href="@Url.Action("Search", "Home", new { searchString = "Studio Ghibli" })" 
+                               class="badge bg-light text-dark text-decoration-none px-3 py-2">Studio Ghibli</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Auto-complete básico (opcional)
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    // Aqui você pode implementar auto-complete
+                    // Por exemplo, fazer uma chamada AJAX para buscar sugestões
+                });
+
+                // Focar no campo de pesquisa quando a página carregar
+                searchInput.focus();
+            }
+        });
+    </script>
+}
