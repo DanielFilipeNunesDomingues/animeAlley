@@ -2,26 +2,6 @@
 
 namespace animeAlley.DTOs
 {
-    // ================== RESPOSTA BASE DA API ==================
-    public class ApiResponse<T>
-    {
-        public bool Success { get; set; }
-        public T? Data { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public IEnumerable<string>? Errors { get; set; }
-        public PaginationInfo? Pagination { get; set; }
-    }
-
-    public class PaginationInfo
-    {
-        public int CurrentPage { get; set; }
-        public int PageSize { get; set; }
-        public int TotalItems { get; set; }
-        public int TotalPages { get; set; }
-        public bool HasPrevious => CurrentPage > 1;
-        public bool HasNext => CurrentPage < TotalPages;
-    }
-
     // ================== DTOs PARA SHOW (ANIME/MANGA) ==================
 
     // DTO para Show - Versão resumida para listas
@@ -31,7 +11,6 @@ namespace animeAlley.DTOs
         public string Nome { get; set; } = string.Empty;
         public string? Sinopse { get; set; }
         public string? Imagem { get; set; }
-        public string Tipo { get; set; } = string.Empty; // "Anime" ou "Manga"
         public decimal? Nota { get; set; }
         public int Ano { get; set; }
         public string Status { get; set; } = string.Empty;
@@ -49,7 +28,6 @@ namespace animeAlley.DTOs
         public string? Imagem { get; set; }
         public string? Banner { get; set; }
         public string? Trailer { get; set; }
-        public string Tipo { get; set; } = string.Empty;
         public decimal? Nota { get; set; }
         public int Ano { get; set; }
         public string Status { get; set; } = string.Empty;
@@ -72,9 +50,6 @@ namespace animeAlley.DTOs
         [Required(ErrorMessage = "Sinopse é obrigatória")]
         [MaxLength(10000, ErrorMessage = "Sinopse deve ter no máximo 10000 caracteres")]
         public string Sinopse { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Tipo é obrigatório")]
-        public string Tipo { get; set; } = string.Empty; // "Anime" ou "Manga"
 
         [Required(ErrorMessage = "Status é obrigatório")]
         public string Status { get; set; } = string.Empty;
@@ -161,6 +136,7 @@ namespace animeAlley.DTOs
     {
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
+
         public string? Biografia { get; set; }
         public string? Foto { get; set; }
         public DateTime? DataNascimento { get; set; }
@@ -229,68 +205,6 @@ namespace animeAlley.DTOs
         public string? Foto { get; set; }
 
         public List<int> ShowIds { get; set; } = new();
-    }
-
-    // ================== DTOs PARA LISTAS DE UTILIZADOR ==================
-    public class ListaDto
-    {
-        public int Id { get; set; }
-        public int UtilizadorId { get; set; }
-        public string NomeUtilizador { get; set; } = string.Empty;
-        public List<ListaShowDto> Shows { get; set; } = new();
-        public int TotalShows { get; set; }
-        public EstatisticasListaDto Estatisticas { get; set; } = new();
-    }
-
-    public class ListaShowDto
-    {
-        public ShowResumoDto Show { get; set; } = new();
-        public string Status { get; set; } = string.Empty; // "Assistindo", "Concluído", "Pausado", "Planejo Assistir"
-        public DateTime DataAdicao { get; set; }
-        public int? Progresso { get; set; } // Episódio/Capítulo atual
-        public decimal? NotaUsuario { get; set; }
-        public DateTime? DataUltimaAtualizacao { get; set; }
-    }
-
-    public class EstatisticasListaDto
-    {
-        public int TotalAssistindo { get; set; }
-        public int TotalConcluido { get; set; }
-        public int TotalPausado { get; set; }
-        public int TotalPlanejado { get; set; }
-        public decimal NotaMedia { get; set; }
-        public int TotalAnimes { get; set; }
-        public int TotalMangas { get; set; }
-    }
-
-    // DTO para adicionar show à lista
-    public class AdicionarShowListaDto
-    {
-        [Required(ErrorMessage = "ShowId é obrigatório")]
-        [Range(1, int.MaxValue, ErrorMessage = "ShowId deve ser maior que zero")]
-        public int ShowId { get; set; }
-
-        [Required(ErrorMessage = "Status é obrigatório")]
-        public string Status { get; set; } = "Planejo Assistir";
-
-        [Range(0, int.MaxValue, ErrorMessage = "Progresso deve ser maior ou igual a zero")]
-        public int? Progresso { get; set; }
-
-        [Range(0.0, 10.0, ErrorMessage = "Nota deve estar entre 0.0 e 10.0")]
-        public decimal? NotaUsuario { get; set; }
-    }
-
-    // DTO para atualizar status na lista
-    public class AtualizarStatusListaDto
-    {
-        [Required(ErrorMessage = "Status é obrigatório")]
-        public string Status { get; set; } = string.Empty;
-
-        [Range(0, int.MaxValue, ErrorMessage = "Progresso deve ser maior ou igual a zero")]
-        public int? Progresso { get; set; }
-
-        [Range(0.0, 10.0, ErrorMessage = "Nota deve estar entre 0.0 e 10.0")]
-        public decimal? NotaUsuario { get; set; }
     }
 
     // ================== DTOs PARA PESQUISA E FILTROS ==================
@@ -407,5 +321,17 @@ namespace animeAlley.DTOs
     {
         public string Status { get; set; } = string.Empty;
         public int Quantidade { get; set; }
+    }
+
+    public class EstatisticasResumoDto
+    {
+        public int TotalShows { get; set; }
+        public int TotalAnimes { get; set; }
+        public int TotalMangas { get; set; }
+        public int TotalUtilizadores { get; set; }
+        public int TotalPersonagens { get; set; }
+        public double NotaMediaGeral { get; set; }
+        public string GeneroMaisPopular { get; set; } = string.Empty;
+        public string ShowMaisPopular { get; set; } = string.Empty;
     }
 }

@@ -52,17 +52,6 @@
                                     <!-- Second Row -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label asp-for="Tipo" class="form-label fw-semibold">Tipo <span class="text-danger d-inline-block">*</span></label>
-                                            <select asp-for="Tipo" class="form-select"
-                                                    asp-items="Html.GetEnumSelectList<animeAlley.Models.Tipo>()">
-                                                <option value="">-- Selecione o Tipo --</option>
-                                            </select>
-                                            <span asp-validation-for="Tipo" class="text-danger"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="form-group">
                                             <label asp-for="Status" class="form-label fw-semibold">Status <span class="text-danger d-inline-block">*</span></label>
                                             <select asp-for="Status" class="form-select"
                                                     asp-items="Html.GetEnumSelectList<animeAlley.Models.Status>()">

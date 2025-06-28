@@ -365,7 +365,6 @@ namespace animeAlley.Controllers
                     // Atualizar propriedades básicas
                     showToUpdate.Nome = show.Nome;
                     showToUpdate.Sinopse = show.Sinopse;
-                    showToUpdate.Tipo = show.Tipo;
                     showToUpdate.Status = show.Status;
                     showToUpdate.Nota = show.Nota;
                     showToUpdate.Ano = show.Ano;

@@ -2,9 +2,14 @@ using animeAlley.Data;
 using animeAlley.Models;
 using animeAlley.Services;
 using AppFotos.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -62,26 +67,67 @@ builder.Services.AddAuthentication(options => { })
            IssuerSigningKey = new SymmetricSecurityKey(key)
        };
    });
-
-
 // configuração do JWT
 builder.Services.AddScoped<TokenService>();
+
+// Adiciona o Swagger
+// builder.Services.AddEndpointsApiExplorer();   // necessária apenas para APIs mínimas. 
+// builder.Services.AddSwaggerGen();
 
 // Pegar o Nome do Utilizador
 builder.Services.AddScoped<UtilizadorService>();
 
-// API para gerir os shows
-builder.Services.AddScoped<MappingService>();
-
 // Novo serviço para gerenciar roles
-builder.Services.AddScoped<RoleService>(); 
+builder.Services.AddScoped<RoleService>();
 
+// declarar o serviço do Signal R
+builder.Services.AddSignalR();
+
+// Registro dos novos serviços com suas interfaces
+builder.Services.AddScoped<IShowService, ShowService>();
+builder.Services.AddScoped<IGeneroService, GeneroService>();
+builder.Services.AddScoped<IStudioService, StudioService>();
+builder.Services.AddScoped<IAutorService, AutorService>();
+builder.Services.AddScoped<IPersonagemService, PersonagemService>();
+builder.Services.AddScoped<IEstatisticasService, EstatisticasService>();
 
 // Eliminar a proteção de 'ciclos' qd se faz uma pesquisa que envolva um relacionamento 1-N em Linq
 // https://code-maze.com/aspnetcore-handling-circular-references-when-working-with-json/
 // https://marcionizzola.medium.com/como-resolver-jsonexception-a-possible-object-cycle-was-detected-27e830ea78e5
 builder.Services.AddControllers()
                 .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "animeAlley API", Version = "v1" });
+
+    // Habilita o JWT Bearer no Swagger
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Digite 'Bearer {seu token}'"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 
 var app = builder.Build();
 
@@ -90,6 +136,9 @@ if (app.Environment.IsDevelopment())
 {
     // Invocar o seed da BD
     app.UseMigrationsEndPoint();
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 else
 {
@@ -107,7 +156,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();
-
 
 app.MapControllerRoute(
     name: "default",
@@ -165,5 +213,3 @@ async Task SeedRolesAndAdmin(IServiceProvider serviceProvider)
 }
 
 app.Run();
-
-

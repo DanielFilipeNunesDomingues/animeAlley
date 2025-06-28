@@ -34,9 +34,6 @@ namespace animeAlley.Models
         [MaxLength(10000, ErrorMessage = "Sinopse deve ter no máximo 10000 caracteres")]
         public string Sinopse { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Tipo é obrigatório")]
-        public Tipo Tipo { get; set; }
-
         [Required(ErrorMessage = "Status é obrigatório")]
         public Status Status { get; set; }
 
@@ -85,9 +82,6 @@ namespace animeAlley.Models
         [Required(ErrorMessage = "Sinopse é obrigatória")]
         [MaxLength(10000, ErrorMessage = "Sinopse deve ter no máximo 10000 caracteres")]
         public string Sinopse { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Tipo é obrigatório")]
-        public Tipo Tipo { get; set; }
 
         [Required(ErrorMessage = "Status é obrigatório")]
         public Status Status { get; set; }

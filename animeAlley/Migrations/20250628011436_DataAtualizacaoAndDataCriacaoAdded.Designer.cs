@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using animeAlley.Data;
 
@@ -11,9 +12,11 @@ using animeAlley.Data;
 namespace animeAlley.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628011436_DataAtualizacaoAndDataCriacaoAdded")]
+    partial class DataAtualizacaoAndDataCriacaoAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,15 +154,15 @@ namespace animeAlley.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "03b9203c-da5d-4e37-925f-51a615704b25",
+                            ConcurrencyStamp = "a0cbd366-5ca1-47d9-a013-9cb895f7cc18",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFW3ZeCpGMnWf+u8ooHXqzB/cazekZZCTIrXkVpRTPf+kJXARh3RvTPeDEx4S67V1g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEOXAatLWqKdoSiLcPgc9AIfx6NnXip31v8fGfzy6O0rt0VBlPFwjVzZ8nSEZbl6TNw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "0b74d822-fa8d-4878-a525-41518e0bd6df",
+                            SecurityStamp = "a1ec4f24-19f3-4e0f-8938-f2cf41aabf8d",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -481,6 +484,9 @@ namespace animeAlley.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("StudioFK")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Tipo")
                         .HasColumnType("int");
 
                     b.Property<string>("Trailer")

@@ -1,88 +1,81 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using animeAlley.Data;
+﻿using animeAlley.Data;
+using animeAlley.DTOs;
 using animeAlley.Models;
+using animeAlley.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace animeAlley.Controllers.Api
 {
 
     // ================== CONTROLLER PRINCIPAL DE SHOWS (ANIMES/MANGAS) ==================
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/[controller]")]
     public class ShowsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IShowService _showService;
 
-        public ShowsController(ApplicationDbContext context)
+        public ShowsController(IShowService showService)
         {
-            _context = context;
+            _showService = showService;
         }
 
         // GET: api/shows
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Show>>>> GetShows(
+        public async Task<ActionResult<ApiResponse<IEnumerable<ShowResumoDto>>>> GetShows(
             [FromQuery] string? search = null,
-            [FromQuery] int? generoId = null,
-            [FromQuery] int? studioId = null,
-            [FromQuery] Tipo? tipo = null,
-            [FromQuery] Status? status = null,
+            [FromQuery] string? generoIds = null,
+            [FromQuery] string? studioIds = null,
+            [FromQuery] string? autorIds = null,
+            [FromQuery] string? tipo = null,
+            [FromQuery] string? status = null,
+            [FromQuery] decimal? notaMinima = null,
+            [FromQuery] decimal? notaMaxima = null,
+            [FromQuery] int? anoInicio = null,
+            [FromQuery] int? anoFim = null,
+            [FromQuery] string? fonte = null,
+            [FromQuery] string ordenarPor = "nome",
+            [FromQuery] string direcao = "ASC",
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
             try
             {
-                var query = _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .Include(s => s.Studio)
-                    .Include(s => s.Autor)
-                    .Include(s => s.Personagens)
-                    .AsQueryable();
-
-                // Filtros
-                if (!string.IsNullOrEmpty(search))
+                var filtro = new ShowFiltroDto
                 {
-                    query = query.Where(s => s.Nome.Contains(search) || s.Sinopse.Contains(search));
-                }
+                    Search = search,
+                    GeneroIds = ParseIds(generoIds),
+                    StudioIds = ParseIds(studioIds),
+                    AutorIds = ParseIds(autorIds),
+                    Tipo = tipo,
+                    Status = status,
+                    NotaMinima = notaMinima,
+                    NotaMaxima = notaMaxima,
+                    AnoInicio = anoInicio,
+                    AnoFim = anoFim,
+                    Fonte = fonte,
+                    OrdenarPor = ordenarPor,
+                    Direcao = direcao,
+                    Page = page,
+                    PageSize = pageSize
+                };
 
-                if (generoId.HasValue)
-                {
-                    query = query.Where(s => s.GenerosShows.Any(g => g.Id == generoId.Value));
-                }
+                var result = await _showService.GetShowsAsync(filtro);
 
-                if (studioId.HasValue)
-                {
-                    query = query.Where(s => s.StudioFK == studioId.Value);
-                }
-
-                if (tipo.HasValue)
-                {
-                    query = query.Where(s => s.Tipo == tipo.Value);
-                }
-
-                if (status.HasValue)
-                {
-                    query = query.Where(s => s.Status == status.Value);
-                }
-
-                // Paginação
-                var totalItems = await query.CountAsync();
-                var shows = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                var response = new ApiResponse<IEnumerable<Show>>
+                var response = new ApiResponse<IEnumerable<ShowResumoDto>>
                 {
                     Success = true,
-                    Data = shows,
+                    Data = result.Data,
                     Message = "Shows recuperados com sucesso",
                     Pagination = new PaginationInfo
                     {
-                        CurrentPage = page,
-                        PageSize = pageSize,
-                        TotalItems = totalItems,
-                        TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+                        CurrentPage = result.CurrentPage,
+                        PageSize = result.PageSize,
+                        TotalItems = result.TotalItems,
+                        TotalPages = result.TotalPages
                     }
                 };
 
@@ -90,7 +83,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<IEnumerable<Show>>
+                return StatusCode(500, new ApiResponse<IEnumerable<ShowResumoDto>>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -100,31 +93,22 @@ namespace animeAlley.Controllers.Api
 
         // GET: api/shows/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Show>>> GetShow(int id)
+        public async Task<ActionResult<ApiResponse<ShowDetalheDto>>> GetShow(int id)
         {
             try
             {
-                var show = await _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .Include(s => s.Studio)
-                    .Include(s => s.Autor)
-                    .Include(s => s.Personagens)
-                    .FirstOrDefaultAsync(s => s.Id == id);
+                var show = await _showService.GetShowByIdAsync(id);
 
                 if (show == null)
                 {
-                    return NotFound(new ApiResponse<Show>
+                    return NotFound(new ApiResponse<ShowDetalheDto>
                     {
                         Success = false,
                         Message = "Show não encontrado"
                     });
                 }
 
-                // Incrementar views
-                show.Views++;
-                await _context.SaveChangesAsync();
-
-                return Ok(new ApiResponse<Show>
+                return Ok(new ApiResponse<ShowDetalheDto>
                 {
                     Success = true,
                     Data = show,
@@ -133,109 +117,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Show>
-                {
-                    Success = false,
-                    Message = "Erro interno do servidor: " + ex.Message
-                });
-            }
-        }
-
-        // GET: api/shows/animes
-        [HttpGet("animes")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Show>>>> GetAnimes(
-            [FromQuery] string? search = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
-        {
-            try
-            {
-                var query = _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .Include(s => s.Studio)
-                    .Include(s => s.Autor)
-                    .Where(s => s.Tipo == Tipo.Anime)
-                    .AsQueryable();
-
-                if (!string.IsNullOrEmpty(search))
-                {
-                    query = query.Where(s => s.Nome.Contains(search) || s.Sinopse.Contains(search));
-                }
-
-                var totalItems = await query.CountAsync();
-                var animes = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                return Ok(new ApiResponse<IEnumerable<Show>>
-                {
-                    Success = true,
-                    Data = animes,
-                    Message = "Animes recuperados com sucesso",
-                    Pagination = new PaginationInfo
-                    {
-                        CurrentPage = page,
-                        PageSize = pageSize,
-                        TotalItems = totalItems,
-                        TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<IEnumerable<Show>>
-                {
-                    Success = false,
-                    Message = "Erro interno do servidor: " + ex.Message
-                });
-            }
-        }
-
-        // GET: api/shows/mangas
-        [HttpGet("mangas")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Show>>>> GetMangas(
-            [FromQuery] string? search = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
-        {
-            try
-            {
-                var query = _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .Include(s => s.Studio)
-                    .Include(s => s.Autor)
-                    .Where(s => s.Tipo == Tipo.Manga)
-                    .AsQueryable();
-
-                if (!string.IsNullOrEmpty(search))
-                {
-                    query = query.Where(s => s.Nome.Contains(search) || s.Sinopse.Contains(search));
-                }
-
-                var totalItems = await query.CountAsync();
-                var mangas = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                return Ok(new ApiResponse<IEnumerable<Show>>
-                {
-                    Success = true,
-                    Data = mangas,
-                    Message = "Mangas recuperados com sucesso",
-                    Pagination = new PaginationInfo
-                    {
-                        CurrentPage = page,
-                        PageSize = pageSize,
-                        TotalItems = totalItems,
-                        TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<IEnumerable<Show>>
+                return StatusCode(500, new ApiResponse<ShowDetalheDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -245,79 +127,24 @@ namespace animeAlley.Controllers.Api
 
         // GET: api/shows/top-rated
         [HttpGet("top-rated")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Show>>>> GetTopRated(
+        public async Task<ActionResult<ApiResponse<IEnumerable<ShowResumoDto>>>> GetTopRated(
             [FromQuery] int limit = 10,
-            [FromQuery] Tipo? tipo = null)
+            [FromQuery] string? tipo = null)
         {
             try
             {
-                var query = _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .Include(s => s.Studio)
-                    .Include(s => s.Autor)
-                    .AsQueryable();
+                var shows = await _showService.GetTopRatedAsync(limit, tipo);
 
-                if (tipo.HasValue)
-                {
-                    query = query.Where(s => s.Tipo == tipo);
-                }
-
-                var topShows = await query
-                    .OrderByDescending(s => s.Nota)
-                    .Take(limit)
-                    .ToListAsync();
-
-                return Ok(new ApiResponse<IEnumerable<Show>>
+                return Ok(new ApiResponse<IEnumerable<ShowResumoDto>>
                 {
                     Success = true,
-                    Data = topShows,
+                    Data = shows,
                     Message = "Top shows recuperados com sucesso"
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<IEnumerable<Show>>
-                {
-                    Success = false,
-                    Message = "Erro interno do servidor: " + ex.Message
-                });
-            }
-        }
-
-        // GET: api/shows/trending
-        [HttpGet("trending")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Show>>>> GetTrending(
-            [FromQuery] int limit = 10,
-            [FromQuery] Tipo? tipo = null)
-        {
-            try
-            {
-                var query = _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .Include(s => s.Studio)
-                    .Include(s => s.Autor)
-                    .AsQueryable();
-
-                if (tipo.HasValue)
-                {
-                    query = query.Where(s => s.Tipo == tipo);
-                }
-
-                var trendingShows = await query
-                    .OrderByDescending(s => s.Views)
-                    .Take(limit)
-                    .ToListAsync();
-
-                return Ok(new ApiResponse<IEnumerable<Show>>
-                {
-                    Success = true,
-                    Data = trendingShows,
-                    Message = "Shows em alta recuperados com sucesso"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<IEnumerable<Show>>
+                return StatusCode(500, new ApiResponse<IEnumerable<ShowResumoDto>>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -327,13 +154,13 @@ namespace animeAlley.Controllers.Api
 
         // POST: api/shows
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<Show>>> CreateShow([FromBody] CreateShowRequest request)
+        public async Task<ActionResult<ApiResponse<ShowDetalheDto>>> CreateShow([FromBody] ShowCreateUpdateDto showDto)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ApiResponse<Show>
+                    return BadRequest(new ApiResponse<ShowDetalheDto>
                     {
                         Success = false,
                         Message = "Dados inválidos",
@@ -341,129 +168,27 @@ namespace animeAlley.Controllers.Api
                     });
                 }
 
-                // Validações adicionais
-                if (request.StudioFK <= 0)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "StudioFK deve ser maior que zero"
-                    });
-                }
+                var createdShow = await _showService.CreateShowAsync(showDto);
 
-                if (request.AutorFK <= 0)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "AutorFK deve ser maior que zero"
-                    });
-                }
-
-                // Validar se Studio e Autor existem
-                var studioExists = await _context.Studios.AnyAsync(s => s.Id == request.StudioFK);
-                if (!studioExists)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "Studio não encontrado"
-                    });
-                }
-
-                var autorExists = await _context.Autores.AnyAsync(a => a.Id == request.AutorFK);
-                if (!autorExists)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "Autor não encontrado"
-                    });
-                }
-
-                // Converter NotaAux para Nota se necessário
-                decimal nota = 0;
-                if (!string.IsNullOrEmpty(request.NotaAux))
-                {
-                    if (!decimal.TryParse(request.NotaAux.Replace(',', '.'),
-                        System.Globalization.NumberStyles.Float,
-                        System.Globalization.CultureInfo.InvariantCulture, out nota))
-                    {
-                        return BadRequest(new ApiResponse<Show>
-                        {
-                            Success = false,
-                            Message = "Formato de nota inválido"
-                        });
-                    }
-                }
-                else if (request.Nota.HasValue)
-                {
-                    nota = request.Nota.Value;
-                }
-
-                var show = new Show
-                {
-                    Nome = request.Nome,
-                    Sinopse = request.Sinopse,
-                    Tipo = request.Tipo,
-                    Status = request.Status,
-                    Nota = nota,
-                    Ano = request.Ano,
-                    Imagem = request.Imagem ?? string.Empty,
-                    Banner = request.Banner ?? string.Empty,
-                    Trailer = request.Trailer ?? string.Empty,
-                    Fonte = request.Fonte,
-                    StudioFK = request.StudioFK,
-                    AutorFK = request.AutorFK,
-                    Views = 0
-                };
-
-                _context.Shows.Add(show);
-                await _context.SaveChangesAsync();
-
-                // Associar gêneros se fornecidos
-                if (request.GeneroIds != null && request.GeneroIds.Any())
-                {
-                    var generos = await _context.Generos
-                        .Where(g => request.GeneroIds.Contains(g.Id))
-                        .ToListAsync();
-
-                    if (generos.Count != request.GeneroIds.Count())
-                    {
-                        // Alguns gêneros não foram encontrados
-                        var foundIds = generos.Select(g => g.Id);
-                        var notFoundIds = request.GeneroIds.Except(foundIds);
-
-                        return BadRequest(new ApiResponse<Show>
-                        {
-                            Success = false,
-                            Message = $"Gêneros não encontrados: {string.Join(", ", notFoundIds)}"
-                        });
-                    }
-
-                    show.GenerosShows = generos;
-                    await _context.SaveChangesAsync();
-                }
-
-                // Recarregar o show com todas as relações para retornar
-                var createdShow = await _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .Include(s => s.Studio)
-                    .Include(s => s.Autor)
-                    .Include(s => s.Personagens)
-                    .FirstOrDefaultAsync(s => s.Id == show.Id);
-
-                return CreatedAtAction(nameof(GetShow), new { id = show.Id },
-                    new ApiResponse<Show>
+                return CreatedAtAction(nameof(GetShow), new { id = createdShow.Id },
+                    new ApiResponse<ShowDetalheDto>
                     {
                         Success = true,
                         Data = createdShow,
                         Message = "Show criado com sucesso"
                     });
             }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new ApiResponse<ShowDetalheDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Show>
+                return StatusCode(500, new ApiResponse<ShowDetalheDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -473,22 +198,13 @@ namespace animeAlley.Controllers.Api
 
         // PUT: api/shows/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<Show>>> UpdateShow(int id, [FromBody] UpdateShowRequest request)
+        public async Task<ActionResult<ApiResponse<ShowDetalheDto>>> UpdateShow(int id, [FromBody] ShowCreateUpdateDto showDto)
         {
             try
             {
-                if (id != request.Id)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "ID do show não coincide"
-                    });
-                }
-
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ApiResponse<Show>
+                    return BadRequest(new ApiResponse<ShowDetalheDto>
                     {
                         Success = false,
                         Message = "Dados inválidos",
@@ -496,159 +212,26 @@ namespace animeAlley.Controllers.Api
                     });
                 }
 
-                var show = await _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .FirstOrDefaultAsync(s => s.Id == id);
+                var updatedShow = await _showService.UpdateShowAsync(id, showDto);
 
-                if (show == null)
-                {
-                    return NotFound(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "Show não encontrado"
-                    });
-                }
-
-                // Validações adicionais
-                if (request.StudioFK <= 0)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "StudioFK deve ser maior que zero"
-                    });
-                }
-
-                if (request.AutorFK <= 0)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "AutorFK deve ser maior que zero"
-                    });
-                }
-
-                // Validar se Studio e Autor existem
-                var studioExists = await _context.Studios.AnyAsync(s => s.Id == request.StudioFK);
-                if (!studioExists)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "Studio não encontrado"
-                    });
-                }
-
-                var autorExists = await _context.Autores.AnyAsync(a => a.Id == request.AutorFK);
-                if (!autorExists)
-                {
-                    return BadRequest(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "Autor não encontrado"
-                    });
-                }
-
-                // Converter NotaAux para Nota se necessário
-                decimal nota = show.Nota; // Manter valor atual se não for fornecido novo
-                if (!string.IsNullOrEmpty(request.NotaAux))
-                {
-                    if (!decimal.TryParse(request.NotaAux.Replace(',', '.'),
-                        System.Globalization.NumberStyles.Float,
-                        System.Globalization.CultureInfo.InvariantCulture, out nota))
-                    {
-                        return BadRequest(new ApiResponse<Show>
-                        {
-                            Success = false,
-                            Message = "Formato de nota inválido"
-                        });
-                    }
-                }
-                else if (request.Nota.HasValue)
-                {
-                    nota = request.Nota.Value;
-                }
-
-                // Atualizar propriedades
-                show.Nome = request.Nome;
-                show.Sinopse = request.Sinopse;
-                show.Tipo = request.Tipo;
-                show.Status = request.Status;
-                show.Nota = nota;
-                show.Ano = request.Ano;
-
-                // Só atualizar se valores forem fornecidos
-                if (!string.IsNullOrEmpty(request.Imagem))
-                    show.Imagem = request.Imagem;
-                if (!string.IsNullOrEmpty(request.Banner))
-                    show.Banner = request.Banner;
-                if (request.Trailer != null)
-                    show.Trailer = request.Trailer;
-
-                show.Fonte = request.Fonte;
-                show.StudioFK = request.StudioFK;
-                show.AutorFK = request.AutorFK;
-
-                // Atualizar gêneros se fornecidos
-                if (request.GeneroIds != null)
-                {
-                    // Limpar gêneros existentes
-                    show.GenerosShows.Clear();
-
-                    if (request.GeneroIds.Any())
-                    {
-                        var generos = await _context.Generos
-                            .Where(g => request.GeneroIds.Contains(g.Id))
-                            .ToListAsync();
-
-                        if (generos.Count != request.GeneroIds.Count())
-                        {
-                            var foundIds = generos.Select(g => g.Id);
-                            var notFoundIds = request.GeneroIds.Except(foundIds);
-
-                            return BadRequest(new ApiResponse<Show>
-                            {
-                                Success = false,
-                                Message = $"Gêneros não encontrados: {string.Join(", ", notFoundIds)}"
-                            });
-                        }
-
-                        show.GenerosShows = generos;
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-
-                // Recarregar o show com todas as relações para retornar
-                var updatedShow = await _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .Include(s => s.Studio)
-                    .Include(s => s.Autor)
-                    .Include(s => s.Personagens)
-                    .FirstOrDefaultAsync(s => s.Id == id);
-
-                return Ok(new ApiResponse<Show>
+                return Ok(new ApiResponse<ShowDetalheDto>
                 {
                     Success = true,
                     Data = updatedShow,
                     Message = "Show atualizado com sucesso"
                 });
             }
-            catch (DbUpdateConcurrencyException)
+            catch (ValidationException ex)
             {
-                if (!ShowExists(id))
+                return BadRequest(new ApiResponse<ShowDetalheDto>
                 {
-                    return NotFound(new ApiResponse<Show>
-                    {
-                        Success = false,
-                        Message = "Show não encontrado"
-                    });
-                }
-                throw;
+                    Success = false,
+                    Message = ex.Message
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Show>
+                return StatusCode(500, new ApiResponse<ShowDetalheDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -662,11 +245,9 @@ namespace animeAlley.Controllers.Api
         {
             try
             {
-                var show = await _context.Shows
-                    .Include(s => s.GenerosShows)
-                    .FirstOrDefaultAsync(s => s.Id == id);
+                var deleted = await _showService.DeleteShowAsync(id);
 
-                if (show == null)
+                if (!deleted)
                 {
                     return NotFound(new ApiResponse<object>
                     {
@@ -674,12 +255,6 @@ namespace animeAlley.Controllers.Api
                         Message = "Show não encontrado"
                     });
                 }
-
-                // Limpar as relações many-to-many antes de deletar
-                show.GenerosShows.Clear();
-
-                _context.Shows.Remove(show);
-                await _context.SaveChangesAsync();
 
                 return Ok(new ApiResponse<object>
                 {
@@ -697,9 +272,22 @@ namespace animeAlley.Controllers.Api
             }
         }
 
-        private bool ShowExists(int id)
+        private static List<int>? ParseIds(string? ids)
         {
-            return _context.Shows.Any(e => e.Id == id);
+            if (string.IsNullOrEmpty(ids))
+                return null;
+
+            try
+            {
+                return ids.Split(',')
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .Select(id => int.Parse(id.Trim()))
+                    .ToList();
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 
@@ -708,21 +296,21 @@ namespace animeAlley.Controllers.Api
     [Route("api/[controller]")]
     public class GenerosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IGeneroService _generoService;
 
-        public GenerosController(ApplicationDbContext context)
+        public GenerosController(IGeneroService generoService)
         {
-            _context = context;
+            _generoService = generoService;
         }
 
         // GET: api/generos
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Genero>>>> GetGeneros()
+        public async Task<ActionResult<ApiResponse<IEnumerable<GeneroDto>>>> GetGeneros()
         {
             try
             {
-                var generos = await _context.Generos.ToListAsync();
-                return Ok(new ApiResponse<IEnumerable<Genero>>
+                var generos = await _generoService.GetGenerosAsync();
+                return Ok(new ApiResponse<IEnumerable<GeneroDto>>
                 {
                     Success = true,
                     Data = generos,
@@ -731,7 +319,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<IEnumerable<Genero>>
+                return StatusCode(500, new ApiResponse<IEnumerable<GeneroDto>>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -741,22 +329,22 @@ namespace animeAlley.Controllers.Api
 
         // GET: api/generos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Genero>>> GetGenero(int id)
+        public async Task<ActionResult<ApiResponse<GeneroDto>>> GetGenero(int id)
         {
             try
             {
-                var genero = await _context.Generos.FindAsync(id);
+                var genero = await _generoService.GetGeneroByIdAsync(id);
 
                 if (genero == null)
                 {
-                    return NotFound(new ApiResponse<Genero>
+                    return NotFound(new ApiResponse<GeneroDto>
                     {
                         Success = false,
                         Message = "Gênero não encontrado"
                     });
                 }
 
-                return Ok(new ApiResponse<Genero>
+                return Ok(new ApiResponse<GeneroDto>
                 {
                     Success = true,
                     Data = genero,
@@ -765,7 +353,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Genero>
+                return StatusCode(500, new ApiResponse<GeneroDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -773,38 +361,34 @@ namespace animeAlley.Controllers.Api
             }
         }
 
-        // GET: api/generos/5/shows
+        // GET: api/generos/5/shows?page=1&pageSize=10
         [HttpGet("{id}/shows")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Show>>>> GetShowsByGenero(int id)
+        public async Task<ActionResult<ApiResponse<PaginatedResponseDto<ShowResumoDto>>>> GetShowsByGenero(
+            int id,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-                var genero = await _context.Generos
-                    .Include(g => g.Shows)
-                        .ThenInclude(s => s.Studio)
-                    .Include(g => g.Shows)
-                        .ThenInclude(s => s.Autor)
-                    .FirstOrDefaultAsync(g => g.Id == id);
-
-                if (genero == null)
-                {
-                    return NotFound(new ApiResponse<IEnumerable<Show>>
-                    {
-                        Success = false,
-                        Message = "Gênero não encontrado"
-                    });
-                }
-
-                return Ok(new ApiResponse<IEnumerable<Show>>
+                var result = await _generoService.GetShowsByGeneroAsync(id, page, pageSize);
+                return Ok(new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
                 {
                     Success = true,
-                    Data = genero.Shows,
+                    Data = result,
                     Message = "Shows do gênero recuperados com sucesso"
+                });
+            }
+            catch (ValidationException ex)
+            {
+                return NotFound(new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
+                {
+                    Success = false,
+                    Message = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<IEnumerable<Show>>
+                return StatusCode(500, new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -814,13 +398,13 @@ namespace animeAlley.Controllers.Api
 
         // POST: api/generos
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<Genero>>> CreateGenero([FromBody] CreateGeneroRequest request)
+        public async Task<ActionResult<ApiResponse<GeneroDto>>> CreateGenero([FromBody] GeneroCreateUpdateDto request)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ApiResponse<Genero>
+                    return BadRequest(new ApiResponse<GeneroDto>
                     {
                         Success = false,
                         Message = "Dados inválidos",
@@ -828,16 +412,10 @@ namespace animeAlley.Controllers.Api
                     });
                 }
 
-                var genero = new Genero
-                {
-                    GeneroNome = request.GeneroNome
-                };
-
-                _context.Generos.Add(genero);
-                await _context.SaveChangesAsync();
+                var genero = await _generoService.CreateGeneroAsync(request);
 
                 return CreatedAtAction(nameof(GetGenero), new { id = genero.Id },
-                    new ApiResponse<Genero>
+                    new ApiResponse<GeneroDto>
                     {
                         Success = true,
                         Data = genero,
@@ -846,7 +424,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Genero>
+                return StatusCode(500, new ApiResponse<GeneroDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -856,42 +434,40 @@ namespace animeAlley.Controllers.Api
 
         // PUT: api/generos/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<Genero>>> UpdateGenero(int id, [FromBody] UpdateGeneroRequest request)
+        public async Task<ActionResult<ApiResponse<GeneroDto>>> UpdateGenero(int id, [FromBody] GeneroCreateUpdateDto request)
         {
             try
             {
-                if (id != request.Id)
+                if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ApiResponse<Genero>
+                    return BadRequest(new ApiResponse<GeneroDto>
                     {
                         Success = false,
-                        Message = "ID do gênero não coincide"
+                        Message = "Dados inválidos",
+                        Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))
                     });
                 }
 
-                var genero = await _context.Generos.FindAsync(id);
-                if (genero == null)
-                {
-                    return NotFound(new ApiResponse<Genero>
-                    {
-                        Success = false,
-                        Message = "Gênero não encontrado"
-                    });
-                }
+                var genero = await _generoService.UpdateGeneroAsync(id, request);
 
-                genero.GeneroNome = request.GeneroNome;
-                await _context.SaveChangesAsync();
-
-                return Ok(new ApiResponse<Genero>
+                return Ok(new ApiResponse<GeneroDto>
                 {
                     Success = true,
                     Data = genero,
                     Message = "Gênero atualizado com sucesso"
                 });
             }
+            catch (ValidationException ex)
+            {
+                return NotFound(new ApiResponse<GeneroDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Genero>
+                return StatusCode(500, new ApiResponse<GeneroDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -905,8 +481,9 @@ namespace animeAlley.Controllers.Api
         {
             try
             {
-                var genero = await _context.Generos.FindAsync(id);
-                if (genero == null)
+                var deleted = await _generoService.DeleteGeneroAsync(id);
+
+                if (!deleted)
                 {
                     return NotFound(new ApiResponse<object>
                     {
@@ -914,9 +491,6 @@ namespace animeAlley.Controllers.Api
                         Message = "Gênero não encontrado"
                     });
                 }
-
-                _context.Generos.Remove(genero);
-                await _context.SaveChangesAsync();
 
                 return Ok(new ApiResponse<object>
                 {
@@ -933,28 +507,57 @@ namespace animeAlley.Controllers.Api
                 });
             }
         }
+
+        // GET: api/generos/5/exists
+        [HttpGet("{id}/exists")]
+        public async Task<ActionResult<ApiResponse<bool>>> GeneroExists(int id)
+        {
+            try
+            {
+                var exists = await _generoService.GeneroExistsAsync(id);
+
+                return Ok(new ApiResponse<bool>
+                {
+                    Success = true,
+                    Data = exists,
+                    Message = exists ? "Gênero existe" : "Gênero não existe"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
     }
 
     // ================== CONTROLLER DE STUDIOS ==================
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/[controller]")]
     public class StudiosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IStudioService _studioService;
 
-        public StudiosController(ApplicationDbContext context)
+        public StudiosController(IStudioService studioService)
         {
-            _context = context;
+            _studioService = studioService;
         }
 
-        // GET: api/studios
+        // GET: api/studios?page=1&pageSize=10&search=nome
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Studio>>>> GetStudios()
+        public async Task<ActionResult<ApiResponse<PaginatedResponseDto<StudioDto>>>> GetStudios(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null)
         {
             try
             {
-                var studios = await _context.Studios.ToListAsync();
-                return Ok(new ApiResponse<IEnumerable<Studio>>
+                var studios = await _studioService.GetStudiosAsync(page, pageSize, search);
+                return Ok(new ApiResponse<PaginatedResponseDto<StudioDto>>
                 {
                     Success = true,
                     Data = studios,
@@ -963,7 +566,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<IEnumerable<Studio>>
+                return StatusCode(500, new ApiResponse<PaginatedResponseDto<StudioDto>>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -973,22 +576,22 @@ namespace animeAlley.Controllers.Api
 
         // GET: api/studios/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Studio>>> GetStudio(int id)
+        public async Task<ActionResult<ApiResponse<StudioDto>>> GetStudio(int id)
         {
             try
             {
-                var studio = await _context.Studios.FindAsync(id);
+                var studio = await _studioService.GetStudioByIdAsync(id);
 
                 if (studio == null)
                 {
-                    return NotFound(new ApiResponse<Studio>
+                    return NotFound(new ApiResponse<StudioDto>
                     {
                         Success = false,
                         Message = "Estúdio não encontrado"
                     });
                 }
 
-                return Ok(new ApiResponse<Studio>
+                return Ok(new ApiResponse<StudioDto>
                 {
                     Success = true,
                     Data = studio,
@@ -997,7 +600,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Studio>
+                return StatusCode(500, new ApiResponse<StudioDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -1005,38 +608,34 @@ namespace animeAlley.Controllers.Api
             }
         }
 
-        // GET: api/studios/5/shows
+        // GET: api/studios/5/shows?page=1&pageSize=10
         [HttpGet("{id}/shows")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Show>>>> GetShowsByStudio(int id)
+        public async Task<ActionResult<ApiResponse<PaginatedResponseDto<ShowResumoDto>>>> GetShowsByStudio(
+            int id,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-                var studio = await _context.Studios
-                    .Include(s => s.ShowsDesenvolvidos)
-                        .ThenInclude(sh => sh.GenerosShows)
-                    .Include(s => s.ShowsDesenvolvidos)
-                        .ThenInclude(sh => sh.Autor)
-                    .FirstOrDefaultAsync(s => s.Id == id);
-
-                if (studio == null)
-                {
-                    return NotFound(new ApiResponse<IEnumerable<Show>>
-                    {
-                        Success = false,
-                        Message = "Estúdio não encontrado"
-                    });
-                }
-
-                return Ok(new ApiResponse<IEnumerable<Show>>
+                var result = await _studioService.GetShowsByStudioAsync(id, page, pageSize);
+                return Ok(new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
                 {
                     Success = true,
-                    Data = studio.ShowsDesenvolvidos,
+                    Data = result,
                     Message = "Shows do estúdio recuperados com sucesso"
+                });
+            }
+            catch (ValidationException ex)
+            {
+                return NotFound(new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
+                {
+                    Success = false,
+                    Message = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<IEnumerable<Show>>
+                return StatusCode(500, new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -1046,13 +645,13 @@ namespace animeAlley.Controllers.Api
 
         // POST: api/studios
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<Studio>>> CreateStudio([FromBody] CreateStudioRequest request)
+        public async Task<ActionResult<ApiResponse<StudioDto>>> CreateStudio([FromBody] StudioCreateUpdateDto request)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ApiResponse<Studio>
+                    return BadRequest(new ApiResponse<StudioDto>
                     {
                         Success = false,
                         Message = "Dados inválidos",
@@ -1060,21 +659,10 @@ namespace animeAlley.Controllers.Api
                     });
                 }
 
-                var studio = new Studio
-                {
-                    Nome = request.Nome,
-                    Foto = request.Foto,
-                    Sobre = request.Sobre,
-                    Fundado = request.Fundado,
-                    Fechado = request.Fechado,
-                    Status = request.Status
-                };
-
-                _context.Studios.Add(studio);
-                await _context.SaveChangesAsync();
+                var studio = await _studioService.CreateStudioAsync(request);
 
                 return CreatedAtAction(nameof(GetStudio), new { id = studio.Id },
-                    new ApiResponse<Studio>
+                    new ApiResponse<StudioDto>
                     {
                         Success = true,
                         Data = studio,
@@ -1083,7 +671,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Studio>
+                return StatusCode(500, new ApiResponse<StudioDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -1093,48 +681,40 @@ namespace animeAlley.Controllers.Api
 
         // PUT: api/studios/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<Studio>>> UpdateStudio(int id, [FromBody] UpdateStudioRequest request)
+        public async Task<ActionResult<ApiResponse<StudioDto>>> UpdateStudio(int id, [FromBody] StudioCreateUpdateDto request)
         {
             try
             {
-                if (id != request.Id)
+                if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ApiResponse<Studio>
+                    return BadRequest(new ApiResponse<StudioDto>
                     {
                         Success = false,
-                        Message = "ID do estúdio não coincide"
+                        Message = "Dados inválidos",
+                        Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))
                     });
                 }
 
-                var studio = await _context.Studios.FindAsync(id);
-                if (studio == null)
-                {
-                    return NotFound(new ApiResponse<Studio>
-                    {
-                        Success = false,
-                        Message = "Estúdio não encontrado"
-                    });
-                }
+                var studio = await _studioService.UpdateStudioAsync(id, request);
 
-                studio.Nome = request.Nome;
-                studio.Foto = request.Foto;
-                studio.Sobre = request.Sobre;
-                studio.Fundado = request.Fundado;
-                studio.Fechado = request.Fechado;
-                studio.Status = request.Status;
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new ApiResponse<Studio>
+                return Ok(new ApiResponse<StudioDto>
                 {
                     Success = true,
                     Data = studio,
                     Message = "Estúdio atualizado com sucesso"
                 });
             }
+            catch (ValidationException ex)
+            {
+                return NotFound(new ApiResponse<StudioDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Studio>
+                return StatusCode(500, new ApiResponse<StudioDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -1148,8 +728,9 @@ namespace animeAlley.Controllers.Api
         {
             try
             {
-                var studio = await _context.Studios.FindAsync(id);
-                if (studio == null)
+                var deleted = await _studioService.DeleteStudioAsync(id);
+
+                if (!deleted)
                 {
                     return NotFound(new ApiResponse<object>
                     {
@@ -1158,13 +739,18 @@ namespace animeAlley.Controllers.Api
                     });
                 }
 
-                _context.Studios.Remove(studio);
-                await _context.SaveChangesAsync();
-
                 return Ok(new ApiResponse<object>
                 {
                     Success = true,
                     Message = "Estúdio deletado com sucesso"
+                });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
                 });
             }
             catch (Exception ex)
@@ -1176,699 +762,397 @@ namespace animeAlley.Controllers.Api
                 });
             }
         }
-    }
 
-    // ================== CONTROLLER DE UTILIZADORES ==================]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UtilizadoresController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
-
-        public UtilizadoresController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/utilizadores
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Utilizador>>>> GetUtilizadores(
-            [FromQuery] string? search = null,
-            [FromQuery] bool? isAdmin = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+        // GET: api/studios/5/exists
+        [HttpGet("{id}/exists")]
+        public async Task<ActionResult<ApiResponse<bool>>> StudioExists(int id)
         {
             try
             {
-                var query = _context.Utilizadores
-                    .Include(u => u.Lista)
-                    .AsQueryable();
+                var exists = await _studioService.StudioExistsAsync(id);
 
-                // Filtros
-                if (!string.IsNullOrEmpty(search))
-                {
-                    query = query.Where(u => u.Nome.Contains(search) || u.UserName.Contains(search));
-                }
-
-                if (isAdmin.HasValue)
-                {
-                    query = query.Where(u => u.isAdmin == isAdmin.Value);
-                }
-
-                // Paginação
-                var totalItems = await query.CountAsync();
-                var utilizadores = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                return Ok(new ApiResponse<IEnumerable<Utilizador>>
+                return Ok(new ApiResponse<bool>
                 {
                     Success = true,
-                    Data = utilizadores,
-                    Message = "Utilizadores recuperados com sucesso",
-                    Pagination = new PaginationInfo
-                    {
-                        CurrentPage = page,
-                        PageSize = pageSize,
-                        TotalItems = totalItems,
-                        TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
-                    }
+                    Data = exists,
+                    Message = exists ? "Estúdio existe" : "Estúdio não existe"
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<IEnumerable<Utilizador>>
+                return StatusCode(500, new ApiResponse<bool>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
                 });
             }
-        }
-
-        // GET: api/utilizadores/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Utilizador>>> GetUtilizador(int id)
-        {
-            try
-            {
-                var utilizador = await _context.Utilizadores
-                    .Include(u => u.Lista)
-                    .FirstOrDefaultAsync(u => u.Id == id);
-
-                if (utilizador == null)
-                {
-                    return NotFound(new ApiResponse<Utilizador>
-                    {
-                        Success = false,
-                        Message = "Utilizador não encontrado"
-                    });
-                }
-
-                return Ok(new ApiResponse<Utilizador>
-                {
-                    Success = true,
-                    Data = utilizador,
-                    Message = "Utilizador recuperado com sucesso"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<Utilizador>
-                {
-                    Success = false,
-                    Message = "Erro interno do servidor: " + ex.Message
-                });
-            }
-        }
-    }
-
-    // ================== CONTROLLER DE LISTAS ==================
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ListasController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
-
-        public ListasController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/listas
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Lista>>> GetListas(
-            [FromQuery] int? utilizadorId = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
-        {
-            var query = _context.Listas
-                .Include(l => l.Utilizador)
-                .Include(l => l.ListaShows)
-                    .ThenInclude(ls => ls.Show)
-                .AsQueryable();
-
-            // Filtros
-            if (utilizadorId.HasValue)
-            {
-                query = query.Where(l => l.UtilizadorId == utilizadorId.Value);
-            }
-
-            // Paginação
-            var totalItems = await query.CountAsync();
-            var listas = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return Ok(new
-            {
-                Data = listas,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalItems = totalItems,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
-            });
-        }
-
-        // GET: api/listas/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Lista>> GetLista(int id)
-        {
-            var lista = await _context.Listas
-                .Include(l => l.Utilizador)
-                .Include(l => l.ListaShows)
-                    .ThenInclude(ls => ls.Show)
-                .FirstOrDefaultAsync(l => l.Id == id);
-
-            if (lista == null)
-            {
-                return NotFound();
-            }
-
-            return lista;
-        }
-
-        // GET: api/listas/utilizador/5
-        [HttpGet("utilizador/{utilizadorId}")]
-        public async Task<ActionResult<Lista>> GetListaByUtilizador(int utilizadorId)
-        {
-            var lista = await _context.Listas
-                .Include(l => l.Utilizador)
-                .Include(l => l.ListaShows)
-                    .ThenInclude(ls => ls.Show)
-                .FirstOrDefaultAsync(l => l.UtilizadorId == utilizadorId);
-
-            if (lista == null)
-            {
-                return NotFound();
-            }
-
-            return lista;
-        }
-
-        // POST: api/listas
-        [HttpPost]
-        public async Task<ActionResult<Lista>> CreateLista(Lista lista)
-        {
-            _context.Listas.Add(lista);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetLista), new { id = lista.Id }, lista);
-        }
-
-        // PUT: api/listas/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateLista(int id, Lista lista)
-        {
-            if (id != lista.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(lista).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ListaExists(id))
-                {
-                    return NotFound();
-                }
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/listas/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLista(int id)
-        {
-            var lista = await _context.Listas.FindAsync(id);
-            if (lista == null)
-            {
-                return NotFound();
-            }
-
-            _context.Listas.Remove(lista);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ListaExists(int id)
-        {
-            return _context.Listas.Any(e => e.Id == id);
-        }
-    }
-
-    // ================== CONTROLLER DE LISTA SHOWS ==================
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ListaShowsController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
-
-        public ListaShowsController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/listashows
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ListaShows>>> GetListaShows(
-            [FromQuery] int? listaId = null,
-            [FromQuery] int? showId = null,
-            [FromQuery] ListaStatus? status = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
-        {
-            var query = _context.ListaShows
-                .Include(ls => ls.Lista)
-                .Include(ls => ls.Show)
-                .AsQueryable();
-
-            // Filtros
-            if (listaId.HasValue)
-            {
-                query = query.Where(ls => ls.ListaId == listaId.Value);
-            }
-
-            if (showId.HasValue)
-            {
-                query = query.Where(ls => ls.ShowId == showId.Value);
-            }
-
-            if (status.HasValue)
-            {
-                query = query.Where(ls => ls.ListaStatus == status.Value);
-            }
-
-            // Paginação
-            var totalItems = await query.CountAsync();
-            var listaShows = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return Ok(new
-            {
-                Data = listaShows,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalItems = totalItems,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
-            });
-        }
-
-        // GET: api/listashows/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ListaShows>> GetListaShow(int id)
-        {
-            var listaShow = await _context.ListaShows
-                .Include(ls => ls.Lista)
-                .Include(ls => ls.Show)
-                .FirstOrDefaultAsync(ls => ls.Id == id);
-
-            if (listaShow == null)
-            {
-                return NotFound();
-            }
-
-            return listaShow;
-        }
-
-        // GET: api/listashows/status/{status}
-        [HttpGet("status/{status}")]
-        public async Task<ActionResult<IEnumerable<ListaShows>>> GetListaShowsByStatus(
-            ListaStatus status,
-            [FromQuery] int? listaId = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
-        {
-            var query = _context.ListaShows
-                .Include(ls => ls.Lista)
-                .Include(ls => ls.Show)
-                .Where(ls => ls.ListaStatus == status)
-                .AsQueryable();
-
-            if (listaId.HasValue)
-            {
-                query = query.Where(ls => ls.ListaId == listaId.Value);
-            }
-
-            var totalItems = await query.CountAsync();
-            var listaShows = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return Ok(new
-            {
-                Data = listaShows,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalItems = totalItems,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
-            });
-        }
-
-        // POST: api/listashows
-        [HttpPost]
-        public async Task<ActionResult<ListaShows>> CreateListaShow(ListaShows listaShow)
-        {
-            // Verificar se o show já existe na lista
-            var existingItem = await _context.ListaShows
-                .FirstOrDefaultAsync(ls => ls.ListaId == listaShow.ListaId && ls.ShowId == listaShow.ShowId);
-
-            if (existingItem != null)
-            {
-                return Conflict("Este show já existe na lista.");
-            }
-
-            _context.ListaShows.Add(listaShow);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetListaShow), new { id = listaShow.Id }, listaShow);
-        }
-
-        // PUT: api/listashows/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateListaShow(int id, ListaShows listaShow)
-        {
-            if (id != listaShow.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(listaShow).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ListaShowExists(id))
-                {
-                    return NotFound();
-                }
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // PUT: api/listashows/5/status
-        [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateListaShowStatus(int id, [FromBody] ListaStatus status)
-        {
-            var listaShow = await _context.ListaShows.FindAsync(id);
-            if (listaShow == null)
-            {
-                return NotFound();
-            }
-
-            listaShow.ListaStatus = status;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        // DELETE: api/listashows/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteListaShow(int id)
-        {
-            var listaShow = await _context.ListaShows.FindAsync(id);
-            if (listaShow == null)
-            {
-                return NotFound();
-            }
-
-            _context.ListaShows.Remove(listaShow);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ListaShowExists(int id)
-        {
-            return _context.ListaShows.Any(e => e.Id == id);
         }
     }
 
     // ================== CONTROLLER DE AUTORES ==================
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/[controller]")]
     public class AutoresController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IAutorService _autorService;
+        private readonly ApplicationDbContext _context; // Mantido para funcionalidades específicas
 
-        public AutoresController(ApplicationDbContext context)
+        public AutoresController(IAutorService autorService, ApplicationDbContext context)
         {
-            _context = context;
+            _autorService = autorService;
+            _context = context; // Para endpoints que não estão no service
         }
 
-        // GET: api/autores
+        // GET: api/autores?page=1&pageSize=20&search=nome
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Autor>>> GetAutores(
-            [FromQuery] string? search = null,
-            [FromQuery] Sexualidade? sexualidade = null,
-            [FromQuery] int? idadeMin = null,
-            [FromQuery] int? idadeMax = null,
+        public async Task<ActionResult<ApiResponse<PaginatedResponseDto<AutorDto>>>> GetAutores(
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? search = null)
         {
-            var query = _context.Autores
-                .Include(a => a.ShowsCriados)
-                .AsQueryable();
-
-            // Filtros
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(a => a.Nome.Contains(search) || a.Sobre.Contains(search));
-            }
-
-            if (sexualidade.HasValue)
-            {
-                query = query.Where(a => a.AutorSexualidade == sexualidade.Value);
-            }
-
-            if (idadeMin.HasValue)
-            {
-                query = query.Where(a => a.Idade >= idadeMin.Value);
-            }
-
-            if (idadeMax.HasValue)
-            {
-                query = query.Where(a => a.Idade <= idadeMax.Value);
-            }
-
-            // Paginação
-            var totalItems = await query.CountAsync();
-            var autores = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return Ok(new
-            {
-                Data = autores,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalItems = totalItems,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
-            });
-        }
-
-        // GET: api/autores/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Autor>> GetAutor(int id)
-        {
-            var autor = await _context.Autores
-                .Include(a => a.ShowsCriados)
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (autor == null)
-            {
-                return NotFound();
-            }
-
-            return autor;
-        }
-
-        // GET: api/autores/5/shows
-        [HttpGet("{id}/shows")]
-        public async Task<ActionResult<IEnumerable<Show>>> GetShowsByAutor(int id)
-        {
-            var autor = await _context.Autores
-                .Include(a => a.ShowsCriados)
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (autor == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(autor.ShowsCriados);
-        }
-
-        // GET: api/autores/populares
-        [HttpGet("populares")]
-        public async Task<ActionResult<IEnumerable<Autor>>> GetAutoresPopulares(
-            [FromQuery] int limit = 10)
-        {
-            var autoresPopulares = await _context.Autores
-                .Include(a => a.ShowsCriados)
-                .OrderByDescending(a => a.ShowsCriados.Count)
-                .Take(limit)
-                .ToListAsync();
-
-            return Ok(autoresPopulares);
-        }
-
-        // POST: api/autores
-        [HttpPost]
-        public async Task<ActionResult<Autor>> CreateAutor(Autor autor)
-        {
-            _context.Autores.Add(autor);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetAutor), new { id = autor.Id }, autor);
-        }
-
-        // PUT: api/autores/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAutor(int id, Autor autor)
-        {
-            if (id != autor.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(autor).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AutorExists(id))
+                var autores = await _autorService.GetAutoresAsync(page, pageSize, search);
+                return Ok(new ApiResponse<PaginatedResponseDto<AutorDto>>
                 {
-                    return NotFound();
-                }
-                throw;
+                    Success = true,
+                    Data = autores,
+                    Message = "Autores recuperados com sucesso"
+                });
             }
-
-            return NoContent();
-        }
-
-        // DELETE: api/autores/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAutor(int id)
-        {
-            var autor = await _context.Autores.FindAsync(id);
-            if (autor == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, new ApiResponse<PaginatedResponseDto<AutorDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
             }
-
-            _context.Autores.Remove(autor);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
-        private bool AutorExists(int id)
-        {
-            return _context.Autores.Any(e => e.Id == id);
-        }
-    }
-
-    // ================== CONTROLLER DE PERSONAGENS ==================
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PersonagensController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
-
-        public PersonagensController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/personagens
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Personagem>>>> GetPersonagens(
+        // GET: api/autores/advanced-search (funcionalidade extra do controller original)
+        [HttpGet("advanced-search")]
+        public async Task<ActionResult<ApiResponse<PaginatedResponseDto<Autor>>>> GetAutoresAdvanced(
             [FromQuery] string? search = null,
-            [FromQuery] TiposPersonagem? tipoPersonagem = null,
             [FromQuery] Sexualidade? sexualidade = null,
             [FromQuery] int? idadeMin = null,
             [FromQuery] int? idadeMax = null,
-            [FromQuery] int? showId = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
             try
             {
-                var query = _context.Personagens
-                    .Include(p => p.Shows)
+                var query = _context.Autores
+                    .Include(a => a.ShowsCriados)
                     .AsQueryable();
 
                 // Filtros
                 if (!string.IsNullOrEmpty(search))
                 {
-                    query = query.Where(p => p.Nome.Contains(search) || p.Sinopse.Contains(search));
-                }
-
-                if (tipoPersonagem.HasValue)
-                {
-                    query = query.Where(p => p.TipoPersonagem == tipoPersonagem.Value);
+                    query = query.Where(a => a.Nome.Contains(search) ||
+                                           (a.Sobre != null && a.Sobre.Contains(search)));
                 }
 
                 if (sexualidade.HasValue)
                 {
-                    query = query.Where(p => p.PersonagemSexualidade == sexualidade.Value);
+                    query = query.Where(a => a.AutorSexualidade == sexualidade.Value);
                 }
 
                 if (idadeMin.HasValue)
                 {
-                    query = query.Where(p => p.Idade >= idadeMin.Value);
+                    query = query.Where(a => a.Idade >= idadeMin.Value);
                 }
 
                 if (idadeMax.HasValue)
                 {
-                    query = query.Where(p => p.Idade <= idadeMax.Value);
-                }
-
-                if (showId.HasValue)
-                {
-                    query = query.Where(p => p.Shows.Any(s => s.Id == showId.Value));
+                    query = query.Where(a => a.Idade <= idadeMax.Value);
                 }
 
                 // Paginação
                 var totalItems = await query.CountAsync();
-                var personagens = await query
+                var autores = await query
+                    .OrderBy(a => a.Nome)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
 
-                var response = new ApiResponse<IEnumerable<Personagem>>
+                var result = new PaginatedResponseDto<Autor>
+                {
+                    Data = autores,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalItems = totalItems,
+                    TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+                };
+
+                return Ok(new ApiResponse<PaginatedResponseDto<Autor>>
                 {
                     Success = true,
-                    Data = personagens,
+                    Data = result,
+                    Message = "Autores recuperados com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<PaginatedResponseDto<Autor>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/autores/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ApiResponse<AutorDto>>> GetAutor(int id)
+        {
+            try
+            {
+                var autor = await _autorService.GetAutorByIdAsync(id);
+
+                if (autor == null)
+                {
+                    return NotFound(new ApiResponse<AutorDto>
+                    {
+                        Success = false,
+                        Message = "Autor não encontrado"
+                    });
+                }
+
+                return Ok(new ApiResponse<AutorDto>
+                {
+                    Success = true,
+                    Data = autor,
+                    Message = "Autor recuperado com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<AutorDto>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/autores/5/shows?page=1&pageSize=10
+        [HttpGet("{id}/shows")]
+        public async Task<ActionResult<ApiResponse<PaginatedResponseDto<ShowResumoDto>>>> GetShowsByAutor(
+            int id,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _autorService.GetShowsByAutorAsync(id, page, pageSize);
+                return Ok(new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
+                {
+                    Success = true,
+                    Data = result,
+                    Message = "Shows do autor recuperados com sucesso"
+                });
+            }
+            catch (ValidationException ex)
+            {
+                return NotFound(new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<PaginatedResponseDto<ShowResumoDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // POST: api/autores
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<AutorDto>>> CreateAutor([FromBody] AutorCreateUpdateDto request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ApiResponse<AutorDto>
+                    {
+                        Success = false,
+                        Message = "Dados inválidos",
+                        Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))
+                    });
+                }
+
+                var autor = await _autorService.CreateAutorAsync(request);
+
+                return CreatedAtAction(nameof(GetAutor), new { id = autor.Id },
+                    new ApiResponse<AutorDto>
+                    {
+                        Success = true,
+                        Data = autor,
+                        Message = "Autor criado com sucesso"
+                    });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<AutorDto>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // PUT: api/autores/5
+        [HttpPut("{id}")]
+        public async Task<ActionResult<ApiResponse<AutorDto>>> UpdateAutor(int id, [FromBody] AutorCreateUpdateDto request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ApiResponse<AutorDto>
+                    {
+                        Success = false,
+                        Message = "Dados inválidos",
+                        Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))
+                    });
+                }
+
+                var autor = await _autorService.UpdateAutorAsync(id, request);
+
+                return Ok(new ApiResponse<AutorDto>
+                {
+                    Success = true,
+                    Data = autor,
+                    Message = "Autor atualizado com sucesso"
+                });
+            }
+            catch (ValidationException ex)
+            {
+                return NotFound(new ApiResponse<AutorDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<AutorDto>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // DELETE: api/autores/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ApiResponse<object>>> DeleteAutor(int id)
+        {
+            try
+            {
+                var deleted = await _autorService.DeleteAutorAsync(id);
+
+                if (!deleted)
+                {
+                    return NotFound(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Autor não encontrado"
+                    });
+                }
+
+                return Ok(new ApiResponse<object>
+                {
+                    Success = true,
+                    Message = "Autor deletado com sucesso"
+                });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/autores/5/exists
+        [HttpGet("{id}/exists")]
+        public async Task<ActionResult<ApiResponse<bool>>> AutorExists(int id)
+        {
+            try
+            {
+                var exists = await _autorService.AutorExistsAsync(id);
+
+                return Ok(new ApiResponse<bool>
+                {
+                    Success = true,
+                    Data = exists,
+                    Message = exists ? "Autor existe" : "Autor não existe"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+    }
+
+    // ================== CONTROLLER DE PERSONAGENS ==================
+    //[Authorize(AuthenticationSchemes = "Bearer")]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PersonagensController : ControllerBase
+    {
+        private readonly IPersonagemService _personagemService;
+
+        public PersonagensController(IPersonagemService personagemService)
+        {
+            _personagemService = personagemService;
+        }
+
+        // GET: api/personagens
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<IEnumerable<PersonagemDto>>>> GetPersonagens(
+            [FromQuery] string? search = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            try
+            {
+                var result = await _personagemService.GetPersonagensAsync(page, pageSize, search);
+
+                var response = new ApiResponse<IEnumerable<PersonagemDto>>
+                {
+                    Success = true,
+                    Data = result.Data,
                     Message = "Personagens recuperados com sucesso",
                     Pagination = new PaginationInfo
                     {
-                        CurrentPage = page,
-                        PageSize = pageSize,
-                        TotalItems = totalItems,
-                        TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+                        CurrentPage = result.CurrentPage,
+                        PageSize = result.PageSize,
+                        TotalItems = result.TotalItems,
+                        TotalPages = result.TotalPages
                     }
                 };
 
@@ -1876,7 +1160,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<IEnumerable<Personagem>>
+                return StatusCode(500, new ApiResponse<IEnumerable<PersonagemDto>>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -1886,24 +1170,22 @@ namespace animeAlley.Controllers.Api
 
         // GET: api/personagens/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Personagem>>> GetPersonagem(int id)
+        public async Task<ActionResult<ApiResponse<PersonagemDto>>> GetPersonagem(int id)
         {
             try
             {
-                var personagem = await _context.Personagens
-                    .Include(p => p.Shows)
-                    .FirstOrDefaultAsync(p => p.Id == id);
+                var personagem = await _personagemService.GetPersonagemByIdAsync(id);
 
                 if (personagem == null)
                 {
-                    return NotFound(new ApiResponse<Personagem>
+                    return NotFound(new ApiResponse<PersonagemDto>
                     {
                         Success = false,
                         Message = "Personagem não encontrado"
                     });
                 }
 
-                return Ok(new ApiResponse<Personagem>
+                return Ok(new ApiResponse<PersonagemDto>
                 {
                     Success = true,
                     Data = personagem,
@@ -1912,117 +1194,7 @@ namespace animeAlley.Controllers.Api
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Personagem>
-                {
-                    Success = false,
-                    Message = "Erro interno do servidor: " + ex.Message
-                });
-            }
-        }
-
-        // GET: api/personagens/5/shows
-        [HttpGet("{id}/shows")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Show>>>> GetShowsByPersonagem(int id)
-        {
-            try
-            {
-                var personagem = await _context.Personagens
-                    .Include(p => p.Shows)
-                        .ThenInclude(s => s.GenerosShows)
-                    .Include(p => p.Shows)
-                        .ThenInclude(s => s.Studio)
-                    .Include(p => p.Shows)
-                        .ThenInclude(s => s.Autor)
-                    .FirstOrDefaultAsync(p => p.Id == id);
-
-                if (personagem == null)
-                {
-                    return NotFound(new ApiResponse<IEnumerable<Show>>
-                    {
-                        Success = false,
-                        Message = "Personagem não encontrado"
-                    });
-                }
-
-                return Ok(new ApiResponse<IEnumerable<Show>>
-                {
-                    Success = true,
-                    Data = personagem.Shows,
-                    Message = "Shows do personagem recuperados com sucesso"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<IEnumerable<Show>>
-                {
-                    Success = false,
-                    Message = "Erro interno do servidor: " + ex.Message
-                });
-            }
-        }
-
-        // GET: api/personagens/protagonistas
-        [HttpGet("protagonistas")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Personagem>>>> GetProtagonistas(
-            [FromQuery] int limit = 10,
-            [FromQuery] int? showId = null)
-        {
-            try
-            {
-                var query = _context.Personagens
-                    .Include(p => p.Shows)
-                    .Where(p => p.TipoPersonagem == TiposPersonagem.Protagonista)
-                    .AsQueryable();
-
-                if (showId.HasValue)
-                {
-                    query = query.Where(p => p.Shows.Any(s => s.Id == showId.Value));
-                }
-
-                var protagonistas = await query
-                    .Take(limit)
-                    .ToListAsync();
-
-                return Ok(new ApiResponse<IEnumerable<Personagem>>
-                {
-                    Success = true,
-                    Data = protagonistas,
-                    Message = "Protagonistas recuperados com sucesso"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<IEnumerable<Personagem>>
-                {
-                    Success = false,
-                    Message = "Erro interno do servidor: " + ex.Message
-                });
-            }
-        }
-
-        // GET: api/personagens/populares
-        [HttpGet("populares")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Personagem>>>> GetPersonagensPopulares(
-            [FromQuery] int limit = 10)
-        {
-            try
-            {
-                var personagensPopulares = await _context.Personagens
-                    .Include(p => p.Shows)
-                    .OrderByDescending(p => p.Shows.Count)
-                    .Take(limit)
-                    .ToListAsync();
-
-                return Ok(new ApiResponse<IEnumerable<Personagem>>
-                {
-                    Success = true,
-                    Data = personagensPopulares,
-                    Message = "Personagens populares recuperados com sucesso"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<IEnumerable<Personagem>>
+                return StatusCode(500, new ApiResponse<PersonagemDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -2032,13 +1204,13 @@ namespace animeAlley.Controllers.Api
 
         // POST: api/personagens
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<Personagem>>> CreatePersonagem([FromBody] CreatePersonagemRequest request)
+        public async Task<ActionResult<ApiResponse<PersonagemDto>>> CreatePersonagem([FromBody] PersonagemCreateUpdateDto personagemDto)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ApiResponse<Personagem>
+                    return BadRequest(new ApiResponse<PersonagemDto>
                     {
                         Success = false,
                         Message = "Dados inválidos",
@@ -2046,59 +1218,27 @@ namespace animeAlley.Controllers.Api
                     });
                 }
 
-                var personagem = new Personagem
-                {
-                    Nome = request.Nome,
-                    TipoPersonagem = request.TipoPersonagem,
-                    PersonagemSexualidade = request.PersonagemSexualidade,
-                    Idade = request.Idade,
-                    DataNasc = request.DataNasc,
-                    Sinopse = request.Sinopse ?? string.Empty,
-                    Foto = request.Foto ?? string.Empty
-                };
+                var createdPersonagem = await _personagemService.CreatePersonagemAsync(personagemDto);
 
-                _context.Personagens.Add(personagem);
-                await _context.SaveChangesAsync();
-
-                // Associar shows se fornecidos
-                if (request.ShowIds != null && request.ShowIds.Any())
-                {
-                    var shows = await _context.Shows
-                        .Where(s => request.ShowIds.Contains(s.Id))
-                        .ToListAsync();
-
-                    if (shows.Count != request.ShowIds.Count())
-                    {
-                        var foundIds = shows.Select(s => s.Id);
-                        var notFoundIds = request.ShowIds.Except(foundIds);
-
-                        return BadRequest(new ApiResponse<Personagem>
-                        {
-                            Success = false,
-                            Message = $"Shows não encontrados: {string.Join(", ", notFoundIds)}"
-                        });
-                    }
-
-                    personagem.Shows = shows;
-                    await _context.SaveChangesAsync();
-                }
-
-                // Recarregar o personagem com todas as relações para retornar
-                var createdPersonagem = await _context.Personagens
-                    .Include(p => p.Shows)
-                    .FirstOrDefaultAsync(p => p.Id == personagem.Id);
-
-                return CreatedAtAction(nameof(GetPersonagem), new { id = personagem.Id },
-                    new ApiResponse<Personagem>
+                return CreatedAtAction(nameof(GetPersonagem), new { id = createdPersonagem.Id },
+                    new ApiResponse<PersonagemDto>
                     {
                         Success = true,
                         Data = createdPersonagem,
                         Message = "Personagem criado com sucesso"
                     });
             }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new ApiResponse<PersonagemDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Personagem>
+                return StatusCode(500, new ApiResponse<PersonagemDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -2108,22 +1248,13 @@ namespace animeAlley.Controllers.Api
 
         // PUT: api/personagens/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<Personagem>>> UpdatePersonagem(int id, [FromBody] UpdatePersonagemRequest request)
+        public async Task<ActionResult<ApiResponse<PersonagemDto>>> UpdatePersonagem(int id, [FromBody] PersonagemCreateUpdateDto personagemDto)
         {
             try
             {
-                if (id != request.Id)
-                {
-                    return BadRequest(new ApiResponse<Personagem>
-                    {
-                        Success = false,
-                        Message = "ID do personagem não coincide"
-                    });
-                }
-
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ApiResponse<Personagem>
+                    return BadRequest(new ApiResponse<PersonagemDto>
                     {
                         Success = false,
                         Message = "Dados inválidos",
@@ -2131,88 +1262,37 @@ namespace animeAlley.Controllers.Api
                     });
                 }
 
-                var personagem = await _context.Personagens
-                    .Include(p => p.Shows)
-                    .FirstOrDefaultAsync(p => p.Id == id);
-
-                if (personagem == null)
+                // Verificar se o personagem existe
+                var exists = await _personagemService.PersonagemExistsAsync(id);
+                if (!exists)
                 {
-                    return NotFound(new ApiResponse<Personagem>
+                    return NotFound(new ApiResponse<PersonagemDto>
                     {
                         Success = false,
                         Message = "Personagem não encontrado"
                     });
                 }
 
-                // Atualizar propriedades
-                personagem.Nome = request.Nome;
-                personagem.TipoPersonagem = request.TipoPersonagem;
-                personagem.PersonagemSexualidade = request.PersonagemSexualidade;
-                personagem.Idade = request.Idade;
-                personagem.DataNasc = request.DataNasc;
-                personagem.Sinopse = request.Sinopse ?? string.Empty;
+                var updatedPersonagem = await _personagemService.UpdatePersonagemAsync(id, personagemDto);
 
-                // Só atualizar a foto se for fornecida
-                if (!string.IsNullOrEmpty(request.Foto))
-                    personagem.Foto = request.Foto;
-
-                // Atualizar shows se fornecidos
-                if (request.ShowIds != null)
-                {
-                    // Limpar shows existentes
-                    personagem.Shows.Clear();
-
-                    if (request.ShowIds.Any())
-                    {
-                        var shows = await _context.Shows
-                            .Where(s => request.ShowIds.Contains(s.Id))
-                            .ToListAsync();
-
-                        if (shows.Count != request.ShowIds.Count())
-                        {
-                            var foundIds = shows.Select(s => s.Id);
-                            var notFoundIds = request.ShowIds.Except(foundIds);
-
-                            return BadRequest(new ApiResponse<Personagem>
-                            {
-                                Success = false,
-                                Message = $"Shows não encontrados: {string.Join(", ", notFoundIds)}"
-                            });
-                        }
-
-                        personagem.Shows = shows;
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-
-                // Recarregar o personagem com todas as relações para retornar
-                var updatedPersonagem = await _context.Personagens
-                    .Include(p => p.Shows)
-                    .FirstOrDefaultAsync(p => p.Id == id);
-
-                return Ok(new ApiResponse<Personagem>
+                return Ok(new ApiResponse<PersonagemDto>
                 {
                     Success = true,
                     Data = updatedPersonagem,
                     Message = "Personagem atualizado com sucesso"
                 });
             }
-            catch (DbUpdateConcurrencyException)
+            catch (ValidationException ex)
             {
-                if (!PersonagemExists(id))
+                return BadRequest(new ApiResponse<PersonagemDto>
                 {
-                    return NotFound(new ApiResponse<Personagem>
-                    {
-                        Success = false,
-                        Message = "Personagem não encontrado"
-                    });
-                }
-                throw;
+                    Success = false,
+                    Message = ex.Message
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse<Personagem>
+                return StatusCode(500, new ApiResponse<PersonagemDto>
                 {
                     Success = false,
                     Message = "Erro interno do servidor: " + ex.Message
@@ -2226,11 +1306,9 @@ namespace animeAlley.Controllers.Api
         {
             try
             {
-                var personagem = await _context.Personagens
-                    .Include(p => p.Shows)
-                    .FirstOrDefaultAsync(p => p.Id == id);
+                var deleted = await _personagemService.DeletePersonagemAsync(id);
 
-                if (personagem == null)
+                if (!deleted)
                 {
                     return NotFound(new ApiResponse<object>
                     {
@@ -2238,12 +1316,6 @@ namespace animeAlley.Controllers.Api
                         Message = "Personagem não encontrado"
                     });
                 }
-
-                // Limpar as relações many-to-many antes de deletar
-                personagem.Shows.Clear();
-
-                _context.Personagens.Remove(personagem);
-                await _context.SaveChangesAsync();
 
                 return Ok(new ApiResponse<object>
                 {
@@ -2261,9 +1333,368 @@ namespace animeAlley.Controllers.Api
             }
         }
 
-        private bool PersonagemExists(int id)
+        // Métodos adicionais específicos que você pode querer manter
+
+        // GET: api/personagens/5/shows
+        [HttpGet("{id}/shows")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<ShowResumoDto>>>> GetShowsByPersonagem(int id)
         {
-            return _context.Personagens.Any(e => e.Id == id);
+            try
+            {
+                var personagem = await _personagemService.GetPersonagemByIdAsync(id);
+
+                if (personagem == null)
+                {
+                    return NotFound(new ApiResponse<IEnumerable<ShowResumoDto>>
+                    {
+                        Success = false,
+                        Message = "Personagem não encontrado"
+                    });
+                }
+
+                return Ok(new ApiResponse<IEnumerable<ShowResumoDto>>
+                {
+                    Success = true,
+                    Data = personagem.Shows,
+                    Message = "Shows do personagem recuperados com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<IEnumerable<ShowResumoDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/personagens/check-exists/5
+        [HttpGet("check-exists/{id}")]
+        public async Task<ActionResult<ApiResponse<bool>>> CheckPersonagemExists(int id)
+        {
+            try
+            {
+                var exists = await _personagemService.PersonagemExistsAsync(id);
+
+                return Ok(new ApiResponse<bool>
+                {
+                    Success = true,
+                    Data = exists,
+                    Message = exists ? "Personagem existe" : "Personagem não existe"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+    }
+
+    // ================== CONTROLLER DE ESTATISTICAS ==================
+    //[Authorize(AuthenticationSchemes = "Bearer")]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class EstatisticasController : ControllerBase
+    {
+        private readonly IEstatisticasService _estatisticasService;
+
+        public EstatisticasController(IEstatisticasService estatisticasService)
+        {
+            _estatisticasService = estatisticasService;
+        }
+
+        // GET: api/estatisticas/gerais
+        [HttpGet("gerais")]
+        public async Task<ActionResult<ApiResponse<EstatisticasDto>>> GetEstatisticasGerais()
+        {
+            try
+            {
+                var estatisticas = await _estatisticasService.GetEstatisticasGeraisAsync();
+
+                return Ok(new ApiResponse<EstatisticasDto>
+                {
+                    Success = true,
+                    Data = estatisticas,
+                    Message = "Estatísticas gerais recuperadas com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<EstatisticasDto>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/estatisticas/shows
+        [HttpGet("shows")]
+        public async Task<ActionResult<ApiResponse<RelatorioShowsDto>>> GetRelatorioShows(
+            [FromQuery] DateTime? inicio = null,
+            [FromQuery] DateTime? fim = null)
+        {
+            try
+            {
+                // Validação das datas
+                if (inicio.HasValue && fim.HasValue && inicio.Value > fim.Value)
+                {
+                    return BadRequest(new ApiResponse<RelatorioShowsDto>
+                    {
+                        Success = false,
+                        Message = "A data de início deve ser anterior à data de fim"
+                    });
+                }
+
+                var relatorio = await _estatisticasService.GetRelatorioShowsAsync(inicio, fim);
+
+                return Ok(new ApiResponse<RelatorioShowsDto>
+                {
+                    Success = true,
+                    Data = relatorio,
+                    Message = "Relatório de shows recuperado com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<RelatorioShowsDto>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/estatisticas/resumo
+        [HttpGet("resumo")]
+        public async Task<ActionResult<ApiResponse<EstatisticasResumoDto>>> GetEstatisticasResumo()
+        {
+            try
+            {
+                var estatisticas = await _estatisticasService.GetEstatisticasGeraisAsync();
+
+                // Criar um resumo com apenas as informações mais importantes
+                var resumo = new EstatisticasResumoDto
+                {
+                    TotalShows = estatisticas.TotalShows,
+                    TotalAnimes = estatisticas.TotalAnimes,
+                    TotalMangas = estatisticas.TotalMangas,
+                    TotalUtilizadores = estatisticas.TotalUtilizadores,
+                    TotalPersonagens = estatisticas.TotalPersonagens,
+                    NotaMediaGeral = (double) estatisticas.NotaMediaGeral,
+                    GeneroMaisPopular = estatisticas.GenerosPopulares?.FirstOrDefault()?.Nome ?? "N/A",
+                    ShowMaisPopular = estatisticas.ShowsPopulares?.FirstOrDefault()?.Nome ?? "N/A"
+                };
+
+                return Ok(new ApiResponse<EstatisticasResumoDto>
+                {
+                    Success = true,
+                    Data = resumo,
+                    Message = "Resumo de estatísticas recuperado com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<EstatisticasResumoDto>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/estatisticas/generos-populares
+        [HttpGet("generos-populares")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<GeneroPopularDto>>>> GetGenerosPopulares(
+            [FromQuery] int limit = 10)
+        {
+            try
+            {
+                if (limit <= 0 || limit > 50)
+                {
+                    return BadRequest(new ApiResponse<IEnumerable<GeneroPopularDto>>
+                    {
+                        Success = false,
+                        Message = "O limite deve estar entre 1 e 50"
+                    });
+                }
+
+                var estatisticas = await _estatisticasService.GetEstatisticasGeraisAsync();
+                var generosPopulares = estatisticas.GenerosPopulares?.Take(limit) ?? new List<GeneroPopularDto>();
+
+                return Ok(new ApiResponse<IEnumerable<GeneroPopularDto>>
+                {
+                    Success = true,
+                    Data = generosPopulares,
+                    Message = "Gêneros populares recuperados com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<IEnumerable<GeneroPopularDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/estatisticas/shows-populares
+        [HttpGet("shows-populares")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<ShowPopularDto>>>> GetShowsPopulares(
+            [FromQuery] int limit = 10)
+        {
+            try
+            {
+                if (limit <= 0 || limit > 50)
+                {
+                    return BadRequest(new ApiResponse<IEnumerable<ShowPopularDto>>
+                    {
+                        Success = false,
+                        Message = "O limite deve estar entre 1 e 50"
+                    });
+                }
+
+                var estatisticas = await _estatisticasService.GetEstatisticasGeraisAsync();
+                var showsPopulares = estatisticas.ShowsPopulares?.Take(limit) ?? new List<ShowPopularDto>();
+
+                return Ok(new ApiResponse<IEnumerable<ShowPopularDto>>
+                {
+                    Success = true,
+                    Data = showsPopulares,
+                    Message = "Shows populares recuperados com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<IEnumerable<ShowPopularDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/estatisticas/studios-populares
+        [HttpGet("studios-populares")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<StudioPopularDto>>>> GetStudiosPopulares(
+            [FromQuery] int limit = 10)
+        {
+            try
+            {
+                if (limit <= 0 || limit > 50)
+                {
+                    return BadRequest(new ApiResponse<IEnumerable<StudioPopularDto>>
+                    {
+                        Success = false,
+                        Message = "O limite deve estar entre 1 e 50"
+                    });
+                }
+
+                var estatisticas = await _estatisticasService.GetEstatisticasGeraisAsync();
+                var studiosPopulares = estatisticas.StudiosPopulares?.Take(limit) ?? new List<StudioPopularDto>();
+
+                return Ok(new ApiResponse<IEnumerable<StudioPopularDto>>
+                {
+                    Success = true,
+                    Data = studiosPopulares,
+                    Message = "Studios populares recuperados com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<IEnumerable<StudioPopularDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/estatisticas/shows/por-ano
+        [HttpGet("shows/por-ano")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<ShowsPorAnoDto>>>> GetShowsPorAno(
+            [FromQuery] DateTime? inicio = null,
+            [FromQuery] DateTime? fim = null)
+        {
+            try
+            {
+                var relatorio = await _estatisticasService.GetRelatorioShowsAsync(inicio, fim);
+
+                return Ok(new ApiResponse<IEnumerable<ShowsPorAnoDto>>
+                {
+                    Success = true,
+                    Data = relatorio.ShowsPorAno ?? new List<ShowsPorAnoDto>(),
+                    Message = "Estatísticas de shows por ano recuperadas com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<IEnumerable<ShowsPorAnoDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/estatisticas/shows/por-genero
+        [HttpGet("shows/por-genero")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<ShowsPorGeneroDto>>>> GetShowsPorGenero(
+            [FromQuery] DateTime? inicio = null,
+            [FromQuery] DateTime? fim = null)
+        {
+            try
+            {
+                var relatorio = await _estatisticasService.GetRelatorioShowsAsync(inicio, fim);
+
+                return Ok(new ApiResponse<IEnumerable<ShowsPorGeneroDto>>
+                {
+                    Success = true,
+                    Data = relatorio.ShowsPorGenero ?? new List<ShowsPorGeneroDto>(),
+                    Message = "Estatísticas de shows por gênero recuperadas com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<IEnumerable<ShowsPorGeneroDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/estatisticas/shows/por-status
+        [HttpGet("shows/por-status")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<ShowsPorStatusDto>>>> GetShowsPorStatus(
+            [FromQuery] DateTime? inicio = null,
+            [FromQuery] DateTime? fim = null)
+        {
+            try
+            {
+                var relatorio = await _estatisticasService.GetRelatorioShowsAsync(inicio, fim);
+
+                return Ok(new ApiResponse<IEnumerable<ShowsPorStatusDto>>
+                {
+                    Success = true,
+                    Data = relatorio.ShowsPorStatus ?? new List<ShowsPorStatusDto>(),
+                    Message = "Estatísticas de shows por status recuperadas com sucesso"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<IEnumerable<ShowsPorStatusDto>>
+                {
+                    Success = false,
+                    Message = "Erro interno do servidor: " + ex.Message
+                });
+            }
         }
     }
 }
