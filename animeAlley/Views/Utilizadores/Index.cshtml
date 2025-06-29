@@ -1,53 +1,128 @@
 ﻿@model IEnumerable<animeAlley.Models.Utilizador>
+@{
+    ViewData["Title"] = "Utilizadores";
+}
 
 @{
-    ViewData["Title"] = "Index";
+    ViewBag.SearchTerm = ViewData["CurrentFilter"] as string ?? "";
+    ViewBag.FilterType = "utilizadores";
 }
 
-<h1>Index</h1>
+<div class="container min-vh-100 py-5">
+    <h2 class="fw-bold">Utilizadores</h2>
+    <!-- Filtros e Ordenação -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form asp-action="Index" method="get" class="d-flex">
+                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" 
+                       placeholder="Buscar utilizadores..." class="form-control" />
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex justify-content-end gap-2 mt-md-0 mt-4">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        Ordenar por
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", searchString = ViewData["CurrentFilter"] })">Nome A-Z</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", searchString = ViewData["CurrentFilter"] })">Nome Z-A</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "username", searchString = ViewData["CurrentFilter"] })">Username A-Z</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "username_desc", searchString = ViewData["CurrentFilter"] })">Username Z-A</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "admin", searchString = ViewData["CurrentFilter"] })">Administradores</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "user", searchString = ViewData["CurrentFilter"] })">Utilizadores</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<p>
-    <a class="text-muted pointer-event" asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nome)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Foto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.isAdmin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UserName)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nome)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Foto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.isAdmin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UserName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <!-- Resultados -->
+    @if(Model.Any())
+    {
+        <!-- Tabela de Utilizadores -->
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Nome)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.UserName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Foto)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.isAdmin)
+                        </th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th>Ações</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) 
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Nome)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.UserName)
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.Foto))
+                                {
+                                    <img src="~/images/userFotos/@item.Foto" alt="Foto do utilizador" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sem foto</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.isAdmin)
+                                {
+                                    <span class="badge bg-success">Admin</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Utilizador</span>
+                                }
+                            </td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td class="action-links">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Detalhes</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Excluir</a>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginação (se implementada) -->
+        <nav aria-label="Navegação de páginas" class="mt-5">
+            <ul class="pagination justify-content-center">
+                <!-- Aqui você pode implementar a paginação -->
+            </ul>
+        </nav>
+    }
+    else
+    {
+        <!-- Nenhum resultado encontrado -->
+        <div class="py-4" role="alert" style="width: 100%; margin: 0 auto">
+            <div class="text-center">
+                <h1 class="text-center mt-4" style="color: #3D2D2D">Procuramos... mas nada foi encontrado :(</h1>
+                <p class="text-center mb-4" style="color: #3D2D2D">Tente pesquisar com outros termos ou verifique a ortografia.</p>
+            </div>
+        </div>
+    }
+</div>

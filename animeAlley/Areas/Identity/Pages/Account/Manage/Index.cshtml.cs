@@ -37,6 +37,11 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+            [Required(ErrorMessage = "O nome é obrigatório.")]
+            [StringLength(50, ErrorMessage = "O nome deve ter no máximo 50 caracteres.")]
+            [Display(Name = "Nome")]
+            public string Nome { get; set; } = string.Empty;
+
             [Phone]
             [Display(Name = "Phone number")]
             public string? PhoneNumber { get; set; }
@@ -73,6 +78,7 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
+                Nome = utilizador?.Nome ?? string.Empty,
                 PhoneNumber = phoneNumber,
                 Foto = utilizador?.Foto,
                 Banner = utilizador?.Banner
@@ -193,6 +199,7 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
                 }
 
                 // Atualizar dados na base de dados
+                utilizador.Nome = Input.Nome;
                 utilizador.Foto = novaFoto;
                 utilizador.Banner = novoBanner;
 
@@ -207,10 +214,10 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
             {
                 // Log do erro (implementar logging conforme necessário)
                 StatusMessage = "Erro: Não foi possível atualizar o perfil. Tente novamente.";
-                
+
                 // Reverter alterações se necessário
                 // (as imagens já foram salvas, mas pode implementar lógica de rollback)
-                
+
                 return RedirectToPage();
             }
         }
@@ -226,7 +233,6 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
             var allowedTypes = new[] { "image/jpeg", "image/png" };
             return allowedTypes.Contains(file.ContentType.ToLower());
         }
-
 
         private async Task<string> SalvarImagemAsync(IFormFile file, string pasta)
         {
@@ -255,6 +261,7 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
 
             return nomeImagem;
         }
+
         private async Task RemoverImagemFisica(string nomeImagem, string pasta)
         {
             if (string.IsNullOrEmpty(nomeImagem))
@@ -272,6 +279,7 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
             }
             catch (Exception)
             {
+                // Silenciar erros de exclusão de arquivo
             }
         }
     }

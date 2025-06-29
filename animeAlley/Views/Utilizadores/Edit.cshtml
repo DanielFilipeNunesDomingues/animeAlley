@@ -1,49 +1,283 @@
-﻿@model animeAlley.Models.Utilizador
+﻿@model animeAlley.Controllers.EditUtilizadorViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar " + Model.Nome;
 }
 
-<h1>Edit</h1>
+<div class="py-5 container">
+    <h1 class="text-center mb-4">Editar Utilizador</h1>
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <form asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Foto" />
+                <input type="hidden" asp-for="Banner" />
 
-<h4>Utilizador</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Foto" class="control-label"></label>
-                <input asp-for="Foto" class="form-control" />
-                <span asp-validation-for="Foto" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="isAdmin" /> @Html.DisplayNameFor(model => model.isAdmin)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="UserName" class="control-label"></label>
-                <input asp-for="UserName" class="form-control" />
-                <span asp-validation-for="UserName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informações do Utilizador</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Nome" class="form-label fw-semibold">Nome <span class="text-danger d-inline-block">*</span></label>
+                                    <input asp-for="Nome" class="form-control" placeholder="Nome completo do utilizador" />
+                                    <span asp-validation-for="Nome" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="UserName" class="form-label fw-semibold">Nome de Utilizador <span class="text-danger d-inline-block">*</span></label>
+                                    <input asp-for="UserName" class="form-control" placeholder="Nome de utilizador único" />
+                                    <span asp-validation-for="UserName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Foto do Utilizador -->
+                            <div class="col-12">
+                                <div class="form-group mb-4">
+                                    <h5>Foto do Utilizador</h5>
+                                    <p class="text-muted small">Formatos permitidos: JPEG, PNG. Tamanho máximo: 3MB. Dimensões ideais: 230x230px</p>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="avatar-preview mb-3" style="width: 150px; height: 150px; border-radius: 0.4rem; overflow: hidden; position: relative;">
+                                                @if (!string.IsNullOrEmpty(Model.Foto))
+                                                {
+                                                    @if(Model.Foto != "placeholder.png")
+                                                    {   
+                                                        <img id="avatar-preview" src="~/images/userFotos/@Model.Foto" alt="Foto Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                                                    } 
+                                                    else
+                                                    {
+                                                        <img id="avatar-preview" src="~/img/@Model.Foto" alt="Foto Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                                        <div class="text-center">
+                                                            <p class="small mb-0">Sem foto</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="mb-3">
+                                                <label for="utilizadorFoto" class="form-label">Escolher nova foto de perfil</label>
+                                                <input type="file"
+                                                       accept="image/jpeg,image/png"
+                                                       name="utilizadorFoto"
+                                                       id="utilizadorFoto"
+                                                       class="form-control"
+                                                       onchange="previewAvatar(this)" />
+                                                <span asp-validation-for="Foto" class="text-danger"></span>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(Model.Foto))
+                                            {
+                                                <div class="form-check">
+                                                    <input name="RemoveAvatar" class="form-check-input" type="checkbox" id="removeAvatarCheck" />
+                                                    <label class="form-check-label" for="removeAvatarCheck" style="cursor: pointer;">
+                                                        Remover foto atual
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Banner do Utilizador -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <h5>Banner do Utilizador</h5>
+                                    <p class="text-muted small">Formatos permitidos: JPEG, PNG. Tamanho máximo: 6MB. Dimensões ideais: 1700x330px</p>
+
+                                    <div class="header-preview mb-3" style="width: 100%; height: 200px; border-radius: 8px; overflow: hidden; position: relative;">
+                                        @if (!string.IsNullOrEmpty(Model.Banner))
+                                        {
+                                            @if(Model.Banner != "bannerplaceholder.png")
+                                            {
+                                                <img id="banner-preview" src="~/images/userBanners/@Model.Banner" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <img id="avatar-preview" src="~/img/@Model.Banner" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                                <div class="text-center">
+                                                    <p class="small mb-0">Sem banner</p>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="utilizadorBanner" class="form-label">Escolher novo banner</label>
+                                        <input type="file"
+                                               accept="image/jpeg,image/png"
+                                               name="utilizadorBanner"
+                                               id="utilizadorBanner"
+                                               class="form-control"
+                                               onchange="previewBanner(this)" />
+                                        <span asp-validation-for="Banner" class="text-danger"></span>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(Model.Banner))
+                                    {
+                                        <div class="form-check">
+                                            <input name="RemoveBanner" class="form-check-input" type="checkbox" id="removeBannerCheck" />
+                                            <label class="form-check-label" for="removeBannerCheck" style="cursor: pointer;">
+                                                Remover banner atual
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Guardar Alterações
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Voltar à Lista
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Tooltip para campos obrigatórios (se necessário, ative aqui)
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
+        function previewAvatar(input) {
+            const preview = document.getElementById('avatar-preview');
+            const previewContainer = preview ? preview.parentElement : document.querySelector('.avatar-preview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validar tamanho do arquivo (3MB = 3 * 1024 * 1024 bytes)
+                if (file.size > 3 * 1024 * 1024) {
+                    alert('O arquivo é muito grande. O tamanho máximo é 3MB.');
+                    input.value = '';
+                    return;
+                }
+
+                // Validar tipo do arquivo
+                if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    alert('Formato não suportado. Use apenas JPEG ou PNG.');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    } else {
+                        previewContainer.innerHTML = `<img id="avatar-preview" src="${e.target.result}" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover;" />`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewBanner(input) {
+            const preview = document.getElementById('banner-preview');
+            const previewContainer = preview ? preview.parentElement : document.querySelector('.header-preview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validar tamanho do arquivo (6MB = 6 * 1024 * 1024 bytes)
+                if (file.size > 6 * 1024 * 1024) {
+                    alert('O arquivo é muito grande. O tamanho máximo é 6MB.');
+                    input.value = '';
+                    return;
+                }
+
+                // Validar tipo do arquivo
+                if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    alert('Formato não suportado. Use apenas JPEG ou PNG.');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    } else {
+                        previewContainer.innerHTML = `<img id="banner-preview" src="${e.target.result}" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;" />`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Resetar preview quando checkbox de remoção é marcado
+        document.addEventListener('DOMContentLoaded', function() {
+            const removeAvatarCheckbox = document.querySelector('input[name="RemoveAvatar"]');
+            const removeBannerCheckbox = document.querySelector('input[name="RemoveBanner"]');
+
+            if (removeAvatarCheckbox) {
+                removeAvatarCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        const avatarInput = document.querySelector('input[name="utilizadorFoto"]');
+                        if (avatarInput) avatarInput.value = '';
+
+                        const previewContainer = document.querySelector('.avatar-preview');
+                        previewContainer.innerHTML = `
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <div class="text-center">
+                                    <p class="small mb-0" style="color: #C4AEAE">Foto será removida</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+
+            if (removeBannerCheckbox) {
+                removeBannerCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        const bannerInput = document.querySelector('input[name="utilizadorBanner"]');
+                        if (bannerInput) bannerInput.value = '';
+
+                        const previewContainer = document.querySelector('.header-preview');
+                        previewContainer.innerHTML = `
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <div class="text-center">
+                                    <p class="small mb-0" style="color: #C4AEAE">Banner será removido</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+        });
+    </script>
 }

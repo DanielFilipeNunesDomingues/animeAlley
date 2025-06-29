@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using animeAlley.Data;
+using animeAlley.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using animeAlley.Data;
-using animeAlley.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace animeAlley.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class GenerosController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,27 +22,21 @@ namespace animeAlley.Controllers
         }
 
         // GET: Generos
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            return View(await _context.Generos.ToListAsync());
-        }
+            ViewData["CurrentFilter"] = searchString;
 
-        // GET: Generos/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
+            var generos = _context.Generos.Include(a => a.Shows).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
             {
-                return NotFound();
+                var lowerSearch = searchString.ToLower();
+                generos = generos.Where(s =>
+                    s.GeneroNome.ToLower().Contains(lowerSearch)
+                );
             }
 
-            var genero = await _context.Generos
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (genero == null)
-            {
-                return NotFound();
-            }
-
-            return View(genero);
+            return View(await generos.ToListAsync());
         }
 
         // GET: Generos/Create

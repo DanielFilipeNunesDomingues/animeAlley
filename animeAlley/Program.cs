@@ -43,6 +43,13 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => {
    .AddRoles<IdentityRole>()
    .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// Configuração de autorização
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy =>
+        policy.RequireRole("Admin"));
+});
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 

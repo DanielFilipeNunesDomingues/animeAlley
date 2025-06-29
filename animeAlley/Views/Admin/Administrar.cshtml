@@ -1,0 +1,167 @@
+﻿@using animeAlley.Controllers
+
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Painel de Administração";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <!-- Header -->
+    <div class="admin-header text-center">
+        <h1 class="display-5 mb-3">Painel de Administração <img src="~/img/iconAnimeAlley.svg" alt="Logo animeAlley" /></h1>
+    </div>
+
+    <!-- Estatísticas Gerais -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title mb-3">Estatísticas Gerais</h2>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+            <div class="card admin-card shows h-100 text-center p-4">
+                <div class="card-body">
+                    <h3 class="card-title">@Model.TotalShows</h3>
+                    <p class="card-text mb-0">Shows</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+            <div class="card admin-card autores h-100 text-center p-4">
+                <div class="card-body">
+
+                    <h3 class="card-title">@Model.TotalAutores</h3>
+                    <p class="card-text mb-0">Autores</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+            <div class="card admin-card studios h-100 text-center p-4">
+                <div class="card-body">
+                    <h3 class="card-title">@Model.TotalStudios</h3>
+                    <p class="card-text mb-0">Estúdios</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+            <div class="card admin-card personagens h-100 text-center p-4">
+                <div class="card-body">
+                    <h3 class="card-title">@Model.TotalPersonagens</h3>
+                    <p class="card-text mb-0">Personagens</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+            <div class="card admin-card generos h-100 text-center p-4">
+                <div class="card-body">
+                    <h3 class="card-title">@Model.TotalGeneros</h3>
+                    <p class="card-text mb-0">Gêneros</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+            <div class="card admin-card utilizadores h-100 text-center p-4">
+                <div class="card-body">
+                    <h3 class="card-title">@Model.TotalUtilizadores</h3>
+                    <p class="card-text mb-0">Utilizadores</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title mb-3">Ações Rápidas</h2>
+        </div>
+        <div class="col-12">
+            <div class="card stats-card p-4">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h5 class="mb-3">Gerenciar Conteúdo</h5>
+                        <div class="col-auto">
+                            <a asp-controller="Shows" asp-action="Index" class="quick-action-btn">Gerenciar Shows</a>
+                            <a asp-controller="Autores" asp-action="Index" class="quick-action-btn">Gerenciar Autores</a>
+                            <a asp-controller="Studios" asp-action="Index" class="quick-action-btn">Gerenciar Estúdios</a>
+                            <a asp-controller="Personagens" asp-action="Index" class="quick-action-btn">Gerenciar Personagens</a>
+                        </div>
+
+                    </div>
+                    <div class="col-lg-6">
+                        <h5 class="mb-3">Configurações</h5>
+                        <div class="row">
+                            <div class="col-auto">
+                                <a asp-controller="Generos" asp-action="Index" class="quick-action-btn">Gerenciar Gêneros</a>
+                                <a asp-controller="Utilizadores" asp-action="Index" class="quick-action-btn">Gerenciar Utilizadores</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações Detalhadas -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card stats-card h-100">
+                <div class="card-header bg-transparent border-0 pt-4">
+                    <h5 class="card-title mb-0">Top 5 Shows Mais Visualizados</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.ShowsMaisVisualizados != null && Model.ShowsMaisVisualizados.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var show in Model.ShowsMaisVisualizados)
+                            {
+                                <div class="list-group-item border-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a asp-controller="Shows" asp-action="Details" asp-route-id="@show.Id" class="fw-medium">@show.Nome</a>
+                                        <span class="badge bg-primary rounded-pill">@show.Views views</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Nenhum show encontrado</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card stats-card h-100">
+                <div class="card-header bg-transparent border-0 pt-4">
+                    <h5 class="card-title mb-0">Shows Mais Recentes</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.ShowsRecentes != null && Model.ShowsRecentes.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var show in Model.ShowsRecentes)
+                            {
+                                <div class="list-group-item border-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a asp-controller="Shows" asp-action="Details" asp-route-id="@show.Id" class="fw-medium">@show.Nome</a>
+                                        <small class="text-muted">@show.DataCriacao.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Nenhum show encontrado</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

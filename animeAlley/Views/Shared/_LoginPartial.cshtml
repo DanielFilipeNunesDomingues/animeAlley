@@ -8,6 +8,7 @@
     var fotoUtilizador = await UtilizadorService.GetFotoUtilizadorAsync();
     var idUtilizador = await UtilizadorService.GetIDUtilizadorAsync();
 }
+
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
@@ -19,7 +20,8 @@
                 <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none;">
                     <img src="@fotoUtilizador" alt="Avatar" class="avatar" />
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+                <!-- Adicionadas classes responsivas -->
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start dropdown-menu-responsive" aria-labelledby="navbarDropdown" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
                     <li>
                         <a class="dropdown-item d-flex align-items-center justify-content-center" asp-area="Identity" asp-page="/Account/Manage/Index">
                             Configurações

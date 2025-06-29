@@ -1,33 +1,65 @@
 ﻿@model animeAlley.Models.Genero
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Criar Gênero";
 }
 
-<h1>Create</h1>
+<div class="py-5 container min-vh-100">
+    <h1 class="text-center mb-4">Criar Gênero</h1>
 
-<h4>Genero</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="GeneroNome" class="control-label"></label>
-                <input asp-for="GeneroNome" class="form-control" />
-                <span asp-validation-for="GeneroNome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informações do Gênero</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label asp-for="GeneroNome" class="form-label fw-semibold">Nome do Gênero <span class="text-danger d-inline-block">*</span></label>
+                                    <input asp-for="GeneroNome" class="form-control" placeholder="Nome do gênero" />
+                                    <span asp-validation-for="GeneroNome" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Criar Gênero
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                        Voltar à Lista
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Validação antes do submit
+            $('form').on('submit', function(e) {
+                const generoNome = $('#GeneroNome').val().trim();
+
+                if (!generoNome) {
+                    e.preventDefault();
+                    alert('Por favor, informe o nome do gênero.');
+                    $('#GeneroNome').focus();
+                    return false;
+                }
+            });
+        });
+    </script>
 }
