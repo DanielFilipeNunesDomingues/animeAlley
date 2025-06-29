@@ -29,8 +29,7 @@ namespace animeAlley.Controllers
         {
             ViewData["CurrentFilter"] = searchString;
 
-            var autores = from a in _context.Autores
-                          select a;
+            var autores = _context.Autores.Include(a => a.ShowsCriados).AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {

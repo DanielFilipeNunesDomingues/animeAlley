@@ -1,17 +1,14 @@
 ﻿@page
 @model RegisterConfirmationModel
 @{
-    ViewData["Title"] = "Register confirmation";
+    ViewData["Title"] = "Confirmar Conta";
 }
 
 <style>
-    #register-confirmation {
-        margin-top: 1rem;
-    }
 </style>
 
-<div class="min-vh-100">
-    <h1>@ViewData["Title"]</h1>
+<div class="min-vh-100 d-flex align-items-center  py-5 flex-column">
+    <h1 class="fw-bold">Confirme sua conta! <img src="~/img/iconAnimeAlley.svg" alt="Alternate Text" /></h1>
     @{
         if (@Model.DisplayConfirmAccountLink)
         {
@@ -22,8 +19,8 @@
         }
         else
         {
-    <p>
-            Please check your email to confirm your account.
+    <p class="text-muted">
+            Por favor, verifique seu E-mail para confirmar sua conta!
     </p>
         }
     }

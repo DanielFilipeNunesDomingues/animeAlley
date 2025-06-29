@@ -64,7 +64,7 @@ namespace animeAlley.Areas.Identity.Pages.Account
             var user = await _userManager.FindByEmailAsync(Input.Email);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
+                ModelState.AddModelError(string.Empty, "Confirmação de Email enviado, verifique sua caixa de correio");
                 return Page();
             }
 
@@ -78,8 +78,8 @@ namespace animeAlley.Areas.Identity.Pages.Account
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
                 Input.Email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                "Confirme o seu Email",
+                $"Por favor, confirme a sua conta clickando <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>aqui!</a>.");
 
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             return Page();

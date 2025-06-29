@@ -272,8 +272,8 @@ namespace animeAlley.Areas.Identity.Pages.Account
                             protocol: Request.Scheme);
 
                         // criar o email e enviá-lo
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirme o seu Email",
+                            $"Por favor, confirme a sua conta clickando <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>aqui!</a>.");
 
                         // Se tiver sido definido que o Registo deve ser seguido de validação do
                         // email, redireciona para a página de Confirmação de Registo de um novo Utilizador

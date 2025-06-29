@@ -29,8 +29,7 @@ namespace animeAlley.Controllers
         {
             ViewData["CurrentFilter"] = searchString;
 
-            var studios = from s in _context.Studios
-                          select s;
+            var studios = _context.Studios.Include(a => a.ShowsDesenvolvidos).AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {

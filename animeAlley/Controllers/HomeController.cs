@@ -235,10 +235,45 @@ namespace animeAlley.Controllers
             return View();
         }
 
+        // Método existente para erros gerais
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        // Novo método para tratar códigos de status específicos
+        [Route("Home/Error/{statusCode}")]
+        public IActionResult Error(int statusCode)
+        {
+            var model = new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                StatusCode = statusCode
+            };
+
+            // Personalizar mensagem baseada no código de status
+            switch (statusCode)
+            {
+                case 404:
+                    model.ErrorMessage = "A página que você está procurando não foi encontrada.";
+                    model.ErrorTitle = "Página não encontrada (404)";
+                    break;
+                case 403:
+                    model.ErrorMessage = "Você não tem permissão para acessar este recurso.";
+                    model.ErrorTitle = "Acesso negado (403)";
+                    break;
+                case 500:
+                    model.ErrorMessage = "Ocorreu um erro interno no servidor.";
+                    model.ErrorTitle = "Erro interno do servidor (500)";
+                    break;
+                default:
+                    model.ErrorMessage = "Ocorreu um erro inesperado.";
+                    model.ErrorTitle = $"Erro ({statusCode})";
+                    break;
+            }
+
+            return View("Error", model);
         }
     }
 }

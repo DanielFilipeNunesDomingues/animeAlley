@@ -4,6 +4,7 @@ using animeAlley.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -26,10 +27,24 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // configurar o uso do IdentityUser como 'utilizador' de autenticação
 // se não se adicionar à instrução '.AddRoles' não é possível usar os ROLES
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => {
+    options.SignIn.RequireConfirmedAccount = true;
+
+    // Configurar para exigir confirmação de email
+    options.User.RequireUniqueEmail = true;
+
+    // Configurações de senha 
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
    .AddRoles<IdentityRole>()
    .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 // configurar o de uso de 'cookies'
 builder.Services.AddSession(options => {
@@ -38,6 +53,17 @@ builder.Services.AddSession(options => {
     options.Cookie.IsEssential = true;
 });
 builder.Services.AddDistributedMemoryCache();
+
+// Configurar SendGrid
+builder.Services.Configure<AuthMessageSenderOptions>(options =>
+{
+    options.SendGridKey = builder.Configuration["SendGridKey"] ?? throw new InvalidOperationException("SendGridKey não configurado");
+    options.FromEmail = builder.Configuration["FromEmail"] ?? throw new InvalidOperationException("FromEmail não configurado");
+    options.FromName = builder.Configuration["FromName"] ?? throw new InvalidOperationException("FromName não configurado");
+});
+
+// Registrar o serviço de email
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 // *******************************************************************
 // Instalar o package
@@ -111,19 +137,18 @@ builder.Services.AddSwaggerGen(c => {
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // Invocar o seed da BD
     app.UseMigrationsEndPoint();
-
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
 }
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
     app.UseHsts();
 }
 
@@ -132,6 +157,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();

@@ -1,28 +1,10 @@
 ﻿@page
 @model AccessDeniedModel
 @{
-    ViewData["Title"] = "Access denied";
+    ViewData["Title"] = "Acesso Negado";
 }
-<style>
-    #access-denied {
-        margin-top: 1rem;
-    }
-    #access-denied-submit {
-        margin-top: 1rem;
-    }
-    #access-denied-form {
-        margin-top: 1rem;
-    }
-    #access-denied-logout {
-        margin-top: 1rem;
-    }
-    #access-denied-logout-link {
-        margin-top: 1rem;
-    }
-</style>
-<div class="min-vh-100">
-    <header>
-        <h1 class="text-danger">@ViewData["Title"]</h1>
-        <p class="text-danger">You do not have access to this resource.</p>
-    </header>
+
+<div class="min-vh-100 min-vh-100 d-flex align-items-center  py-5 flex-column">
+    <h1 class="text-danger fs-1 fw-bold">Acesso Negado!</h1>
+    <p class="text-muted">Você não tem acesso á esse conteúdo!</p>
 </div>

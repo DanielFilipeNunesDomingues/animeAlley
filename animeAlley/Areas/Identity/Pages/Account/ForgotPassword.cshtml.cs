@@ -72,8 +72,8 @@ namespace animeAlley.Areas.Identity.Pages.Account
 
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    "Resetar Senha",
+                    $"Por favor, resete sua senha clickando <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>aqui!</a>.");
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

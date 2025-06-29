@@ -1,25 +1,55 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = Model.ErrorTitle ?? "Erro";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="min-vh-100 d-flex align-items-center  py-5 flex-column">
+    @if (Model.StatusCode == 404)
+    {
+        <h1 class="fs-1 fw-bold text-danger">404 <img src="~/img/iconAnimeAlley.svg" alt="Alternate Text" /></h1>
+        <h2 class="mb-3">Oops! Página não encontrada</h2>
+        <p class="lead text-muted mb-4">
+            A página que você está procurando não existe ou foi movida.
+        </p>
+    }
+    else if (Model.StatusCode == 403)
+    {
+        <h1 class="fs-1 fw-bold text-danger">403 <img src="~/img/iconAnimeAlley.svg" alt="Alternate Text" /></h1>
+        <h2 class="mb-3">Acesso Negado</h2>
+        <p class="lead text-muted mb-4">
+            Você não tem permissão para acessar esta página.
+        </p>
+    }
+    else
+    {
+        <h1 class="fs-1 fw-bold text-danger">@Model.StatusCode <img src="~/img/iconAnimeAlley.svg" alt="Alternate Text" /></h1>
+        <h2 class="mb-3">@Model.ErrorTitle</h2>
+        <p class="lead text-muted mb-4">
+            @Model.ErrorMessage
+        </p>
+    }
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+        <a href="/" class="btn btn-primary btn-lg me-md-2">
+            Voltar ao Início
+        </a>
+        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+            Página Anterior
+        </button>
+    </div>
+
+    @if (Model.ShowRequestId)
+    {
+        <div class="mt-4">
+            <small class="text-muted">
+                ID da Requisição: @Model.RequestId
+            </small>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        console.log('Erro @Model.StatusCode na URL:', window.location.href);
+    </script>
 }
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>

@@ -1,17 +1,13 @@
 ﻿@page
 @model ConfirmEmailModel
 @{
-    ViewData["Title"] = "Confirm email";
+    ViewData["Title"] = "Email Confirmado!";
 }
-<style>
-    #confirm-email { margin-top: 1rem; }
-    #confirm-email-submit { margin-top: 1rem; }
-    #confirm-email-form { margin-top: 1rem; }
-    #confirm-email-logout { margin-top: 1rem; }
-    #confirm-email-logout-link {
-        margin-top: 1rem;
-    }
-    </style>
 
-<h1>@ViewData["Title"]</h1>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+<div class="min-vh-100 d-flex align-items-center  py-5 flex-column">
+    <h1 class="fw-bold">Email Confirmado! <img src="~/img/iconAnimeAlley.svg" alt="Alternate Text" /></h1>
+    <p class="text-muted">
+        Obrigado por se registar no animeAlley! :)
+    </p>
+</div>
+
