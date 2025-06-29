@@ -13,7 +13,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace animeAlley.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class UtilizadoresController : Controller
     {
         /// <summary>
@@ -31,6 +30,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Utilizadores
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Utilizadores.ToListAsync());
@@ -71,6 +71,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Utilizadores/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -106,6 +107,7 @@ namespace animeAlley.Controllers
         // POST: Utilizadores/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, EditUtilizadorViewModel model)
         {
             if (id != model.Id)
@@ -297,6 +299,7 @@ namespace animeAlley.Controllers
         }
 
         // GET: Utilizadores/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -337,6 +340,7 @@ namespace animeAlley.Controllers
         // POST: Utilizadores/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try
