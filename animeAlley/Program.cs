@@ -1,4 +1,6 @@
 using animeAlley.Data;
+using animeAlley.Data.Seed;
+using animeAlley.Hubs;
 using animeAlley.Models;
 using animeAlley.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -109,9 +111,6 @@ builder.Services.AddScoped<UtilizadorService>();
 // Novo serviço para gerenciar roles
 builder.Services.AddScoped<RoleService>();
 
-// declarar o serviço do Signal R
-builder.Services.AddSignalR();
-
 // Registro dos novos serviços com suas interfaces
 builder.Services.AddScoped<IShowService, ShowService>();
 builder.Services.AddScoped<IGeneroService, GeneroService>();
@@ -126,7 +125,8 @@ builder.Services.AddScoped<IEstatisticasService, EstatisticasService>();
 builder.Services.AddControllers()
                 .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddSwaggerGen(c => {
+builder.Services.AddSwaggerGen(c =>
+{
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "animeAlley API",
@@ -139,6 +139,14 @@ builder.Services.AddSwaggerGen(c => {
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
 
+});
+
+// Configuração do SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true; // Para debugging
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
 });
 
 
@@ -169,12 +177,17 @@ app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSession();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.UseItToSeedSqlServer();
+
+app.UseSession();
+
 app.MapRazorPages();
+
+app.MapHub<ShowsHub>("/showsHub");
 
 using (var scope = app.Services.CreateScope())
 {

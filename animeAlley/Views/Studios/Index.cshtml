@@ -26,22 +26,6 @@
                        placeholder="Buscar estúdios..." class="form-control" />
             </form>
         </div>
-        <div class="col-md-6">
-            <div class="d-flex justify-content-end gap-2 mt-md-0 mt-4">
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Ordenar por
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name" })">Nome A-Z</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc" })">Nome Z-A</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date" })">Mais Recente</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc" })">Mais Antigo</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Resultados -->

@@ -237,6 +237,7 @@ namespace animeAlley.Controllers
 
         // Método existente para erros gerais
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [NonAction]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
@@ -244,6 +245,7 @@ namespace animeAlley.Controllers
 
         // Novo método para tratar códigos de status específicos
         [Route("Home/Error/{statusCode}")]
+        [NonAction]
         public IActionResult Error(int statusCode)
         {
             var model = new ErrorViewModel

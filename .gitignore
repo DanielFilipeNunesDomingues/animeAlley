@@ -10,9 +10,6 @@
 *.userosscache
 *.sln.docstates
 
-# Ignorar o envio de imagens não Place Holders
-/animeAlley/wwwroot/images
-
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
