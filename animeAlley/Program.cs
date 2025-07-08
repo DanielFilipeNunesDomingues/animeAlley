@@ -3,6 +3,7 @@ using animeAlley.Data.Seed;
 using animeAlley.Hubs;
 using animeAlley.Models;
 using animeAlley.Services;
+using animeAlley.Data.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -152,47 +153,10 @@ builder.Services.AddSignalR(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseMigrationsEndPoint();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
-}
-else
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.UseItToSeedSqlServer();
-
-app.UseSession();
-
-app.MapRazorPages();
-
-app.MapHub<ShowsHub>("/showsHub");
-
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    await SeedRolesAndAdmin(services);
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await DbInitializer.Initialize(context);
 }
 
 async Task SeedRolesAndAdmin(IServiceProvider serviceProvider)
@@ -237,6 +201,49 @@ async Task SeedRolesAndAdmin(IServiceProvider serviceProvider)
         context.Utilizadores.Add(utilizador);
         await context.SaveChangesAsync();
     }
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseMigrationsEndPoint();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.UseItToSeedSqlServer();
+
+app.UseSession();
+
+app.MapRazorPages();
+
+app.MapHub<ShowsHub>("/showsHub");
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedRolesAndAdmin(services);
 }
 
 app.Run();
