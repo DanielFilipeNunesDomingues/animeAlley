@@ -7,12 +7,12 @@ namespace animeAlley.Services
 {
     public class RoleService
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
 
-        public RoleService(UserManager<IdentityUser> userManager,
-                          RoleManager<IdentityRole> roleManager,
+        public RoleService(UserManager<ApplicationUser> userManager,
+                          RoleManager<IdentityRole> roleManager, 
                           ApplicationDbContext context)
         {
             _userManager = userManager;
@@ -113,6 +113,41 @@ namespace animeAlley.Services
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Cria uma role se ela não existir
+        /// </summary>
+        public async Task<bool> CreateRoleIfNotExistsAsync(string roleName)
+        {
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
+                return result.Succeeded;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Obtém todas as roles disponíveis
+        /// </summary>
+        public async Task<List<IdentityRole>> GetAllRolesAsync()
+        {
+            return await _roleManager.Roles.ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtém as roles de um utilizador
+        /// </summary>
+        public async Task<List<string>> GetUserRolesAsync(string userEmail)
+        {
+            var user = await _userManager.FindByEmailAsync(userEmail);
+            if (user != null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                return roles.ToList();
+            }
+            return new List<string>();
         }
     }
 }

@@ -19,10 +19,10 @@ namespace animeAlley.Controllers
         /// Referência à Base de Dados do projeto
         /// </summary>
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public UtilizadoresController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment webHostEnvironment)
+        public UtilizadoresController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _userManager = userManager;

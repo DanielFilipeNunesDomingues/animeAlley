@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace animeAlley.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
 
@@ -26,7 +27,7 @@ namespace animeAlley.Data
 
             // criar os perfis de utilizador da nossa app
             modelBuilder.Entity<IdentityRole>().HasData(
-                new IdentityRole { Id = "a", Name = "admin", NormalizedName = "ADMIN" });
+                new IdentityRole { Id = "a", Name = "Admin", NormalizedName = "ADMIN" });
 
             // criar um utilizador para funcionar como ADMIN
             // função para codificar a password
@@ -118,6 +119,18 @@ namespace animeAlley.Data
                         j.Property<int>("ShowsId").HasColumnName("ShowsId");
                         j.Property<int>("GenerosId").HasColumnName("GenerosId");
                     });
+
+            // Configurar relacionamento entre ApplicationUser e Utilizador
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Utilizador)
+                .WithMany()
+                .HasForeignKey(u => u.UtilizadorId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Configurar índice único para UserName na tabela Utilizador
+            modelBuilder.Entity<Utilizador>()
+                .HasIndex(u => u.UserName)
+                .IsUnique();
         }
 
         public DbSet<Autor> Autores { get; set; }

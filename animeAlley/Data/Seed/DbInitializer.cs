@@ -62,43 +62,84 @@ namespace animeAlley.Data.Seed
 
 
             // Se não houver Utilizadores Identity, cria-os
-            var newIdentityUsers = Array.Empty<IdentityUser>();
+            var newIdentityUsers = Array.Empty<ApplicationUser>();
             //a hasher to hash the password before seeding the user to the db
-            var hasher = new PasswordHasher<IdentityUser>();
+            var hasher = new PasswordHasher<ApplicationUser>();
 
             if (await dbContext.Users.CountAsync() == 1)
             {
-                newIdentityUsers = [
-                   new IdentityUser{
-                        UserName="go3370764@gmail.com",
-                        NormalizedUserName="GO3370764@GMAIL.COM",
-                        Email="go3370764@gmail.com",
-                        NormalizedEmail="GO3370764@GMAIL.COM",
-                        EmailConfirmed=true,
-                        SecurityStamp=Guid.NewGuid().ToString("N").ToUpper(),
-                        ConcurrencyStamp=Guid.NewGuid().ToString(),
-                        PasswordHash=hasher.HashPassword(null,"12345A@")
+                // Primeiro criar os ApplicationUsers
+                newIdentityUsers = new[]
+                {
+                    new ApplicationUser
+                    {
+                        UserName = "go3370764@gmail.com",
+                        NormalizedUserName = "GO3370764@GMAIL.COM",
+                        Email = "go3370764@gmail.com",
+                        NormalizedEmail = "GO3370764@GMAIL.COM",
+                        EmailConfirmed = true,
+                        SecurityStamp = Guid.NewGuid().ToString("N").ToUpper(),
+                        ConcurrencyStamp = Guid.NewGuid().ToString(),
+                        PasswordHash = hasher.HashPassword(null, "12345A@"),
+                        CreatedAt = DateTime.UtcNow,
+                        IsActive = true
                     },
-                    new IdentityUser{
-                        UserName="kakirmsplatoon2@gmail.com",
-                        NormalizedUserName="KAKIRMSPLATOON2@GMAIL.COM",
-                        Email="kakirmsplatoon2@gmail.com",
-                        NormalizedEmail="KAKIRMSPLATOON2@GMAIL.COM",
-                        EmailConfirmed=true,
-                        SecurityStamp=Guid.NewGuid().ToString("N").ToUpper(),
-                        ConcurrencyStamp=Guid.NewGuid().ToString(),
-                        PasswordHash=hasher.HashPassword(null,"ADMIN2025@")
+                    new ApplicationUser
+                    {
+                        UserName = "kakirmsplatoon2@gmail.com",
+                        NormalizedUserName = "KAKIRMSPLATOON2@GMAIL.COM",
+                        Email = "kakirmsplatoon2@gmail.com",
+                        NormalizedEmail = "KAKIRMSPLATOON2@GMAIL.COM",
+                        EmailConfirmed = true,
+                        SecurityStamp = Guid.NewGuid().ToString("N").ToUpper(),
+                        ConcurrencyStamp = Guid.NewGuid().ToString(),
+                        PasswordHash = hasher.HashPassword(null, "ADMIN2025@"),
+                        CreatedAt = DateTime.UtcNow,
+                        IsActive = true
                     }
-                ];
+                };
 
+                // Adicionar os ApplicationUsers primeiro
                 await dbContext.Users.AddRangeAsync(newIdentityUsers);
                 await dbContext.SaveChangesAsync();
+
+                // Depois criar os Utilizadores com referência aos ApplicationUsers
+                var utilizadores = new[]
+                {
+                    new Utilizador {
+                        Nome="Daniel",
+                        Foto="placeholder.png",
+                        UserName=newIdentityUsers[0].UserName,
+                        isAdmin=false,
+                        Banner="bannerplaceholder.png"
+                    },
+                    new Utilizador {
+                        Nome="animeAlley",
+                        Foto="placeholder.png",
+                        UserName=newIdentityUsers[1].UserName,
+                        isAdmin=true,
+                        Banner="bannerplaceholder.png"
+                    }
+                };
+
+                dbContext.Utilizadores.AddRange(utilizadores);
+                await dbContext.SaveChangesAsync();
+
+                // Atualizar os ApplicationUsers com as referências aos Utilizadores
+                newIdentityUsers[0].UtilizadorId = utilizadores[0].Id;
+                newIdentityUsers[1].UtilizadorId = utilizadores[1].Id;
+
+                dbContext.Users.UpdateRange(newIdentityUsers);
+                await dbContext.SaveChangesAsync();
+
                 haAdicao = true;
             }
             else
             {
                 // Get existing users (excluding the admin user we know exists)  
-                var existingUsers = await dbContext.Users.Where(u => u.Email != "admin@animealley.com").ToArrayAsync();
+                var existingUsers = await dbContext.Users
+                    .Where(u => u.Email != "admin@animealley.com" && u.Email != "admin@mail.pt")
+                    .ToArrayAsync();
                 newIdentityUsers = existingUsers;
             }
 
@@ -151,37 +192,6 @@ namespace animeAlley.Data.Seed
                         haAdicao = true;
                     }
                 }
-            }
-
-
-            // NOW create Utilizadores after IdentityUsers exist
-            var utilizadores = Array.Empty<Utilizador>();
-            if (!await dbContext.Utilizadores.AnyAsync())
-            {
-                utilizadores = [
-                    new Utilizador {
-                        Nome="animeAlley",
-                        Foto="placeholder.png",
-                        UserName=newIdentityUsers[1].UserName,
-                        isAdmin=true,
-                        Banner="bannerplaceholder.png"
-                    },
-                    new Utilizador {
-                        Nome="Daniel",
-                        Foto="placeholder.png",
-                        UserName=newIdentityUsers[0].UserName,
-                        isAdmin=false,
-                        Banner="bannerplaceholder.png"
-                    },
-                ];
-
-                await dbContext.Utilizadores.AddRangeAsync(utilizadores);
-                await dbContext.SaveChangesAsync();
-                haAdicao = true;
-            }
-            else
-            {
-                utilizadores = await dbContext.Utilizadores.ToArrayAsync();
             }
 
             // Método para popular dados de personagens baseado na tabela fornecida

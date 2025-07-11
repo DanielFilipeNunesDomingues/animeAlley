@@ -1,89 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using animeAlley.Data;
-using animeAlley.Models;
+﻿using animeAlley.Models.ViewModels.AuthenticatorDTO;
+using animeAlley.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text;
-using animeAlley.Models.ViewModels;
+using System.Threading.Tasks;
 
 namespace animeAlley.Controllers.API
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
+        private readonly IAuthService _authService;
 
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly IConfiguration _config;
-
-        public AuthController(ApplicationDbContext context,
-           UserManager<IdentityUser> userManager,
-           SignInManager<IdentityUser> signInManager,
-           IConfiguration config)
+        public AuthController(IAuthService authService)
         {
-            _context = context;
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _config = config;
+            _authService = authService;
         }
 
-
-        [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDTO login)
+        public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
         {
+            var response = await _authService.LoginAsync(loginDto);
+            if (response == null)
+            {
+                return Unauthorized(new { message = "Credenciais inválidas ou conta não ativa" });
+            }
 
-            // procura pelo 'username' na base de dados, 
-            // para determinar se o utilizador existe
-            var user = await _userManager.FindByEmailAsync(login.Username);
-            if (user == null) return Unauthorized();
-
-            // se chego aqui, é pq o 'username' existe
-            // mas, a password é válida?
-            var result = await _signInManager.CheckPasswordSignInAsync(user, login.Password, false);
-            if (!result.Succeeded) return Unauthorized();
-
-            // houve sucesso na autenticação
-            // vou gerar o 'token', associado ao utilizador
-            var token = GenerateJwtToken(login.Username);
-
-            // devolvo o 'token'
-            return Ok(new { token });
+            return Ok(response);
         }
 
-        /// <summary>
-        /// gerar o Token
-        /// </summary>
-        /// <param name="username">nome da pessoa associada ao token</param>
-        /// <returns></returns>
-        private string GenerateJwtToken(string username)
+        [HttpPost("register")]
+        public async Task<ActionResult<AuthResponseDto>> Register(RegisterDto registerDto)
         {
-            var claims = new[] {
-         new Claim(ClaimTypes.Name, username)
-     };
+            var response = await _authService.RegisterAsync(registerDto);
+            if (response == null)
+            {
+                return BadRequest(new { message = "Erro ao criar conta. Usuário ou email já existem." });
+            }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(s: _config["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            return Ok(response);
+        }
 
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(2),
-                signingCredentials: creds);
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<object>> GetCurrentUser()
+        {
+            var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (string.IsNullOrEmpty(userName))
+            {
+                return Unauthorized();
+            }
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var utilizador = await _authService.GetUtilizadorByUserNameAsync(userName);
+            if (utilizador == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new
+            {
+                id = utilizador.Id,
+                nome = utilizador.Nome,
+                userName = utilizador.UserName,
+                foto = utilizador.Foto,
+                banner = utilizador.Banner,
+                isAdmin = utilizador.isAdmin,
+            });
         }
     }
 }

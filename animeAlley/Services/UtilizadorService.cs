@@ -10,11 +10,11 @@ namespace animeAlley.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public UtilizadorService(ApplicationDbContext context,
                                IHttpContextAccessor httpContextAccessor,
-                               UserManager<IdentityUser> userManager)
+                               UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;

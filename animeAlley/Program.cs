@@ -1,17 +1,17 @@
+using animeAlley.Configuration;
 using animeAlley.Data;
 using animeAlley.Data.Seed;
 using animeAlley.Hubs;
+using animeAlley.Mapping;
 using animeAlley.Models;
 using animeAlley.Services;
-using animeAlley.Data.Seed;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
+using animeAlley.Services.Implementations;
+using animeAlley.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -19,52 +19,108 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-// ler do ficheiro 'appsettings.json' os dados da BD
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// define o tipo de BD e a sua 'ligação'
+// Define database context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// configurar o uso do IdentityUser como 'utilizador' de autenticação
-// se não se adicionar à instrução '.AddRoles' não é possível usar os ROLES
-builder.Services.AddDefaultIdentity<IdentityUser>(options => {
+// Configure Identity with proper authentication schemes
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+
+    options.SignIn.RequireConfirmedEmail = true;
     options.SignIn.RequireConfirmedAccount = true;
 
-    // Configurar para exigir confirmação de email
-    options.User.RequireUniqueEmail = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
 
-    // Configurações de senha 
-    options.Password.RequireDigit = true;
     options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
 })
-   .AddRoles<IdentityRole>()
-   .AddEntityFrameworkStores<ApplicationDbContext>();
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders()
+.AddDefaultUI(); 
 
-// Configuração de autorização
-builder.Services.AddAuthorization(options =>
+// Configure Cookie Authentication (for web pages)
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.AddPolicy("RequireAdminRole", policy =>
-        policy.RequireRole("Admin"));
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    options.SlidingExpiration = true;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
+// Configure JWT settings
+var jwtSection = builder.Configuration.GetSection("Jwt");
+builder.Services.Configure<JwtSettings>(jwtSection);
+var jwtSettings = jwtSection.Get<JwtSettings>();
+
+if (jwtSettings == null)
+{
+    throw new InvalidOperationException("JWT settings não configuradas corretamente no appsettings.json");
+}
+
+// Configure JWT Authentication (for API)
+builder.Services.AddAuthentication()
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+// Configure authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+
+    // API-specific policies that use JWT
+    options.AddPolicy("ApiAdminOnly", policy =>
+    {
+        policy.RequireRole("Admin");
+        policy.AuthenticationSchemes.Add("JWT");
+    });
+
+    options.AddPolicy("ApiUserOnly", policy =>
+    {
+        policy.RequireRole("User");
+        policy.AuthenticationSchemes.Add("JWT");
+    });
+});
+
+// Add MVC services
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// configurar o de uso de 'cookies'
+// Configure session
 builder.Services.AddSession(options => {
-    options.IdleTimeout = TimeSpan.FromSeconds(60);
+    options.IdleTimeout = TimeSpan.FromMinutes(60); // Increased from 60 seconds
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 builder.Services.AddDistributedMemoryCache();
 
-// Configurar SendGrid
+// Configure SendGrid
 builder.Services.Configure<AuthMessageSenderOptions>(options =>
 {
     options.SendGridKey = builder.Configuration["SendGridKey"] ?? throw new InvalidOperationException("SendGridKey não configurado");
@@ -72,97 +128,89 @@ builder.Services.Configure<AuthMessageSenderOptions>(options =>
     options.FromName = builder.Configuration["FromName"] ?? throw new InvalidOperationException("FromName não configurado");
 });
 
-// Registrar o serviço de email
+// Register services
 builder.Services.AddTransient<IEmailSender, EmailSender>();
-
-// *******************************************************************
-// Instalar o package
-// Microsoft.AspNetCore.Authentication.JwtBearer
-//
-// using Microsoft.IdentityModel.Tokens;
-// *******************************************************************
-// JWT Settings
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
-
-builder.Services.AddAuthentication(options => { })
-   .AddCookie("Cookies", options => {
-       options.LoginPath = "/Identity/Account/Login";
-       options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-   })
-   .AddJwtBearer("Bearer", options => {
-       options.TokenValidationParameters = new TokenValidationParameters
-       {
-           ValidateIssuer = true,
-           ValidateAudience = true,
-           ValidateLifetime = true,
-           ValidateIssuerSigningKey = true,
-           ValidIssuer = jwtSettings["Issuer"],
-           ValidAudience = jwtSettings["Audience"],
-           IssuerSigningKey = new SymmetricSecurityKey(key)
-       };
-   });
-
-// configuração do JWT
-builder.Services.AddScoped<TokenService>();
-
-// Pegar o Nome do Utilizador
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<UtilizadorService>();
-
-// Novo serviço para gerenciar roles
 builder.Services.AddScoped<RoleService>();
+builder.Services.AddHttpContextAccessor();
 
-// Registro dos novos serviços com suas interfaces
-builder.Services.AddScoped<IShowService, ShowService>();
-builder.Services.AddScoped<IGeneroService, GeneroService>();
-builder.Services.AddScoped<IStudioService, StudioService>();
-builder.Services.AddScoped<IAutorService, AutorService>();
-builder.Services.AddScoped<IPersonagemService, PersonagemService>();
-builder.Services.AddScoped<IEstatisticasService, EstatisticasService>();
-
-// Eliminar a proteção de 'ciclos' qd se faz uma pesquisa que envolva um relacionamento 1-N em Linq
-// https://code-maze.com/aspnetcore-handling-circular-references-when-working-with-json/
-// https://marcionizzola.medium.com/como-resolver-jsonexception-a-possible-object-cycle-was-detected-27e830ea78e5
-builder.Services.AddControllers()
-                .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
+// Swagger configuration
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "animeAlley API",
-        Version = "v1",
+        Version = "v2",
         Description = "API para gestão de shows, autores, personagens, generos e estúdios"
     });
 
-    // Caminho para o XML gerado
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
-
 });
 
-// Configuração do SignalR
+// SignalR configuration
 builder.Services.AddSignalR(options =>
 {
-    options.EnableDetailedErrors = true; // Para debugging
+    options.EnableDetailedErrors = true;
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
 });
 
+// AutoMapper configuration
+builder.Services.AddAutoMapper(typeof(ShowsMappingProfile));
+builder.Services.AddAutoMapper(typeof(AutoresMappingProfile));
+builder.Services.AddAutoMapper(typeof(StudiosMappingProfile));
+builder.Services.AddAutoMapper(typeof(PersonagensMappingProfile));
+builder.Services.AddAutoMapper(typeof(GenerosMappingProfile));
+builder.Services.AddAutoMapper(typeof(EstatisticasMappingProfile));
+
+// Business services
+builder.Services.AddScoped<IShowsService, ShowsService>();
+builder.Services.AddScoped<IAutorService, AutorService>();
+builder.Services.AddScoped<IStudioService, StudioService>();
+builder.Services.AddScoped<IPersonagemService, PersonagemService>();
+builder.Services.AddScoped<IGeneroService, GeneroService>();
+builder.Services.AddScoped<IEstatisticaService, EstatisticaService>();
+
+// Configure JSON serialization
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await DbInitializer.Initialize(context);
-}
-
+// Seed roles and admin function
 async Task SeedRolesAndAdmin(IServiceProvider serviceProvider)
 {
     var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
     string[] roleNames = { "Admin", "User" };
@@ -180,16 +228,7 @@ async Task SeedRolesAndAdmin(IServiceProvider serviceProvider)
 
     if (adminUser == null)
     {
-        adminUser = new IdentityUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
-
-        await userManager.CreateAsync(adminUser, "Admin123!");
-        await userManager.AddToRoleAsync(adminUser, "Admin");
-
+        // First create the Utilizador
         var utilizador = new Utilizador
         {
             Nome = "Administrador",
@@ -200,21 +239,41 @@ async Task SeedRolesAndAdmin(IServiceProvider serviceProvider)
 
         context.Utilizadores.Add(utilizador);
         await context.SaveChangesAsync();
+
+        // Then create the ApplicationUser
+        adminUser = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true,
+            UtilizadorId = utilizador.Id,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true
+        };
+
+        await userManager.CreateAsync(adminUser, "Admin123!");
+        await userManager.AddToRoleAsync(adminUser, "Admin");
     }
 }
 
+// Initialize database
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await DbInitializer.Initialize(context);
+}
+
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+    app.UseItToSeedSqlServer();
 }
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
     app.UseHsts();
 }
 
@@ -223,23 +282,26 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+// Session must come before authentication
+app.UseSession();
 
+// Authentication and authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Status code pages
+app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+
+// Map routes
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.UseItToSeedSqlServer();
-
-app.UseSession();
-
 app.MapRazorPages();
-
 app.MapHub<ShowsHub>("/showsHub");
+app.MapControllers();
 
+// Execute seeding
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

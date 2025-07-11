@@ -10,14 +10,14 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
 {
     public partial class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ApplicationDbContext _context;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             IWebHostEnvironment webHostEnvironment,
             ApplicationDbContext context)
         {
@@ -65,7 +65,7 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
             public bool RemoveBanner { get; set; }
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);

@@ -3,16 +3,10 @@
 @{
     ViewData["Title"] = "Confirm email change";
 }
-<style>
-    #confirm-email-change { margin-top: 1rem; }
-    #confirm-email-change-submit { margin-top: 1rem; }
-    #confirm-email-change-form { margin-top: 1rem; }
-    #confirm-email-change-logout { margin-top: 1rem; }
 
-    #confirm-email-change-logout-link {
-        margin-top: 1rem;
-    }
-</style>
-
-<h1>@ViewData["Title"]</h1>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+<div class="min-vh-100 d-flex align-items-center  py-5 flex-column">
+    <h1 class="fw-bold">Email Confirmado! <img src="~/img/iconAnimeAlley.svg" alt="Alternate Text" /></h1>
+    <p class="text-muted">
+        Seu email foi alterado com sucesso!
+    </p>
+</div>

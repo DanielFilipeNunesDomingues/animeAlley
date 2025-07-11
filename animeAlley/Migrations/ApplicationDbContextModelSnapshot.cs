@@ -22,6 +22,85 @@ namespace animeAlley.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int?>("UtilizadorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("UtilizadorId");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -52,7 +131,7 @@ namespace animeAlley.Migrations
                         new
                         {
                             Id = "a",
-                            Name = "admin",
+                            Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
                 });
@@ -91,12 +170,10 @@ namespace animeAlley.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -108,12 +185,10 @@ namespace animeAlley.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -131,35 +206,26 @@ namespace animeAlley.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("IdentityUser");
 
                     b.HasData(
                         new
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "03b9203c-da5d-4e37-925f-51a615704b25",
+                            ConcurrencyStamp = "d993b820-0938-4dd1-9f05-be5540894766",
                             Email = "admin@mail.pt",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
                             NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFW3ZeCpGMnWf+u8ooHXqzB/cazekZZCTIrXkVpRTPf+kJXARh3RvTPeDEx4S67V1g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENkMy4FRZatpSywxcqXGjbRJVRsYT2JrdpskG+MRu66DOf8kz8P92vaaGDQJ7tz6lA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "0b74d822-fa8d-4878-a525-41518e0bd6df",
+                            SecurityStamp = "a7b11d2e-5452-4653-89a5-0a51d5b784b2",
                             TwoFactorEnabled = false,
                             UserName = "admin@mail.pt"
                         });
@@ -193,12 +259,10 @@ namespace animeAlley.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -242,12 +306,10 @@ namespace animeAlley.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -567,7 +629,20 @@ namespace animeAlley.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
                     b.ToTable("Utilizadores");
+                });
+
+            modelBuilder.Entity("ApplicationUser", b =>
+                {
+                    b.HasOne("animeAlley.Models.Utilizador", "Utilizador")
+                        .WithMany()
+                        .HasForeignKey("UtilizadorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Utilizador");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -581,7 +656,7 @@ namespace animeAlley.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -590,7 +665,7 @@ namespace animeAlley.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -605,7 +680,7 @@ namespace animeAlley.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -614,7 +689,7 @@ namespace animeAlley.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using animeAlley.Services
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @inject UtilizadorService UtilizadorService
 @{
     var nomeUtilizador = await UtilizadorService.GetNomeUtilizadorAsync();

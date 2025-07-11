@@ -17,13 +17,13 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
 {
     public class EmailModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
         public EmailModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender)
         {
             _userManager = userManager;
@@ -73,7 +73,7 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
             public string NewEmail { get; set; }
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        private async Task LoadAsync(ApplicationUser user)
         {
             var email = await _userManager.GetEmailAsync(user);
             Email = email;
@@ -125,10 +125,10 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
                     protocol: Request.Scheme);
                 await _emailSender.SendEmailAsync(
                     Input.NewEmail,
-                    "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    "Confirme seu email",
+                    $"Por favor, confirme sua conta <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicando aqui</a>.");
 
-                StatusMessage = "Confirmation link to change email sent. Please check your email.";
+                StatusMessage = "Email de confirmação foi enviado para esse novo email.";
                 return RedirectToPage();
             }
 
@@ -161,8 +161,8 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
                 email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                "Confirme seu email",
+                $"Por favor, confirme sua conta <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicando aqui</a>.");
 
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToPage();

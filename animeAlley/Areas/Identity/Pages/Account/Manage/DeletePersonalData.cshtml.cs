@@ -19,15 +19,15 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
 {
     public class DeletePersonalDataModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         public DeletePersonalDataModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             ILogger<DeletePersonalDataModel> logger,
             ApplicationDbContext context,
             IWebHostEnvironment webHostEnvironment)

@@ -14,7 +14,7 @@
             <div class="cover">
                 <img src="~/images/showCover/@Html.DisplayFor(Model => Model.Imagem)" alt="@Html.DisplayFor(Model => Model.Nome) | Foto" />
             </div>
-            @if (User.IsInRole("User"))
+            @if (User.IsInRole("User") || User.IsInRole("Admin"))
             {
             <div class="options">
                 <a class="add" href="#" data-show-id="@Model.Id">Adicionar +</a> 
