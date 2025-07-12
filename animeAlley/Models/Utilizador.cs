@@ -24,14 +24,12 @@ namespace animeAlley.Models
         /// Foto do utilizador.
         /// </summary>
         [MaxLength(200, ErrorMessage = "O caminho da foto não pode ter mais de 200 caracteres.")]
-        [Url(ErrorMessage = "O formato da URL da foto não é válido.")]
         public string? Foto { get; set; } // Foto do Utilizador
 
         /// <summary>
         /// Banner do utilizador.
         /// </summary>
         [MaxLength(200, ErrorMessage = "O caminho do banner não pode ter mais de 200 caracteres.")]
-        [Url(ErrorMessage = "O formato da URL do banner não é válido.")]
         public string? Banner { get; set; } // Banner do Utilizador
 
         /// <summary>
