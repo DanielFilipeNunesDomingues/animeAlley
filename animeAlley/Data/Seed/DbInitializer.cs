@@ -20,7 +20,7 @@ namespace animeAlley.Data.Seed
              */
 
             ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
-            dbContext.Database.EnsureCreated();
+            dbContext.Database.Migrate();
 
             // var auxiliar
             bool haAdicao = false;
@@ -66,7 +66,7 @@ namespace animeAlley.Data.Seed
             //a hasher to hash the password before seeding the user to the db
             var hasher = new PasswordHasher<ApplicationUser>();
 
-            if (await dbContext.Users.CountAsync() == 1)
+            if (await dbContext.Users.CountAsync() == 1  || await dbContext.Users.CountAsync() == 0)
             {
                 // Primeiro criar os ApplicationUsers
                 newIdentityUsers = new[]

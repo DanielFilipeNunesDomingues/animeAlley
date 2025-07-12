@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = Model.ErrorTitle ?? "Erro";
 }
-
 <div class="min-vh-100 d-flex align-items-center  py-5 flex-column">
     @if (Model.StatusCode == 404)
     {
@@ -28,7 +27,6 @@
             @Model.ErrorMessage
         </p>
     }
-
     <div class="d-grid gap-2 d-md-flex justify-content-md-center">
         <a href="/" class="btn btn-primary btn-lg me-md-2">
             Voltar ao Início
@@ -37,7 +35,6 @@
             Página Anterior
         </button>
     </div>
-
     @if (Model.ShowRequestId)
     {
         <div class="mt-4">

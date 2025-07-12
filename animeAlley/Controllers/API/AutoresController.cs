@@ -140,11 +140,11 @@ namespace animeAlley.Controllers.Api
         /// <summary>
         /// Verifica se um autor existe
         /// </summary>
-        [HttpHead("{id}")]
-        public async Task<ActionResult> CheckAutorExists(int id)
+        [HttpGet("{id}/exists")]
+        public async Task<ActionResult<bool>> CheckAutorExists(int id)
         {
             var exists = await _autorService.AutorExistsAsync(id);
-            return exists ? Ok() : NotFound();
+            return Ok(exists);
         }
 
         /// <summary>

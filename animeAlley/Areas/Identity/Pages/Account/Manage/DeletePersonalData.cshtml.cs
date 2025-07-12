@@ -95,7 +95,7 @@ namespace animeAlley.Areas.Identity.Pages.Account.Manage
                 if (utilizador != null)
                 {
                     // 2. Apagar ficheiros de imagem se existirem
-                    ApagarFicheirosUtilizador(utilizador);
+                    await ApagarFicheirosUtilizador(utilizador);
 
                     // 3. Apagar dados relacionados (se houver)
                     // Por exemplo, se tiver uma Lista associada
