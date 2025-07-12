@@ -24,12 +24,14 @@ namespace animeAlley.Models
         /// Foto do utilizador.
         /// </summary>
         [MaxLength(200, ErrorMessage = "O caminho da foto não pode ter mais de 200 caracteres.")]
+        [Url(ErrorMessage = "O formato da URL da foto não é válido.")]
         public string? Foto { get; set; } // Foto do Utilizador
 
         /// <summary>
         /// Banner do utilizador.
         /// </summary>
         [MaxLength(200, ErrorMessage = "O caminho do banner não pode ter mais de 200 caracteres.")]
+        [Url(ErrorMessage = "O formato da URL do banner não é válido.")]
         public string? Banner { get; set; } // Banner do Utilizador
 
         /// <summary>
@@ -43,10 +45,7 @@ namespace animeAlley.Models
         /// entre a tabela dos Utilizadores e a 
         /// tabela da Autenticação da Microsoft Identity
         /// </summary>
-        [StringLength(50, ErrorMessage = "O nome de utilizador não pode ter mais de 50 caracteres.")]
-        [Required(ErrorMessage = "O nome de utilizador é obrigatório.")]
-        [MinLength(3, ErrorMessage = "O nome de utilizador deve ter pelo menos 3 caracteres.")]
-        [RegularExpression(@"^[a-zA-Z0-9._-]+$", ErrorMessage = "O nome de utilizador só pode conter letras, números, pontos, hífens e underscores.")]
+        [StringLength(50)]
         public string UserName { get; set; } = string.Empty;
 
         /// <summary>
