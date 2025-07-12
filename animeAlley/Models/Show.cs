@@ -15,26 +15,32 @@ public class Show
     /// <summary>
     /// Nome do show
     /// </summary>
-    [Required]
-    [MaxLength(200)]
+    [Required(ErrorMessage = "O nome do show é obrigatório.")]
+    [MaxLength(200, ErrorMessage = "O nome do show não pode exceder 200 caracteres.")]
+    [Display(Name = "Nome")]
     public string Nome { get; set; } = string.Empty;
 
     /// <summary>
     /// Descrição do show
     /// </summary>
-    [Required]
-    [MaxLength(10000)]
+    [Required(ErrorMessage = "A sinopse do show é obrigatória.")]
+    [MaxLength(10000, ErrorMessage = "A sinopse não pode exceder 10.000 caracteres.")]
+    [MinLength(20, ErrorMessage = "A sinopse deve ter pelo menos 20 caracteres.")]
+    [Display(Name = "Sinopse")]
     public string Sinopse { get; set; } = string.Empty;
 
     /// <summary>
     /// Estado atual do show
     /// </summary>
-    [Required]
+    [Required(ErrorMessage = "O status do show é obrigatório.")]
+    [Display(Name = "Status")]
     public Status Status { get; set; }
 
     /// <summary>
     /// Nota do show (0.0-10.0)
     /// </summary>
+    [Range(0.0, 10.0, ErrorMessage = "A nota deve estar entre 0,0 e 10,0.")]
+    [Display(Name = "Nota")]
     public decimal Nota { get; set; }
 
     /// <summary>
@@ -42,55 +48,66 @@ public class Show
     /// </summary>
     [NotMapped]
     [Display(Name = "Nota")]
-    [Required]
-    [StringLength(4)]
+    [Required(ErrorMessage = "A nota é obrigatória.")]
+    [StringLength(4, ErrorMessage = "A nota deve ter no máximo 4 caracteres.")]
     [RegularExpression(@"^(\d{1}[.,]\d{1,2}|10[.,]0{1,2})$", ErrorMessage = "Nota inválida. O valor deve estar entre 0,0 e 10,0 (casas decimais obrigatórias).")]
     public string NotaAux { get; set; } = string.Empty;
 
     /// <summary>
     /// Ano em que o show foi lançado
     /// </summary>
+    [Required(ErrorMessage = "O ano de lançamento é obrigatório.")]
+    [Range(1900, 2100, ErrorMessage = "O ano deve estar entre 1900 e 2100.")]
+    [Display(Name = "Ano de Lançamento")]
     public int Ano { get; set; }
 
     /// <summary>
     /// Capa do show
     /// </summary>
-    [Required]
-    [MaxLength(200)]
+    [Required(ErrorMessage = "A imagem de capa é obrigatória.")]
+    [MaxLength(200, ErrorMessage = "O caminho da imagem não pode exceder 200 caracteres.")]
+    [Display(Name = "Imagem de Capa")]
     public string Imagem { get; set; } = string.Empty;
 
     /// <summary>
     /// Banner do show
     /// </summary>
-    [Required]
-    [MaxLength(200)]
+    [Required(ErrorMessage = "O banner é obrigatório.")]
+    [MaxLength(200, ErrorMessage = "O caminho do banner não pode exceder 200 caracteres.")]
+    [Display(Name = "Banner")]
     public string Banner { get; set; } = string.Empty;
 
     /// <summary>
     /// Url do trailer do show
     /// </summary>
-    [MaxLength(500)]
+    [MaxLength(500, ErrorMessage = "A URL do trailer não pode exceder 500 caracteres.")]
+    [Display(Name = "Trailer (URL)")]
     public string Trailer { get; set; } = string.Empty;
 
     /// <summary>
     /// Número de visualizações do show
     /// </summary>
+    [Range(0, int.MaxValue, ErrorMessage = "O número de visualizações deve ser um valor positivo.")]
+    [Display(Name = "Visualizações")]
     public int Views { get; set; }
 
     /// <summary>
     /// Fonte onde a obra é originada
     /// </summary>
-    [Required]
+    [Required(ErrorMessage = "A fonte da obra é obrigatória.")]
+    [Display(Name = "Fonte")]
     public Fonte Fonte { get; set; }
 
     /// <summary>
     /// Data de criação do registro
     /// </summary>
+    [Display(Name = "Data de Criação")]
     public DateTime DataCriacao { get; set; } = DateTime.Now;
 
     /// <summary>
     /// Data da última atualização
     /// </summary>
+    [Display(Name = "Data de Atualização")]
     public DateTime? DataAtualizacao { get; set; }
 
     //FK 1-N
@@ -99,6 +116,8 @@ public class Show
     /// </summary>
     [Display(Name = "Estúdio")]
     [ForeignKey(nameof(Studio))]
+    [Required(ErrorMessage = "O estúdio é obrigatório.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Por favor, selecione um estúdio válido.")]
     public int StudioFK { get; set; }
 
     /// <summary>
@@ -112,6 +131,8 @@ public class Show
     /// </summary>
     [Display(Name = "Autor")]
     [ForeignKey(nameof(Autor))]
+    [Required(ErrorMessage = "O autor é obrigatório.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Por favor, selecione um autor válido.")]
     public int AutorFK { get; set; }
 
     /// <summary>

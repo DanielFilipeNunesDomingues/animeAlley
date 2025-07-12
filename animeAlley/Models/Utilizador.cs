@@ -15,23 +15,27 @@ namespace animeAlley.Models
         /// <summary>
         /// Nome do utilizador.
         /// </summary>
-        [MaxLength(50)]
+        [MaxLength(50, ErrorMessage = "O nome não pode ter mais de 50 caracteres.")]
         [Required(ErrorMessage = "O nome é obrigatório.")]
+        [MinLength(2, ErrorMessage = "O nome deve ter pelo menos 2 caracteres.")]
         public string Nome { get; set; } = string.Empty; // Nome do utilizador
 
         /// <summary>
         /// Foto do utilizador.
         /// </summary>
-        [MaxLength(200)]
+        [MaxLength(200, ErrorMessage = "O caminho da foto não pode ter mais de 200 caracteres.")]
         public string? Foto { get; set; } // Foto do Utilizador
 
         /// <summary>
         /// Banner do utilizador.
         /// </summary>
-        [MaxLength(200)]
+        [MaxLength(200, ErrorMessage = "O caminho do banner não pode ter mais de 200 caracteres.")]
         public string? Banner { get; set; } // Banner do Utilizador
 
-        [Required]
+        /// <summary>
+        /// Define se o utilizador é administrador.
+        /// </summary>
+        [Required(ErrorMessage = "O campo isAdmin é obrigatório.")]
         public bool isAdmin { get; set; } = false;
 
         /// <summary>
@@ -39,7 +43,10 @@ namespace animeAlley.Models
         /// entre a tabela dos Utilizadores e a 
         /// tabela da Autenticação da Microsoft Identity
         /// </summary>
-        [StringLength(50)]
+        [StringLength(50, ErrorMessage = "O nome de utilizador não pode ter mais de 50 caracteres.")]
+        [Required(ErrorMessage = "O nome de utilizador é obrigatório.")]
+        [MinLength(3, ErrorMessage = "O nome de utilizador deve ter pelo menos 3 caracteres.")]
+        [RegularExpression(@"^[a-zA-Z0-9._-]+$", ErrorMessage = "O nome de utilizador só pode conter letras, números, pontos, hífens e underscores.")]
         public string UserName { get; set; } = string.Empty;
 
         /// <summary>

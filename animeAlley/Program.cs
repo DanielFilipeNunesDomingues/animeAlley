@@ -25,7 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 /// <summary>
 /// Configuração da string de conexão com o banco de dados SQL Server
 /// </summary>
-var connectionString = builder.Configuration["ConnectionStings:DefaultConnection"]
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 /// <summary>
